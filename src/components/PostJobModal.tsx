@@ -2,7 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { CheckCircle2, ExternalLink, Sparkles, X } from 'lucide-react';
 import type { JobCategory, JobListing, JobRoleLevel, RemoteRegion } from '../types';
 import { BrandAvatar, resolveBrandDomain } from './BrandAvatar';
-import { resolveApplyUrl } from '../utils/referralLinks';
+import {
+  MICRO1_COMPANY_REFERRAL_URL,
+  resolveApplyUrl,
+} from '../utils/referralLinks';
 
 interface PostJobModalProps {
   isOpen: boolean;
@@ -149,7 +152,7 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
     onPublishJob(newJob);
 
     try {
-      await fetch(`https://formsubmit.co{CONTACT_EMAIL}`, {
+      await fetch(`https://formsubmit.co/ajax/${CONTACT_EMAIL}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,15 +179,17 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
     setSubmitting(false);
     setSubmittedTier(tier);
 
-    if (isFeatured) {
-      window.open(PAYPAL_FEATURED_URL, '_blank', 'noopener,noreferrer');
-    }
-
     setTitle('');
     setCompany('');
     setEmployerEmail('');
     setSummary('');
   };
+
+  const previewCompanyName = company.trim() || 'AI';
+  const previewDomain = company.trim()
+    ? resolveBrandDomain(company)
+    : 'planetaihub.com';
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-sm sm:items-center sm:p-4"
@@ -309,7 +314,7 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                 onClick={() => setTier('standard')}
                 className={`flex flex-col items-start rounded-xl border p-3.5 text-left transition ${
                   tier === 'standard'
-                    ? 'border-cyan-400/70 bg-cyan-500/10'
+                    ? 'border-cyan-400/70 bg-cyan-500/10 shadow-md shadow-cyan-500/10'
                     : 'border-white/10 bg-slate-950/40 hover:border-white/20'
                 }`}
               >
@@ -324,6 +329,7 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                 </p>
               </button>
             </div>
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-xs font-medium text-slate-300">
@@ -344,8 +350,8 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                 </label>
                 <div className="mt-1.5 flex items-center gap-2">
                   <BrandAvatar
-                    company={company || 'AI'}
-                    domain={resolveBrandDomain(company || 'planetaihub.com')}
+                    name={previewCompanyName}
+                    domain={previewDomain}
                     size="sm"
                   />
                   <input
@@ -490,6 +496,20 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                   : 'Publish Free Standard Role'}
               </button>
             </div>
+
+            <a
+              href={MICRO1_COMPANY_REFERRAL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between gap-3 rounded-xl border border-cyan-500/20 bg-slate-950/60 px-4 py-3 text-left transition-all duration-200 hover:border-cyan-400/45 hover:bg-slate-950/90"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <BrandAvatar name="micro1" domain="micro1.ai" size="xs" />
+                <span className="text-xs font-medium text-cyan-300 hover:text-cyan-200">
+                  Hiring AI Talent? Source Pre-Vetted Engineers via micro1 →
+                </span>
+              </div>
+            </a>
           </form>
         )}
       </div>
