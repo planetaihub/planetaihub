@@ -35,12 +35,12 @@
       crossorigin="anonymous"
     ></script>
 
-    <!-- Safe CSS-Only Hide for Netlify Badge -->
     <style>
       netlify-badge,
       #netlify-badge,
       [data-netlify-badge],
-      [data-netlify-deploy-id] {
+      [data-netlify-deploy-id],
+      body > div:not(#root) {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -51,5 +51,19 @@
   <body class="bg-[#060913] text-slate-100 antialiased selection:bg-cyan-400 selection:text-slate-950">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      (function () {
+        const cleanTopLevel = () => {
+          if (!document.body) return;
+          Array.from(document.body.children).forEach((el) => {
+            if (el.id !== 'root' && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE') {
+              el.remove();
+            }
+          });
+        };
+        cleanTopLevel();
+        new MutationObserver(cleanTopLevel).observe(document.body, { childList: true });
+      })();
+    </script>
   </body>
 </html>
