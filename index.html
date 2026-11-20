@@ -34,9 +34,167 @@
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6655685917040449"
       crossorigin="anonymous"
     ></script>
+
+    <!-- Hide any host-injected Netlify badge immediately before first paint -->
+    <style id="hide-host-badges">
+      netlify-badge,
+      #netlify-badge,
+      [data-netlify-badge],
+      [data-netlify-deploy-id],
+      body > *:not(#root):not(script):not(style) {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+      }
+    </style>
   </head>
   <body class="bg-[#060913] text-slate-100 antialiased selection:bg-cyan-400 selection:text-slate-950">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      (function () {
+        var ROOT_ID = 'root';
+        var IGNORED_TAGS = {
+          HTML: true,
+          HEAD: true,
+          BODY: true,
+          SCRIPT: true,
+          STYLE: true,
+          LINK: true,
+          META: true,
+          TITLE: true,
+          NOSCRIPT: true
+        };
+
+        function getRoot() {
+          return document.getElementById(ROOT_ID);
+        }
+
+        function isInsideRoot(node) {
+          var root = getRoot();
+          return Boolean(root && (node === root || root.contains(node)));
+        }
+
+        function isProtected(el) {
+          if (!el || el.nodeType !== 1) return true;
+          if (el.id === ROOT_ID || isInsideRoot(el)) return true;
+          if (IGNORED_TAGS[el.tagName]) return true;
+          return false;
+        }
+
+        function hasNetlifySignature(el) {
+          try {
+            if (el.tagName && el.tagName.toLowerCase().indexOf('netlify') !== -1) return true;
+            if (el.id && el.id.toLowerCase().indexOf('netlify') !== -1) return true;
+            var attrs = el.attributes;
+            if (attrs) {
+              for (var i = 0; i < attrs.length; i++) {
+                var name = attrs[i].name ? attrs[i].name.toLowerCase() : '';
+                var val = attrs[i].value ? attrs[i].value.toLowerCase() : '';
+                if (name.indexOf('netlify') !== -1 || val.indexOf('netlify') !== -1) {
+                  return true;
+                }
+              }
+            }
+            if (el.shadowRoot && el.shadowRoot.innerHTML && el.shadowRoot.innerHTML.toLowerCase().indexOf('netlify') !== -1) {
+              return true;
+            }
+            if (el.outerHTML && el.outerHTML.toLowerCase().indexOf('netlify') !== -1) {
+              return true;
+            }
+          } catch (e) {}
+          return false;
+        }
+
+        function isFixedHighZOverlay(el) {
+          try {
+            var inlinePos = el.style && el.style.position;
+            var inlineZ = el.style && parseInt(el.style.zIndex, 10);
+            if (inlinePos === 'fixed' && !isNaN(inlineZ) && inlineZ >= 9999) {
+              return true;
+            }
+            var computed = window.getComputedStyle ? window.getComputedStyle(el) : null;
+            if (computed && computed.position === 'fixed') {
+              var z = parseInt(computed.zIndex, 10);
+              if (!isNaN(z) && z >= 9999) {
+                return true;
+              }
+            }
+          } catch (e) {}
+          return false;
+        }
+
+        function inspectAndRemove(el) {
+          if (isProtected(el)) return;
+          if (hasNetlifySignature(el) || isFixedHighZOverlay(el)) {
+            if (el.parentNode) {
+              el.parentNode.removeChild(el);
+            }
+            return;
+          }
+          if (el.children && el.children.length > 0) {
+            var children = Array.prototype.slice.call(el.children);
+            for (var i = 0; i < children.length; i++) {
+              inspectAndRemove(children[i]);
+            }
+          }
+        }
+
+        function sweepOutsideRoot() {
+          var docEl = document.documentElement;
+          if (docEl && docEl.children) {
+            var topChildren = Array.prototype.slice.call(docEl.children);
+            for (var i = 0; i < topChildren.length; i++) {
+              var child = topChildren[i];
+              if (child === document.body) {
+                var bodyChildren = Array.prototype.slice.call(document.body.children);
+                for (var j = 0; j < bodyChildren.length; j++) {
+                  inspectAndRemove(bodyChildren[j]);
+                }
+              } else {
+                inspectAndRemove(child);
+              }
+            }
+          }
+        }
+
+        sweepOutsideRoot();
+
+        if (typeof MutationObserver !== 'undefined') {
+          var observer = new MutationObserver(function (mutations) {
+            for (var i = 0; i < mutations.length; i++) {
+              var m = mutations[i];
+              if (isInsideRoot(m.target)) continue;
+
+              if (m.type === 'childList' && m.addedNodes) {
+                for (var j = 0; j < m.addedNodes.length; j++) {
+                  var added = m.addedNodes[j];
+                  if (added && added.nodeType === 1) {
+                    inspectAndRemove(added);
+                  }
+                }
+              } else if (m.type === 'attributes' && m.target && m.target.nodeType === 1) {
+                inspectAndRemove(m.target);
+              }
+            }
+          });
+
+          var config = { childList: true, subtree: true, attributes: true };
+          if (document.documentElement) {
+            observer.observe(document.documentElement, config);
+          }
+          if (document.body) {
+            observer.observe(document.body, config);
+          }
+        }
+
+        window.addEventListener('DOMContentLoaded', sweepOutsideRoot);
+        window.addEventListener('load', sweepOutsideRoot);
+      })();
+    </script>
   </body>
 </html>
