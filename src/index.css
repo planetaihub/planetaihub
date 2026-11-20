@@ -179,11 +179,13 @@
     scroll-behavior: auto !important;
   }
 }
-/* Hide floating Netlify branding badge */
+
+/* Hide any host-injected Netlify badge outside #root */
+netlify-badge,
+#netlify-badge,
+[data-netlify-badge],
 [data-netlify-deploy-id],
-#netlify-identity-widget,
-a[href*="netlify.com"][style*="position: fixed"],
-div[style*="z-index: 2147483647"] {
+body > *:not(#root):not(script):not(style) {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
