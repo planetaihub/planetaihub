@@ -17,53 +17,26 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="PlanetAI Hub" />
     <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
 
     <!-- Fonts: Playfair Display (Editorial Serif), Inter (UI Sans), JetBrains Mono (Tabular Pay & Metrics) -->
-    <link rel="preconnect" href="https://googleapis.com" />
-    <link rel="preconnect" href="https://gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&display=swap"
       rel="stylesheet"
     />
 
     <!-- Google AdSense (Manual Ad Units Only - Auto-Ads Disabled) -->
     <script
       async
-      src="https://googlesyndication.com"
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6655685917040449"
       crossorigin="anonymous"
     ></script>
-
-    <style>
-      netlify-badge,
-      #netlify-badge,
-      [data-netlify-badge],
-      [data-netlify-deploy-id],
-      body > div:not(#root) {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-      }
-    </style>
   </head>
   <body class="bg-[#060913] text-slate-100 antialiased selection:bg-cyan-400 selection:text-slate-950">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      (function () {
-        const cleanTopLevel = () => {
-          if (!document.body) return;
-          Array.from(document.body.children).forEach((el) => {
-            if (el.id !== 'root' && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE') {
-              el.remove();
-            }
-          });
-        };
-        cleanTopLevel();
-        new MutationObserver(cleanTopLevel).observe(document.body, { childList: true });
-      })();
-    </script>
   </body>
 </html>
