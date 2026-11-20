@@ -34,6 +34,36 @@
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6655685917040449"
       crossorigin="anonymous"
     ></script>
+
+    <!-- Hide Floating Netlify Branding Badge -->
+    <style>
+      netlify-badge,
+      #netlify-badge,
+      [data-netlify-badge],
+      [data-netlify-deploy-id],
+      a[href*="netlify.com"][style*="fixed"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+    </style>
+    <script>
+      (function () {
+        const nukeBadge = () => {
+          document.querySelectorAll('netlify-badge, #netlify-badge, [data-netlify-badge], [data-netlify-deploy-id]').forEach(el => el.remove());
+          document.querySelectorAll('div, aside, a').forEach(el => {
+            const txt = (el.textContent || '').trim();
+            const shadowTxt = el.shadowRoot ? (el.shadowRoot.textContent || '') : '';
+            if (txt.includes('Powered by Netlify') || shadowTxt.includes('Powered by Netlify')) {
+              el.remove();
+            }
+          });
+        };
+        nukeBadge();
+        new MutationObserver(nukeBadge).observe(document.documentElement, { childList: true, subtree: true });
+      })();
+    </script>
   </head>
   <body class="bg-[#060913] text-slate-100 antialiased selection:bg-cyan-400 selection:text-slate-950">
     <div id="root"></div>
