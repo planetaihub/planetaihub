@@ -70,6 +70,8 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
   const [location, setLocation] = useState('Remote (Worldwide)');
   const [applyUrl, setApplyUrl] = useState('https://');
   const [summary, setSummary] = useState('');
+  const [paypalTransactionId, setPaypalTransactionId] = useState('');
+  const [submittedTxnId, setSubmittedTxnId] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submittedTier, setSubmittedTier] = useState<'standard' | 'featured' | null>(null);
@@ -79,6 +81,7 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setSubmittedTier(null);
+        setSubmittedTxnId('');
         setError('');
         onClose();
       }
@@ -91,6 +94,7 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
 
   const handleResetAndClose = () => {
     setSubmittedTier(null);
+    setSubmittedTxnId('');
     setError('');
     onClose();
   };
@@ -102,6 +106,8 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
     const trimmedPay = payRange.trim();
     const trimmedUrl = applyUrl.trim();
     const trimmedEmail = employerEmail.trim();
+    const trimmedTxnId = paypalTransactionId.trim();
+    const isFeatured = tier === 'featured';
 
     if (!trimmedTitle || !trimmedCompany || !trimmedPay) {
       setError('Please enter a role title, company name, and transparent USD pay range.');
@@ -111,12 +117,15 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
       setError('Please provide a valid direct ATS or careers URL starting with https://');
       return;
     }
+    if (isFeatured && !trimmedTxnId) {
+      setError('Please enter your PayPal Transaction ID as proof of payment for Featured Spotlight.');
+      return;
+    }
 
     setError('');
     setSubmitting(true);
 
     const { minUsd, maxUsd } = parseAnnualPay(trimmedPay);
-    const isFeatured = tier === 'featured';
 
     const newJob: JobListing = {
       id: `employer-${Date.now()}`,
@@ -161,6 +170,7 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
         body: JSON.stringify({
           _subject: `[PlanetAI Hub] ${isFeatured ? 'FEATURED ($29) ' : 'Free '}Job Submission: ${trimmedTitle} @ ${trimmedCompany}`,
           tier: isFeatured ? 'Featured Spotlight ($29 USD / 30 days)' : 'Standard Listing ($0 Free)',
+          paypal_transaction_id: isFeatured ? trimmedTxnId : 'N/A (Free Standard)',
           employer_email: trimmedEmail || 'Not provided',
           company: trimmedCompany,
           title: trimmedTitle,
@@ -177,12 +187,14 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
     }
 
     setSubmitting(false);
+    setSubmittedTxnId(isFeatured ? trimmedTxnId : '');
     setSubmittedTier(tier);
 
     setTitle('');
     setCompany('');
     setEmployerEmail('');
     setSummary('');
+    setPaypalTransactionId('');
   };
 
   const previewCompanyName = company.trim() || 'AI';
@@ -234,30 +246,21 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
             </div>
 
             {submittedTier === 'featured' ? (
-              <>
-                <div>
-                  <h3 className="font-serif text-xl font-semibold text-white">
-                    Role Submitted — Complete Featured Payment
-                  </h3>
-                  <p className="mt-2 text-xs leading-relaxed text-slate-300">
-                    Your role details have been sent to{' '}
-                    <span className="font-mono text-cyan-300">{CONTACT_EMAIL}</span>. Complete
-                    your <strong className="text-white">$29 USD</strong> PayPal checkout below to
-                    pin your role in the <strong className="text-cyan-300">Featured Spotlight</strong>{' '}
-                    for 30 days.
-                  </p>
-                </div>
-
-                <a
-                  href={PAYPAL_FEATURED_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-5 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:brightness-110"
-                >
-                  <span>Complete $29 Featured Payment via PayPal</span>
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </>
+              <div className="space-y-3">
+                <h3 className="font-serif text-xl font-semibold text-white">
+                  Featured Role Submitted!
+                </h3>
+                <p className="text-xs leading-relaxed text-slate-300">
+                  Your listing and PayPal Transaction ID{' '}
+                  <span className="font-mono font-semibold text-emerald-400">
+                    {submittedTxnId}
+                  </span>{' '}
+                  have been sent to{' '}
+                  <span className="font-mono text-cyan-300">{CONTACT_EMAIL}</span>. Your role is
+                  now pinned in the{' '}
+                  <strong className="text-cyan-300">Featured Spotlight</strong>.
+                </p>
+              </div>
             ) : (
               <div>
                 <h3 className="font-serif text-xl font-semibold text-white">
@@ -476,6 +479,51 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
               />
             </div>
 
+            {tier === 'featured' && (
+              <div className="space-y-3 rounded-xl border border-cyan-500/20 bg-slate-950/70 p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-white">
+                      Featured Spotlight Checkout ($29 USD)
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Complete PayPal payment first, then paste your receipt ID below.
+                    </p>
+                  </div>
+                  <a
+                    href={PAYPAL_FEATURED_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[38px] shrink-0 items-center justify-center gap-1.5 rounded-xl border border-cyan-400/40 bg-cyan-500/15 px-3.5 py-2 text-xs font-semibold text-cyan-300 transition hover:bg-cyan-500/25 whitespace-nowrap"
+                  >
+                    <span>Pay $29 via PayPal</span>
+                    <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="paypal-transaction-id"
+                    className="block text-xs font-medium text-slate-200"
+                  >
+                    PayPal Transaction ID *
+                  </label>
+                  <input
+                    id="paypal-transaction-id"
+                    type="text"
+                    required
+                    value={paypalTransactionId}
+                    onChange={(e) => setPaypalTransactionId(e.target.value)}
+                    placeholder="e.g. 9AB12345CD678901E"
+                    className="input-obsidian mt-1.5 h-11 w-full px-3 font-mono text-sm"
+                  />
+                  <p className="mt-1.5 text-[11px] text-slate-400">
+                    Required as proof of payment to verify and pin your Featured Spotlight listing.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-col-reverse gap-3 border-t border-cyan-500/15 pt-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
@@ -492,7 +540,7 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                 {submitting
                   ? 'Submitting...'
                   : tier === 'featured'
-                  ? 'Submit & Pay $29 via PayPal →'
+                  ? 'Verify Payment & Publish Featured Role →'
                   : 'Publish Free Standard Role'}
               </button>
             </div>
