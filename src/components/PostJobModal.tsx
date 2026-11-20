@@ -74,11 +74,15 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleResetAndClose();
+      if (e.key === 'Escape') {
+        setSubmittedTier(null);
+        setError('');
+        onClose();
+      }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
