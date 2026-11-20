@@ -1,72 +1,21 @@
-<!doctype html>
-<html lang="en" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>PlanetAI Hub — Remote AI Jobs & Utility Platform</title>
-    <meta name="description" content="Flagship editorial directory for remote AI & tech jobs with transparent USD pay, live briefings, and an offline-ready career & productivity suite." />
-    <meta property="og:title" content="PlanetAI Hub — Remote AI Jobs & Utility Platform" />
-    <meta property="og:description" content="Flagship editorial directory for remote AI & tech jobs with transparent USD pay, live briefings, and an offline-ready career & productivity suite." />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-
-    <!-- PWA & iOS Safari Meta Tags -->
-    <meta name="theme-color" content="#060913" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="PlanetAI Hub" />
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-
-    <!-- Fonts: Playfair Display (Editorial Serif), Inter (UI Sans), JetBrains Mono (Tabular Pay & Metrics) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- Google AdSense (Manual Ad Units Only - Auto-Ads Disabled) -->
-    <script
-      async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6655685917040449"
-      crossorigin="anonymous"
-    ></script>
-
-    <!-- Hide Floating Netlify Branding Badge -->
-    <style>
-      netlify-badge,
-      #netlify-badge,
-      [data-netlify-badge],
-      [data-netlify-deploy-id],
-      a[href*="netlify.com"][style*="fixed"] {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-      }
-    </style>
-    <script>
-      (function () {
-        const nukeBadge = () => {
-          document.querySelectorAll('netlify-badge, #netlify-badge, [data-netlify-badge], [data-netlify-deploy-id]').forEach(el => el.remove());
-          document.querySelectorAll('div, aside, a').forEach(el => {
-            const txt = (el.textContent || '').trim();
-            const shadowTxt = el.shadowRoot ? (el.shadowRoot.textContent || '') : '';
-            if (txt.includes('Powered by Netlify') || shadowTxt.includes('Powered by Netlify')) {
-              el.remove();
-            }
-          });
-        };
-        nukeBadge();
-        new MutationObserver(nukeBadge).observe(document.documentElement, { childList: true, subtree: true });
-      })();
-    </script>
-  </head>
-  <body class="bg-[#060913] text-slate-100 antialiased selection:bg-cyan-400 selection:text-slate-950">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<script>
+  (function () {
+    const removeNetlifyBadge = () => {
+      document.querySelectorAll('body > *:not(#root):not(script):not(style), html > *:not(head):not(body)').forEach(el => {
+        const style = window.getComputedStyle(el);
+        const html = (el.outerHTML || '').toLowerCase();
+        if (
+          html.includes('netlify') ||
+          el.shadowRoot ||
+          (style.position === 'fixed' && parseInt(style.zIndex || '0', 10) >= 9999)
+        ) {
+          el.remove();
+        }
+      });
+    };
+    removeNetlifyBadge();
+    window.addEventListener('DOMContentLoaded', removeNetlifyBadge);
+    window.addEventListener('load', removeNetlifyBadge);
+    setInterval(removeNetlifyBadge, 500);
+  })();
+</script>
