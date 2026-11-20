@@ -1,15 +1,11 @@
-const STATIC_CACHE = 'planetai-static-v4';
-const DATA_CACHE = 'planetai-data-v4';
+const STATIC_CACHE = 'planetai-static-v5';
+const DATA_CACHE = 'planetai-data-v5';
 
 const APP_SHELL_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/icon.svg',
-  '/apple-touch-icon.png',
-  '/pwa-192x192.png',
-  '/pwa-512x512.png',
-  '/pwa-maskable-512x512.png',
 ];
 
 function isLiveJobDataRequest(url) {
