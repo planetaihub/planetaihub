@@ -18,6 +18,7 @@ import { DevToolsTab } from './components/tabs/DevToolsTab';
 import { FinanceDocsTab } from './components/tabs/FinanceDocsTab';
 import { HealthWeatherTab } from './components/tabs/HealthWeatherTab';
 import { JobsBoard } from './components/tabs/JobsBoard';
+import { LiveEarningTab } from './components/tabs/LiveEarningTab';
 import { ProductivityTab } from './components/tabs/ProductivityTab';
 import type { JobListing, TabId } from './types';
 import {
@@ -108,6 +109,8 @@ export default function App() {
         return <ProductivityTab />;
       case 'health-weather':
         return <HealthWeatherTab />;
+      case 'live-earning':
+        return <LiveEarningTab />;
     }
   };
 
