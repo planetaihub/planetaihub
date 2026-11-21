@@ -7,6 +7,7 @@ import {
   Wallet,
   CheckSquare,
   CloudSun,
+  Coins,
   Bookmark,
 } from 'lucide-react';
 import type { TabId } from '../types';
@@ -71,6 +72,13 @@ export const TABS: NavTabItem[] = [
     shortLabel: 'Health',
     icon: CloudSun,
   },
+  {
+    id: 'live-earning',
+    label: 'Live Earning',
+    desktopLabel: 'Live Earning',
+    shortLabel: 'Earning',
+    icon: Coins,
+  },
 ];
 
 // Backward-compatible export alias if referenced elsewhere
@@ -126,7 +134,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             aria-label="Main workspaces"
             className="hidden md:flex flex-1 min-w-0 items-center overflow-x-auto no-scrollbar mx-2 py-1"
           >
-            <div className="mx-auto flex items-center gap-1">
+            <div className="mx-auto flex items-center gap-0.5 xl:gap-1">
               {TABS.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
@@ -135,7 +143,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     type="button"
                     onClick={() => onSelectTab(tab.id)}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`relative inline-flex min-h-[36px] items-center px-2.5 py-1.5 text-[13px] font-medium transition-all whitespace-nowrap shrink-0 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 ${
+                    className={`relative inline-flex min-h-[36px] items-center px-2 py-1.5 text-xs xl:px-2.5 xl:text-[13px] font-medium transition-all whitespace-nowrap shrink-0 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 ${
                       isActive
                         ? 'bg-cyan-400 text-slate-950 font-semibold shadow-[0_2px_14px_rgba(6,182,212,0.3)]'
                         : 'text-slate-400 hover:bg-slate-800/70 hover:text-white'
