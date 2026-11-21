@@ -1,5 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Check, Pencil, Plus, RotateCcw, Trash2, X } from 'lucide-react';
+import {
+  Check,
+  Pencil,
+  Plus,
+  Receipt,
+  RotateCcw,
+  Trash2,
+  X,
+} from 'lucide-react';
 import type { ExpenseEntry } from '../../../types';
 import {
   loadExpenses,
@@ -45,47 +53,44 @@ const BAR_STROKE_PALETTE = [
   { from: '#64748b', to: '#94a3b8', glow: 'rgba(148,163,184,0.3)' },
 ];
 
-const STARTER_EXPENSES: ExpenseEntry[] = [
-  {
-    id: 'exp-seed-1',
-    label: 'Cloud Hosting & Domain Renewal',
-    amount: 42.0,
-    category: 'Software & SaaS',
-    date: new Date().toISOString().slice(0, 10),
-  },
-  {
-    id: 'exp-seed-2',
-    label: 'Ergonomic Desk Lamp & Stand',
-    amount: 118.5,
-    category: 'Home Office',
-    date: new Date().toISOString().slice(0, 10),
-  },
-  {
-    id: 'exp-seed-3',
-    label: 'Day Pass Coworking Desk',
-    amount: 28.0,
-    category: 'Coworking & Travel',
-    date: new Date().toISOString().slice(0, 10),
-  },
-];
+const LEGACY_SEED_IDS = new Set(['exp-seed-1', 'exp-seed-2', 'exp-seed-3']);
+
+function loadInitialExpenses(): ExpenseEntry[] {
+  const stored = loadExpenses();
+  if (stored.length === 0) return [];
+  if (stored.every((item) => LEGACY_SEED_IDS.has(item.id))) {
+    return [];
+  }
+  return stored;
+}
 
 interface BudgetPrefs {
   currencyCode: CurrencyOption['code'];
-  monthlyBudget: number;
+  monthlyBudget: string;
+}
+
+function loadInitialBudgetPrefs(): BudgetPrefs {
+  const raw = readJson<{ currencyCode?: CurrencyOption['code']; monthlyBudget?: number | string } | null>(
+    STORAGE_KEYS.FINANCE_BUDGET,
+    null
+  );
+  if (!raw) {
+    return { currencyCode: 'USD', monthlyBudget: '' };
+  }
+  // If untouched default 1500 from earlier version, show clean empty input with placeholder
+  const rawBudget =
+    raw.monthlyBudget === 1500 || raw.monthlyBudget === undefined
+      ? ''
+      : String(raw.monthlyBudget);
+  return {
+    currencyCode: raw.currencyCode || 'USD',
+    monthlyBudget: rawBudget,
+  };
 }
 
 export const ExpenseTrackerTool: React.FC = () => {
-  const [expenses, setExpenses] = useState<ExpenseEntry[]>(() => {
-    const stored = loadExpenses();
-    return stored.length > 0 ? stored : STARTER_EXPENSES;
-  });
-
-  const [prefs, setPrefs] = useState<BudgetPrefs>(() =>
-    readJson<BudgetPrefs>(STORAGE_KEYS.FINANCE_BUDGET, {
-      currencyCode: 'USD',
-      monthlyBudget: 1500,
-    })
-  );
+  const [expenses, setExpenses] = useState<ExpenseEntry[]>(loadInitialExpenses);
+  const [prefs, setPrefs] = useState<BudgetPrefs>(loadInitialBudgetPrefs);
 
   const [label, setLabel] = useState('');
   const [amount, setAmount] = useState('');
@@ -173,10 +178,15 @@ export const ExpenseTrackerTool: React.FC = () => {
     [expenses]
   );
 
-  const remainingBudget = prefs.monthlyBudget - totalSpent;
+  const monthlyBudgetNum = useMemo(() => {
+    const n = parseFloat(prefs.monthlyBudget);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }, [prefs.monthlyBudget]);
+
+  const remainingBudget = monthlyBudgetNum - totalSpent;
   const budgetPct =
-    prefs.monthlyBudget > 0
-      ? Math.min(100, Math.round((totalSpent / prefs.monthlyBudget) * 100))
+    monthlyBudgetNum > 0
+      ? Math.min(100, Math.round((totalSpent / monthlyBudgetNum) * 100))
       : 0;
 
   const categoryBreakdown = useMemo(() => {
@@ -201,78 +211,95 @@ export const ExpenseTrackerTool: React.FC = () => {
   const labelClass =
     'block text-[11px] font-semibold uppercase tracking-wider text-slate-400';
   const inputClass =
-    'mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 text-sm text-slate-100 placeholder:text-slate-600 transition-colors focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none';
+    'mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 text-sm text-slate-100 placeholder:text-slate-500 transition-colors focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none';
 
   return (
     <div className="space-y-6">
       {/* Top KPI & Multi-Currency Budget Header */}
-      <div className="grid grid-cols-1 gap-4 rounded-2xl border border-white/[0.08] bg-slate-900/75 p-5 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)] sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <label htmlFor="expense-currency" className={labelClass}>
-            Display Currency
-          </label>
-          <select
-            id="expense-currency"
-            value={prefs.currencyCode}
-            onChange={(e) =>
-              setPrefs((p) => ({
-                ...p,
-                currencyCode: e.target.value as CurrencyOption['code'],
-              }))
-            }
-            className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 text-sm font-semibold text-slate-100 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-          >
-            {CURRENCIES.map((c) => (
-              <option key={c.code} value={c.code} className="bg-slate-900">
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/75 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="h-1 w-full bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500" />
+        <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <label htmlFor="expense-currency" className={labelClass}>
+              Display Currency
+            </label>
+            <select
+              id="expense-currency"
+              value={prefs.currencyCode}
+              onChange={(e) =>
+                setPrefs((p) => ({
+                  ...p,
+                  currencyCode: e.target.value as CurrencyOption['code'],
+                }))
+              }
+              className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 text-sm font-semibold text-slate-100 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+            >
+              {CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code} className="bg-slate-900">
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div>
-          <label htmlFor="monthly-budget-input" className={labelClass}>
-            Monthly Budget Target ({activeCurrency.code})
-          </label>
-          <input
-            id="monthly-budget-input"
-            type="number"
-            min={0}
-            step="50"
-            value={prefs.monthlyBudget}
-            onChange={(e) =>
-              setPrefs((p) => ({
-                ...p,
-                monthlyBudget: Math.max(0, Number(e.target.value)),
-              }))
-            }
-            className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 font-mono text-sm font-semibold text-slate-100 tabular-nums focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-          />
-        </div>
+          <div>
+            <label htmlFor="monthly-budget-input" className={labelClass}>
+              Monthly Budget Target ({activeCurrency.code})
+            </label>
+            <input
+              id="monthly-budget-input"
+              type="number"
+              min={0}
+              step="50"
+              value={prefs.monthlyBudget}
+              onChange={(e) =>
+                setPrefs((p) => ({
+                  ...p,
+                  monthlyBudget: e.target.value,
+                }))
+              }
+              placeholder="e.g. 1500"
+              className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 font-mono text-sm font-semibold text-slate-100 placeholder:text-slate-500 tabular-nums focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+            />
+          </div>
 
-        <div className="rounded-xl border border-white/[0.08] bg-[#060913]/70 px-4 py-3">
-          <p className={labelClass}>Total Logged</p>
-          <p className="mt-1 font-mono text-xl font-bold text-slate-50 tabular-nums">
-            {formatMoney(totalSpent)}
-          </p>
-          <p className="font-mono text-xs text-cyan-300 tabular-nums">
-            {budgetPct}% of budget used
-          </p>
-        </div>
+          <div className="rounded-xl border border-white/[0.08] bg-[#060913]/70 px-4 py-3">
+            <p className={labelClass}>Total Logged</p>
+            <p className="mt-1 font-mono text-xl font-bold text-slate-50 tabular-nums">
+              {formatMoney(totalSpent)}
+            </p>
+            <p className="font-mono text-xs text-cyan-300 tabular-nums">
+              {monthlyBudgetNum > 0
+                ? `${budgetPct}% of budget used`
+                : `${expenses.length} item${expenses.length === 1 ? '' : 's'} logged`}
+            </p>
+          </div>
 
-        <div className="rounded-xl border border-emerald-500/20 bg-[#060913]/75 px-4 py-3">
-          <p className={labelClass}>Remaining Budget</p>
-          <p
-            className={`mt-1 font-mono text-xl font-bold tabular-nums ${
-              remainingBudget >= 0 ? 'text-emerald-400' : 'text-red-400'
-            }`}
-          >
-            {remainingBudget < 0 ? '-' : ''}
-            {formatMoney(Math.abs(remainingBudget))}
-          </p>
-          <p className="text-xs text-slate-400">
-            {remainingBudget >= 0 ? 'Within target' : 'Over monthly limit'}
-          </p>
+          <div className="rounded-xl border border-emerald-500/20 bg-[#060913]/75 px-4 py-3">
+            <p className={labelClass}>Remaining Budget</p>
+            <p
+              className={`mt-1 font-mono text-xl font-bold tabular-nums ${
+                monthlyBudgetNum === 0
+                  ? 'text-slate-400'
+                  : remainingBudget >= 0
+                    ? 'text-emerald-400'
+                    : 'text-red-400'
+              }`}
+            >
+              {monthlyBudgetNum === 0
+                ? '—'
+                : `${remainingBudget < 0 ? '-' : ''}${formatMoney(
+                    Math.abs(remainingBudget)
+                  )}`}
+            </p>
+            <p className="text-xs text-slate-400">
+              {monthlyBudgetNum === 0
+                ? 'Set a monthly budget target'
+                : remainingBudget >= 0
+                  ? 'Within target'
+                  : 'Over monthly limit'}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -281,96 +308,99 @@ export const ExpenseTrackerTool: React.FC = () => {
         <div className="space-y-6 lg:col-span-5">
           <form
             onSubmit={handleSubmit}
-            className="space-y-4 rounded-2xl border border-white/[0.08] bg-slate-900/75 p-5 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]"
+            className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/75 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]"
           >
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-              <h2 className="font-display text-lg font-bold text-slate-50">
-                {editingId ? 'Edit Transaction' : 'Log Expense'}
-              </h2>
-              {editingId && (
-                <button
-                  type="button"
-                  onClick={cancelEdit}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-100"
+            <div className="h-0.5 w-full bg-gradient-to-r from-cyan-400/70 via-indigo-400/50 to-transparent" />
+            <div className="space-y-4 p-5">
+              <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                <h2 className="font-display text-lg font-bold text-slate-50">
+                  {editingId ? 'Edit Transaction' : 'Log Expense'}
+                </h2>
+                {editingId && (
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-100"
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Cancel</span>
+                  </button>
+                )}
+              </div>
+
+              <div>
+                <label className={labelClass}>Description</label>
+                <input
+                  type="text"
+                  required
+                  value={label}
+                  onChange={(e) => setLabel(e.target.value)}
+                  placeholder="e.g. Cloud hosting or ergonomic keyboard"
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>
+                    Amount ({activeCurrency.symbol})
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="0.01"
+                    step="0.01"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 font-mono text-sm text-slate-100 placeholder:text-slate-500 tabular-nums focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Date</label>
+                  <input
+                    type="date"
+                    required
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 font-mono text-xs text-slate-100 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Category</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className={inputClass}
                 >
-                  <X className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>Cancel</span>
-                </button>
-              )}
-            </div>
-
-            <div>
-              <label className={labelClass}>Description</label>
-              <input
-                type="text"
-                required
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                placeholder="e.g. Figma Pro subscription"
-                className={inputClass}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelClass}>
-                  Amount ({activeCurrency.symbol})
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="0.01"
-                  step="0.01"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.00"
-                  className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 font-mono text-sm text-slate-100 placeholder:text-slate-600 tabular-nums focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-                />
+                  {EXPENSE_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat} className="bg-slate-900">
+                      {cat}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              <div>
-                <label className={labelClass}>Date</label>
-                <input
-                  type="date"
-                  required
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="mt-1.5 h-11 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 font-mono text-xs text-slate-100 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className={labelClass}>Category</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className={inputClass}
+              <button
+                type="submit"
+                className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-cyan-400 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all hover:bg-cyan-300"
               >
-                {EXPENSE_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat} className="bg-slate-900">
-                    {cat}
-                  </option>
-                ))}
-              </select>
+                {editingId ? (
+                  <>
+                    <Check className="h-4 w-4" aria-hidden="true" />
+                    <span>Save Changes</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4" aria-hidden="true" />
+                    <span>Add Expense</span>
+                  </>
+                )}
+              </button>
             </div>
-
-            <button
-              type="submit"
-              className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-cyan-400 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all hover:bg-cyan-300"
-            >
-              {editingId ? (
-                <>
-                  <Check className="h-4 w-4" aria-hidden="true" />
-                  <span>Save Changes</span>
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4" aria-hidden="true" />
-                  <span>Add Expense</span>
-                </>
-              )}
-            </button>
           </form>
 
           {/* Visual Glowing SVG Category Breakdown Bars */}
@@ -380,7 +410,7 @@ export const ExpenseTrackerTool: React.FC = () => {
             </h3>
             {categoryBreakdown.length === 0 ? (
               <p className="mt-3 text-xs text-slate-500">
-                Add expenses to see category distribution.
+                Log expenses to visualize your category breakdown.
               </p>
             ) : (
               <div className="mt-4 space-y-3.5">
@@ -447,93 +477,102 @@ export const ExpenseTrackerTool: React.FC = () => {
         </div>
 
         {/* Right: Transaction Ledger */}
-        <div className="rounded-2xl border border-white/[0.08] bg-slate-900/75 p-5 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)] lg:col-span-7">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
-            <h2 className="font-display text-lg font-bold text-slate-50">
-              Transactions ({visibleExpenses.length})
-            </h2>
-            <div className="flex items-center gap-2">
-              <select
-                aria-label="Filter transactions by category"
-                value={filterCat}
-                onChange={(e) => setFilterCat(e.target.value)}
-                className="h-10 rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 text-xs font-semibold text-slate-200 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-              >
-                <option value="All" className="bg-slate-900">
-                  All Categories
-                </option>
-                {EXPENSE_CATEGORIES.map((c) => (
-                  <option key={c} value={c} className="bg-slate-900">
-                    {c}
+        <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/75 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)] lg:col-span-7">
+          <div className="h-0.5 w-full bg-gradient-to-r from-indigo-400/70 via-cyan-400/60 to-emerald-400/50" />
+          <div className="p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
+              <h2 className="font-display text-lg font-bold text-slate-50">
+                Transactions ({visibleExpenses.length})
+              </h2>
+              <div className="flex items-center gap-2">
+                <select
+                  aria-label="Filter transactions by category"
+                  value={filterCat}
+                  onChange={(e) => setFilterCat(e.target.value)}
+                  className="h-10 rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 text-xs font-semibold text-slate-200 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                >
+                  <option value="All" className="bg-slate-900">
+                    All Categories
                   </option>
+                  {EXPENSE_CATEGORIES.map((c) => (
+                    <option key={c} value={c} className="bg-slate-900">
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                {expenses.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setExpenses([])}
+                    className="inline-flex min-h-[40px] items-center gap-1 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                    <span>Clear</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {visibleExpenses.length === 0 ? (
+              <div className="my-6 flex flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.08] bg-[#060913]/40 px-6 py-12 text-center">
+                <Receipt className="h-7 w-7 text-cyan-400/70" aria-hidden="true" />
+                <p className="mt-2.5 text-sm font-semibold text-slate-200">
+                  No expenses logged yet
+                </p>
+                <p className="mt-1 max-w-xs text-xs text-slate-500">
+                  Add software tools, office gear, or travel expenses on the left. Everything stays stored locally in your browser.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-2 divide-y divide-white/[0.06]">
+                {visibleExpenses.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3.5"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-slate-50">
+                        {entry.label}
+                      </p>
+                      <p className="mt-0.5 text-xs text-slate-400">
+                        <span className="rounded bg-indigo-500/15 px-1.5 py-0.5 text-[11px] font-medium text-indigo-300">
+                          {entry.category}
+                        </span>
+                        <span aria-hidden="true" className="mx-1.5 text-slate-600">
+                          ·
+                        </span>
+                        <span className="font-mono text-slate-500 tabular-nums">
+                          {entry.date}
+                        </span>
+                      </p>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className="font-mono text-sm font-bold text-slate-50 tabular-nums">
+                        {formatMoney(entry.amount)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => startEdit(entry)}
+                        aria-label={`Edit ${entry.label}`}
+                        className="inline-flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-cyan-300"
+                      >
+                        <Pencil className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(entry.id)}
+                        aria-label={`Delete ${entry.label}`}
+                        className="inline-flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-red-500/15 hover:text-red-400"
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
                 ))}
-              </select>
-              {expenses.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setExpenses([])}
-                  className="inline-flex min-h-[40px] items-center gap-1 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
-                >
-                  <RotateCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-                  <span>Clear</span>
-                </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-
-          {visibleExpenses.length === 0 ? (
-            <div className="py-12 text-center text-sm text-slate-500">
-              No transactions logged for this view.
-            </div>
-          ) : (
-            <div className="mt-2 divide-y divide-white/[0.06]">
-              {visibleExpenses.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-3.5"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-slate-50">
-                      {entry.label}
-                    </p>
-                    <p className="mt-0.5 text-xs text-slate-400">
-                      <span className="rounded bg-indigo-500/15 px-1.5 py-0.5 text-[11px] font-medium text-indigo-300">
-                        {entry.category}
-                      </span>
-                      <span aria-hidden="true" className="mx-1.5 text-slate-600">
-                        ·
-                      </span>
-                      <span className="font-mono text-slate-500 tabular-nums">
-                        {entry.date}
-                      </span>
-                    </p>
-                  </div>
-
-                  <div className="flex shrink-0 items-center gap-2">
-                    <span className="font-mono text-sm font-bold text-slate-50 tabular-nums">
-                      {formatMoney(entry.amount)}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => startEdit(entry)}
-                      aria-label={`Edit ${entry.label}`}
-                      className="inline-flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-cyan-300"
-                    >
-                      <Pencil className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(entry.id)}
-                      aria-label={`Delete ${entry.label}`}
-                      className="inline-flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-red-500/15 hover:text-red-400"
-                    >
-                      <Trash2 className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>
