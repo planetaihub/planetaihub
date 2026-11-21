@@ -102,15 +102,28 @@ interface SavedRubricState {
   checkedIds: string[];
 }
 
-const DEFAULT_RUBRIC: SavedRubricState = {
-  targetLabel: 'Senior Frontend Engineer — Linearity Labs',
-  checkedIds: ['r-1', 'r-2', 'r-3', 'r-4', 'r-6', 'r-7'],
+const EMPTY_RUBRIC: SavedRubricState = {
+  targetLabel: '',
+  checkedIds: [],
 };
 
+function loadInitialRubricState(): SavedRubricState {
+  const saved = loadCareerState<Partial<SavedRubricState> | null>('rubric', null);
+  if (!saved) return EMPTY_RUBRIC;
+
+  // Clear untouched legacy pre-filled sample data
+  if (saved.targetLabel === 'Senior Frontend Engineer — Linearity Labs') {
+    return EMPTY_RUBRIC;
+  }
+
+  return {
+    targetLabel: typeof saved.targetLabel === 'string' ? saved.targetLabel : '',
+    checkedIds: Array.isArray(saved.checkedIds) ? saved.checkedIds : [],
+  };
+}
+
 export const RubricSimulatorTool: React.FC = () => {
-  const [state, setState] = useState<SavedRubricState>(() =>
-    loadCareerState<SavedRubricState>('rubric', DEFAULT_RUBRIC)
-  );
+  const [state, setState] = useState<SavedRubricState>(loadInitialRubricState);
 
   useEffect(() => {
     saveCareerState('rubric', state);
@@ -136,6 +149,13 @@ export const RubricSimulatorTool: React.FC = () => {
   );
 
   const readinessStatus = useMemo(() => {
+    if (earnedPoints === 0) {
+      return {
+        label: 'Select Criteria to Score Readiness',
+        tone: 'text-slate-400',
+        bar: 'bg-cyan-400/50',
+      };
+    }
     if (earnedPoints >= 85) {
       return {
         label: 'Strong Submit Ready',
@@ -169,8 +189,8 @@ export const RubricSimulatorTool: React.FC = () => {
     });
   };
 
-  const resetChecklist = () => {
-    setState({ targetLabel: state.targetLabel, checkedIds: [] });
+  const resetAll = () => {
+    setState(EMPTY_RUBRIC);
   };
 
   const sections = useMemo(() => {
@@ -186,56 +206,60 @@ export const RubricSimulatorTool: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Live Score Summary Bar */}
-      <div className="rounded-2xl border border-white/[0.08] bg-slate-900/75 p-5 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)] sm:p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex-1">
-            <label
-              htmlFor="rubric-target-role"
-              className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400"
-            >
-              Application Being Scored
-            </label>
-            <input
-              id="rubric-target-role"
-              type="text"
-              value={state.targetLabel}
-              onChange={(e) =>
-                setState((prev) => ({ ...prev, targetLabel: e.target.value }))
-              }
-              placeholder="e.g. Senior Frontend Engineer — Company"
-              className="mt-1.5 h-11 w-full max-w-lg rounded-xl border border-white/[0.08] bg-slate-950/60 px-3.5 text-sm font-medium text-slate-100 placeholder:text-slate-600 transition-colors focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-            />
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                Checklist Score
-              </p>
-              <p className="font-mono text-2xl font-bold text-slate-50 tabular-nums">
-                {earnedPoints} / {maxPoints}
-              </p>
-              <p className={`text-xs font-semibold ${readinessStatus.tone}`}>
-                {readinessStatus.label}
-              </p>
+      <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/75 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="h-1 w-full bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500" />
+        <div className="p-5 sm:p-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex-1">
+              <label
+                htmlFor="rubric-target-role"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400"
+              >
+                Application Being Scored
+              </label>
+              <input
+                id="rubric-target-role"
+                type="text"
+                value={state.targetLabel}
+                onChange={(e) =>
+                  setState((prev) => ({ ...prev, targetLabel: e.target.value }))
+                }
+                placeholder="e.g. Senior Frontend Engineer — Company Name"
+                className="mt-1.5 h-11 w-full max-w-lg rounded-xl border border-white/[0.08] bg-slate-950/60 px-3.5 text-sm font-medium text-slate-100 placeholder:text-slate-500 transition-colors focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+              />
             </div>
 
-            <button
-              type="button"
-              onClick={resetChecklist}
-              className="inline-flex min-h-[42px] items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-slate-200 transition-colors hover:border-white/20 hover:bg-white/[0.08] whitespace-nowrap"
-            >
-              <RotateCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-              <span>Uncheck All</span>
-            </button>
-          </div>
-        </div>
+            <div className="flex items-center gap-6">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Checklist Score
+                </p>
+                <p className="font-mono text-2xl font-bold text-slate-50 tabular-nums">
+                  {earnedPoints} / {maxPoints}
+                </p>
+                <p className={`text-xs font-semibold ${readinessStatus.tone}`}>
+                  {readinessStatus.label}
+                </p>
+              </div>
 
-        <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full border border-white/[0.06] bg-[#060913]/90">
-          <div
-            className={`h-full rounded-full transition-all duration-300 ${readinessStatus.bar}`}
-            style={{ width: `${Math.round((earnedPoints / maxPoints) * 100)}%` }}
-          />
+              <button
+                type="button"
+                onClick={resetAll}
+                disabled={!state.targetLabel && state.checkedIds.length === 0}
+                className="inline-flex min-h-[42px] items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-slate-200 transition-colors hover:border-white/20 hover:bg-white/[0.08] disabled:opacity-40 whitespace-nowrap"
+              >
+                <RotateCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                <span>Clear Form</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full border border-white/[0.06] bg-[#060913]/90">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${readinessStatus.bar}`}
+              style={{ width: `${Math.round((earnedPoints / maxPoints) * 100)}%` }}
+            />
+          </div>
         </div>
       </div>
 
@@ -244,55 +268,58 @@ export const RubricSimulatorTool: React.FC = () => {
         {sections.map(([sectionTitle, items]) => (
           <div
             key={sectionTitle}
-            className="rounded-2xl border border-white/[0.08] bg-slate-900/75 p-5 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]"
+            className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/75 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]"
           >
-            <h2 className="border-b border-white/[0.08] pb-3 font-display text-base font-bold text-slate-50">
-              {sectionTitle}
-            </h2>
+            <div className="h-0.5 w-full bg-gradient-to-r from-cyan-400/50 via-indigo-400/40 to-transparent" />
+            <div className="p-5">
+              <h2 className="border-b border-white/[0.08] pb-3 font-display text-base font-bold text-slate-50">
+                {sectionTitle}
+              </h2>
 
-            <div className="mt-3 divide-y divide-white/[0.06]">
-              {items.map((item) => {
-                const isChecked = checkedSet.has(item.id);
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="checkbox"
-                    aria-checked={isChecked}
-                    onClick={() => toggleItem(item.id)}
-                    className="flex w-full items-start gap-3 rounded-xl px-2 py-3 text-left transition-colors hover:bg-white/[0.04]"
-                  >
-                    <span className="mt-0.5 shrink-0">
-                      {isChecked ? (
-                        <CheckSquare
-                          className="h-5 w-5 text-emerald-400"
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        <Square
-                          className="h-5 w-5 text-slate-600"
-                          aria-hidden="true"
-                        />
-                      )}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span
-                        className={`block text-sm font-medium ${
-                          isChecked ? 'text-slate-50' : 'text-slate-300'
-                        }`}
-                      >
-                        {item.label}
+              <div className="mt-3 divide-y divide-white/[0.06]">
+                {items.map((item) => {
+                  const isChecked = checkedSet.has(item.id);
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      role="checkbox"
+                      aria-checked={isChecked}
+                      onClick={() => toggleItem(item.id)}
+                      className="flex w-full items-start gap-3 rounded-xl px-2 py-3 text-left transition-colors hover:bg-white/[0.04]"
+                    >
+                      <span className="mt-0.5 shrink-0">
+                        {isChecked ? (
+                          <CheckSquare
+                            className="h-5 w-5 text-emerald-400"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <Square
+                            className="h-5 w-5 text-slate-600"
+                            aria-hidden="true"
+                          />
+                        )}
                       </span>
-                      <span className="mt-0.5 block text-xs text-slate-500">
-                        {item.guidance}
+                      <span className="min-w-0 flex-1">
+                        <span
+                          className={`block text-sm font-medium ${
+                            isChecked ? 'text-slate-50' : 'text-slate-300'
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+                        <span className="mt-0.5 block text-xs text-slate-500">
+                          {item.guidance}
+                        </span>
                       </span>
-                    </span>
-                    <span className="shrink-0 rounded-md border border-indigo-400/25 bg-indigo-500/15 px-2 py-0.5 font-mono text-[11px] font-semibold text-indigo-300 tabular-nums">
-                      +{item.points}
-                    </span>
-                  </button>
-                );
-              })}
+                      <span className="shrink-0 rounded-md border border-indigo-400/25 bg-indigo-500/15 px-2 py-0.5 font-mono text-[11px] font-semibold text-indigo-300 tabular-nums">
+                        +{item.points}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         ))}
