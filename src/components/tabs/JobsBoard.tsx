@@ -567,16 +567,29 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
           </div>
         </div>
 
-        {/* Right Side: Staggered Floating Stack of 3 Featured Job Preview Cards */}
+        {/* Right Side: 3-Column Stepped Square Grid Podium Ladder */}
         <div className="lg:col-span-5">
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
             {heroPreviewCards.map((job, idx) => {
-              const offsetClass =
+              const podiumMtClass =
                 idx === 0
-                  ? 'lg:translate-x-2'
+                  ? 'sm:mt-0'
                   : idx === 1
-                  ? 'lg:-translate-x-3'
-                  : 'lg:translate-x-3';
+                  ? 'sm:mt-6'
+                  : 'sm:mt-12';
+              const rankBadge =
+                idx === 0
+                  ? '#1 TOP SPOT'
+                  : idx === 1
+                  ? '#2 VIP TIER'
+                  : '#3 FEATURED';
+              const glowClass =
+                idx === 0
+                  ? 'border-cyan-400/50 shadow-[0_0_30px_rgba(34,211,238,0.28)] hover:shadow-[0_0_40px_rgba(34,211,238,0.4)]'
+                  : idx === 1
+                  ? 'border-cyan-400/35 shadow-[0_0_22px_rgba(34,211,238,0.18)] hover:shadow-[0_0_30px_rgba(34,211,238,0.3)]'
+                  : 'border-cyan-400/20 shadow-[0_0_15px_rgba(34,211,238,0.10)] hover:shadow-[0_0_22px_rgba(34,211,238,0.2)]';
+
               return (
                 <div
                   key={job.id}
@@ -589,44 +602,50 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
                       setActiveJob(job);
                     }
                   }}
-                  className={`w-full cursor-pointer text-left rounded-2xl border border-cyan-500/15 bg-slate-900/75 p-4 shadow-[0_14px_34px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-400/40 hover:shadow-[0_8px_30px_rgba(6,182,212,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 ${offsetClass}`}
+                  className={`relative overflow-hidden w-full cursor-pointer text-left min-h-[210px] flex flex-col justify-between p-4 rounded-2xl border bg-slate-900/90 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 ${glowClass} ${podiumMtClass}`}
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <BrandAvatar name={job.company} domain={job.companyDomain} />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                          <span className="font-semibold text-slate-200 truncate">
-                            {job.company}
-                          </span>
-                          <span aria-hidden="true">·</span>
-                          <span className="rounded bg-cyan-400 px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-slate-950">
-                            Featured
-                          </span>
-                        </div>
-                        <p className="mt-0.5 truncate font-serif text-base font-semibold text-white">
-                          {job.title}
-                        </p>
-                      </div>
-                    </div>
+                  {/* Dark Atmospheric Photo Backdrop + Dark Navy/Cyan Gradient Overlay */}
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <img
+                      src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80"
+                      alt="Tech backdrop"
+                      className="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-luminosity filter brightness-90 transition-transform duration-700 hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#08121e] via-[#0a192f]/85 to-[#08121e]/40" />
+                  </div>
 
-                    <div className="shrink-0 text-right">
-                      <p className="font-mono text-xs font-semibold text-emerald-400 tabular-nums">
-                        {job.payRange}
-                      </p>
-                      <div className="mt-1 flex items-center justify-end gap-2 text-[11px]">
-                        <span className="text-slate-500">{job.type}</span>
-                        <a
-                          href={resolveApplyUrl(job.company, job.applyUrl)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="font-semibold text-cyan-300 transition-colors hover:text-cyan-200 whitespace-nowrap"
-                        >
-                          View Role ↗
-                        </a>
-                      </div>
-                    </div>
+                  {/* Top Row: Company Logo on Left + Rank Pill on Right */}
+                  <div className="relative z-10 flex items-center justify-between gap-2">
+                    <BrandAvatar name={job.company} domain={job.companyDomain} />
+                    <span className="rounded-full border border-cyan-400/40 bg-cyan-500/20 px-2.5 py-1 font-mono text-[10px] font-bold tracking-wider text-cyan-200 backdrop-blur-md shadow-sm">
+                      {rankBadge}
+                    </span>
+                  </div>
+
+                  {/* Middle: Company Name + Full 2-Line Job Title */}
+                  <div className="relative z-10 my-2">
+                    <p className="text-[11px] font-semibold text-slate-300">
+                      {job.company}
+                    </p>
+                    <h3 className="mt-1 font-serif text-sm font-bold leading-snug text-white line-clamp-2">
+                      {job.title}
+                    </h3>
+                  </div>
+
+                  {/* Bottom Row: Cyan USD Pay Rate + View Role Link */}
+                  <div className="relative z-10 flex items-center justify-between gap-2 border-t border-white/10 pt-2.5">
+                    <span className="font-mono text-xs font-bold text-cyan-300 tabular-nums">
+                      {job.payRange}
+                    </span>
+                    <a
+                      href={resolveApplyUrl(job.company, job.applyUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-xs font-semibold text-cyan-300 transition-colors hover:text-cyan-200 whitespace-nowrap"
+                    >
+                      View Role ↗
+                    </a>
                   </div>
                 </div>
               );
@@ -1079,9 +1098,9 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
                             </div>
                           </div>
 
-                          {/* Right: Pay Rate + Save Bookmark + Apply Button */}
-                          <div className="flex flex-wrap items-center justify-between gap-2.5 border-t border-cyan-500/15 pt-3 md:shrink-0 md:justify-end md:border-t-0 md:pt-0">
-                            <span className="font-mono text-sm font-semibold text-emerald-400 tabular-nums md:mr-2">
+                          {/* Right Side: USD Pay Range & Action Buttons */}
+                          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-cyan-500/10 pt-3 md:border-0 md:pt-0 md:justify-end">
+                            <span className="font-mono text-sm font-bold text-emerald-400 tabular-nums">
                               {job.payRange}
                             </span>
 
@@ -1095,7 +1114,7 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
                                     ? `Remove ${job.title} from saved`
                                     : `Save ${job.title}`
                                 }
-                                className={`inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap ${
+                                className={`inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border px-3 text-xs font-semibold transition-colors ${
                                   isSaved
                                     ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/20'
                                     : 'border-cyan-500/20 bg-slate-800/70 text-slate-200 hover:border-cyan-400/45 hover:bg-slate-800'
@@ -1115,7 +1134,7 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
                               <button
                                 type="button"
                                 onClick={() => {
-                                  const origin =
+                                 const origin =
                                     typeof window !== 'undefined'
                                       ? window.location.origin
                                       : 'https://planetaihub.com';
