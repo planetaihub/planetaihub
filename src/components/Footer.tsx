@@ -11,7 +11,7 @@ interface FooterProps {
   onOpenPostJob: () => void;
 }
 
-type LegalModalType = 'privacy' | 'terms' | null;
+type LegalModalType = 'about' | 'contact' | 'privacy' | 'terms' | null;
 
 export const Footer: React.FC<FooterProps> = ({
   onSelectTab,
@@ -118,9 +118,27 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Column 4: Legal & Info */}
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-              Legal & Info
+              Legal &amp; Info
             </h3>
             <ul className="mt-4 space-y-2.5 text-sm text-slate-400">
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setLegalModal('about')}
+                  className="text-left transition-colors hover:text-cyan-300"
+                >
+                  About Us
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setLegalModal('contact')}
+                  className="text-left transition-colors hover:text-cyan-300"
+                >
+                  Contact Us
+                </button>
+              </li>
               <li>
                 <button
                   type="button"
@@ -136,17 +154,8 @@ export const Footer: React.FC<FooterProps> = ({
                   onClick={() => setLegalModal('terms')}
                   className="text-left transition-colors hover:text-cyan-300"
                 >
-                  Terms of Use
+                  Terms of Service
                 </button>
-              </li>
-              <li>
-                <a
-                  href="mailto:team@planetaihub.com"
-                  className="inline-flex items-center gap-1.5 transition-colors hover:text-cyan-300"
-                >
-                  <Mail className="h-3.5 w-3.5 text-cyan-400" aria-hidden="true" />
-                  <span>team@planetaihub.com</span>
-                </a>
               </li>
             </ul>
           </div>
@@ -162,7 +171,7 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
       </footer>
 
-      {/* Privacy & Terms Editorial Modal */}
+      {/* Comprehensive AdSense-Compliant Legal & Info Modals */}
       {legalModal && (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-sm sm:items-center sm:p-4"
@@ -172,7 +181,7 @@ export const Footer: React.FC<FooterProps> = ({
           onClick={() => setLegalModal(null)}
         >
           <div
-            className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-t-3xl border border-cyan-500/20 bg-slate-900/95 p-6 text-slate-100 shadow-2xl backdrop-blur-xl sm:rounded-2xl sm:p-7"
+            className="max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-t-3xl border border-cyan-500/20 bg-slate-900/95 p-6 text-slate-100 shadow-2xl backdrop-blur-xl sm:rounded-2xl sm:p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4 border-b border-cyan-500/15 pb-4">
@@ -180,7 +189,13 @@ export const Footer: React.FC<FooterProps> = ({
                 id="legal-modal-title"
                 className="font-serif text-2xl font-semibold text-white"
               >
-                {legalModal === 'privacy' ? 'Privacy Policy' : 'Terms of Use'}
+                {legalModal === 'about'
+                  ? 'About PlanetAI Hub'
+                  : legalModal === 'contact'
+                  ? 'Contact Us'
+                  : legalModal === 'privacy'
+                  ? 'Privacy Policy'
+                  : 'Terms of Service'}
               </h2>
               <button
                 type="button"
@@ -192,28 +207,73 @@ export const Footer: React.FC<FooterProps> = ({
               </button>
             </div>
 
-            {legalModal === 'privacy' ? (
-              <div className="mt-4 space-y-3 text-sm leading-relaxed text-slate-300">
+            {legalModal === 'about' && (
+              <div className="mt-4 space-y-4 text-sm leading-relaxed text-slate-300">
                 <p>
-                  PlanetAI Hub operates on a zero-signup, browser-first privacy model. Your saved job shortlists, notes, resume drafts, invoices, expenses, and vitals are stored exclusively inside your device’s <code className="font-mono text-xs text-cyan-300">localStorage</code>.
+                  <strong>PlanetAI Hub</strong> (<a href="https://planetaihub.com" className="text-cyan-400 underline">planetaihub.com</a>) is an independent editorial platform dedicated to remote artificial intelligence, machine learning training, prompt engineering, voice AI, and software engineering career opportunities.
                 </p>
                 <p>
-                  We do not maintain user accounts or sell personal workspace entries. Manual Google AdSense display units may use standard advertising cookies subject to Google’s publisher policies.
+                  Our mission is to bring absolute transparency to remote employment by curating verified listings that feature transparent USD compensation bands and direct employer ATS links. In addition to our job board, we publish in-depth editorial intelligence briefings and provide professional offline-capable career, finance, and productivity utilities.
                 </p>
-                <p className="text-xs text-slate-400">
-                  Questions? Contact <a href="mailto:team@planetaihub.com" className="text-cyan-400 underline">team@planetaihub.com</a>.
+                <p>
+                  We operate with a zero-signup, local-first design philosophy, ensuring user privacy and instant accessibility across desktop and mobile devices.
                 </p>
               </div>
-            ) : (
-              <div className="mt-4 space-y-3 text-sm leading-relaxed text-slate-300">
+            )}
+
+            {legalModal === 'contact' && (
+              <div className="mt-4 space-y-4 text-sm leading-relaxed text-slate-300">
                 <p>
-                  Job listings aggregated from curated company career pages and public remote ATS feeds are provided for informational discovery. Always verify final compensation, eligibility, and contract terms directly on the employer’s official ATS page.
+                  We welcome inquiries from job seekers, hiring managers, and editorial partners. Whether you have questions about our remote listings, advertising opportunities, or technical feedback, our team is ready to assist you.
+                </p>
+                <div className="rounded-xl border border-cyan-500/20 bg-slate-950/70 p-4">
+                  <p className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">Editorial &amp; Support Desk</p>
+                  <p className="mt-1 text-base font-bold text-white">
+                    <a href="mailto:team@planetaihub.com" className="hover:text-cyan-300 underline">team@planetaihub.com</a>
+                  </p>
+                </div>
+                <p className="text-xs text-slate-400">
+                  We strive to respond to all publisher and employer placement inquiries within 24–48 business hours.
+                </p>
+              </div>
+            )}
+
+            {legalModal === 'privacy' && (
+              <div className="mt-4 space-y-4 text-sm leading-relaxed text-slate-300">
+                <p>
+                  At PlanetAI Hub, accessible at <a href="https://planetaihub.com" className="text-cyan-400 underline">planetaihub.com</a>, one of our main priorities is the privacy of our visitors. This Privacy Policy document outlines the types of information collected and recorded by PlanetAI Hub and how we use it.
                 </p>
                 <p>
-                  Client-side financial calculators, invoice exports, and health trackers are utility aids and do not constitute tax, legal, or medical advice.
+                  <strong>Browser Local Storage Privacy:</strong> PlanetAI Hub operates on a zero-signup model. All user shortlists, bookmarks, notes, resume drafts, expense records, and health vitals are stored exclusively inside your device’s browser <code className="font-mono text-xs text-cyan-300">localStorage</code>. We do not transmit or store personal workspace records on external servers.
+                </p>
+                <p>
+                  <strong>Google AdSense &amp; Third-Party Cookies:</strong> Google, as a third-party vendor, uses cookies (such as DART cookies) to serve ads on PlanetAI Hub. Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visit to our site and/or other sites on the internet.
+                </p>
+                <p>
+                  Users may opt out of personalized advertising by visiting the <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline">Google Ads Settings</a> page.
                 </p>
                 <p className="text-xs text-slate-400">
-                  Employer inquiries: <a href="mailto:team@planetaihub.com" className="text-cyan-400 underline">team@planetaihub.com</a>.
+                  If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us at <a href="mailto:team@planetaihub.com" className="text-cyan-400 underline">team@planetaihub.com</a>.
+                </p>
+              </div>
+            )}
+
+            {legalModal === 'terms' && (
+              <div className="mt-4 space-y-4 text-sm leading-relaxed text-slate-300">
+                <p>
+                  By accessing and using PlanetAI Hub (<a href="https://planetaihub.com" className="text-cyan-400 underline">planetaihub.com</a>), you agree to comply with and be bound by the following terms and conditions of use.
+                </p>
+                <p>
+                  <strong>Aggregated Job Listings &amp; ATS Links:</strong> Job listings displayed on PlanetAI Hub are curated from public remote RSS feeds, employer career pages, and direct submissions. We do not act as an employer or recruitment agency. Users must verify final compensation, employment contracts, and regional eligibility directly on the hiring company's official ATS portal.
+                </p>
+                <p>
+                  <strong>Utility Disclaimer:</strong> Financial calculators, resume builders, and productivity tools provided on this platform are for informational and workflow assistance only and do not constitute formal legal, financial, or tax advice.
+                </p>
+                <p>
+                  <strong>Intellectual Property:</strong> Editorial briefings, interface design, and branding are the property of PlanetAI Hub. Unauthorized scraping or republishing of proprietary editorial content is prohibited.
+                </p>
+                <p className="text-xs text-slate-400">
+                  For questions regarding these Terms of Service, please contact <a href="mailto:team@planetaihub.com" className="text-cyan-400 underline">team@planetaihub.com</a>.
                 </p>
               </div>
             )}
@@ -222,7 +282,7 @@ export const Footer: React.FC<FooterProps> = ({
               <button
                 type="button"
                 onClick={() => setLegalModal(null)}
-                className="min-h-[40px] rounded-xl bg-cyan-400 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-cyan-300"
+                className="min-h-[40px] rounded-xl bg-cyan-400 px-5 py-2 text-xs font-semibold text-slate-950 hover:bg-cyan-300"
               >
                 Close
               </button>
