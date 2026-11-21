@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Pause, Play, RotateCcw } from 'lucide-react';
+import { Mic, Pause, Play, RotateCcw, Trash2 } from 'lucide-react';
 import { loadCareerState, saveCareerState } from '../../../utils/storage';
 
 interface ScriptPreset {
@@ -14,21 +14,29 @@ const SCRIPT_PRESETS: ScriptPreset[] = [
     id: 'intro-pitch',
     label: '30s Remote Intro Pitch',
     targetSeconds: 30,
-    text: `Hi, I'm Jordan Reyes, a senior product engineer based in UTC minus five. Over the last six years, I have helped distributed teams ship faster, more reliable web software—most recently unifying four frontends into a single accessible design system and cutting UI regressions by thirty-eight percent. I thrive in async environments where clear writing and thoughtful architecture keep teams aligned. I'd love to bring that same ownership to your engineering team.`,
+    text: `Hi, I'm [Your Name], a product engineer working across async remote teams. Over the last several years, I have focused on shipping accessible, reliable web software and streamlining engineering workflows. I thrive in environments where clear writing and thoughtful architecture keep distributed teams aligned, and I'd love to bring that same ownership to your team.`,
   },
   {
     id: 'commercial-read',
     label: '45s Warm Commercial Read',
     targetSeconds: 45,
-    text: `Great work doesn't always happen in a crowded office. Sometimes your best thinking starts at a quiet desk, with clear goals and tools that stay out of your way. PlanetAI Hub brings transparent remote roles, calm daily planning, and practical offline utilities into one focused space—with zero signups and zero clutter. Wherever you log in from today, open your workspace and build something meaningful.`,
+    text: `Great work doesn't always happen in a crowded office. Sometimes your best thinking starts at a quiet desk, with clear goals and tools that stay out of your way. PlanetAI Hub brings transparent remote roles, calm daily planning, and practical offline utilities into one focused space—with zero clutter. Open your workspace and build something meaningful.`,
   },
   {
     id: 'technical-narration',
     label: '60s Technical Demo Narration',
     targetSeconds: 60,
-    text: `Welcome to this quick walkthrough of our local-first sync engine. Notice how changes made offline immediately update the interface with zero spinner delay. Every edit is written to browser storage first, queued deterministically, and reconciled automatically once connectivity returns. In the next thirty seconds, we'll inspect the conflict resolver, verify schema validation, and export a clean audit log ready for your team.`,
+    text: `Welcome to this quick walkthrough of our local-first sync engine. Notice how changes made offline immediately update the interface with zero spinner delay. Every edit is written to browser storage first, queued deterministically, and reconciled automatically once connectivity returns. Next, we'll inspect the conflict resolver and export a clean audit log for your team.`,
   },
 ];
+
+function loadInitialVoiceScript(): string {
+  const saved = loadCareerState<string>('voice', '');
+  if (!saved || saved.includes('Jordan Reyes')) {
+    return '';
+  }
+  return saved;
+}
 
 function formatTimer(totalSeconds: number): string {
   const mins = Math.floor(totalSeconds / 60);
@@ -37,9 +45,7 @@ function formatTimer(totalSeconds: number): string {
 }
 
 export const VoiceSampleTool: React.FC = () => {
-  const [scriptText, setScriptText] = useState<string>(() =>
-    loadCareerState<string>('voice', SCRIPT_PRESETS[0].text)
-  );
+  const [scriptText, setScriptText] = useState<string>(loadInitialVoiceScript);
   const [targetSeconds, setTargetSeconds] = useState<number>(30);
   const [isPlaying, setIsPlaying] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -102,7 +108,7 @@ export const VoiceSampleTool: React.FC = () => {
     return trimmed ? trimmed.split(/\s+/).length : 0;
   }, [scriptText]);
 
-  const estimatedSeconds = Math.max(1, Math.round((wordCount / 140) * 60));
+  const estimatedSeconds = wordCount > 0 ? Math.max(1, Math.round((wordCount / 140) * 60)) : 0;
 
   const handleSelectPreset = (preset: ScriptPreset) => {
     setIsPlaying(false);
@@ -112,9 +118,18 @@ export const VoiceSampleTool: React.FC = () => {
     if (prompterRef.current) prompterRef.current.scrollTop = 0;
   };
 
-  const handleReset = () => {
+  const handleResetTimer = () => {
     setIsPlaying(false);
     setElapsedSeconds(0);
+    if (prompterRef.current) {
+      prompterRef.current.scrollTop = 0;
+    }
+  };
+
+  const handleClearScript = () => {
+    setIsPlaying(false);
+    setElapsedSeconds(0);
+    setScriptText('');
     if (prompterRef.current) {
       prompterRef.current.scrollTop = 0;
     }
@@ -130,110 +145,127 @@ export const VoiceSampleTool: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Presets & Stage Controls */}
-      <div className="space-y-4 rounded-2xl border border-white/[0.08] bg-slate-900/80 p-4 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-            {SCRIPT_PRESETS.map((preset) => (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => handleSelectPreset(preset)}
-                className="min-h-[38px] rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-slate-200 transition-colors hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-cyan-300 whitespace-nowrap shrink-0"
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2 rounded-lg border border-indigo-400/30 bg-indigo-500/15 px-2.5 py-1 font-mono text-xs text-indigo-300 tabular-nums">
-            <span>{wordCount} words</span>
-            <span aria-hidden="true">·</span>
-            <span>~{estimatedSeconds}s @ 140 WPM</span>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[0.08] pt-3.5">
-          {/* Play / Pause / Reset & Timer */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => setIsPlaying((p) => !p)}
-              className="inline-flex min-h-[42px] items-center gap-2 rounded-xl bg-cyan-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all hover:bg-cyan-300 whitespace-nowrap"
-            >
-              {isPlaying ? (
-                <>
-                  <Pause className="h-4 w-4" aria-hidden="true" />
-                  <span>Pause</span>
-                </>
-              ) : (
-                <>
-                  <Play className="h-4 w-4" aria-hidden="true" />
-                  <span>Start Read</span>
-                </>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={handleReset}
-              className="inline-flex min-h-[42px] items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-slate-200 transition-colors hover:border-white/20 hover:bg-white/[0.08] whitespace-nowrap"
-            >
-              <RotateCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-              <span>Reset</span>
-            </button>
-
-            <div className="rounded-xl border border-white/[0.08] bg-[#060913]/85 px-3.5 py-2 font-mono text-sm font-bold text-slate-50 tabular-nums">
-              <span className={isPlaying ? 'text-emerald-400' : 'text-slate-50'}>
-                {formatTimer(elapsedSeconds)}
-              </span>{' '}
-              <span className="font-normal text-slate-500">
-                / {formatTimer(targetSeconds)}
+      <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/80 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="h-1 w-full bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500" />
+        <div className="space-y-4 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400 whitespace-nowrap">
+                Templates:
               </span>
-            </div>
-          </div>
-
-          {/* Speed, Font Size & Contrast Controls */}
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-              <span>Speed</span>
-              <input
-                type="range"
-                min={0.5}
-                max={2.5}
-                step={0.25}
-                value={scrollSpeed}
-                onChange={(e) => setScrollSpeed(Number(e.target.value))}
-                className="w-24 accent-cyan-400"
-              />
-              <span className="w-9 font-mono text-cyan-300 tabular-nums">
-                {scrollSpeed.toFixed(2)}x
-              </span>
-            </label>
-
-            <div className="flex items-center gap-1 rounded-xl border border-white/[0.08] bg-[#060913]/85 p-0.5">
-              {(['md', 'lg', 'xl'] as const).map((sz) => (
+              {SCRIPT_PRESETS.map((preset) => (
                 <button
-                  key={sz}
+                  key={preset.id}
                   type="button"
-                  onClick={() => setFontSize(sz)}
-                  className={`min-h-[34px] rounded-lg px-2.5 text-xs font-semibold uppercase transition-all ${
-                    fontSize === sz
-                      ? 'bg-cyan-400 text-slate-950 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-100'
-                  }`}
+                  onClick={() => handleSelectPreset(preset)}
+                  className="min-h-[38px] rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-slate-200 transition-colors hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-cyan-300 whitespace-nowrap shrink-0"
                 >
-                  {sz}
+                  {preset.label}
                 </button>
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={() => setDarkStage((d) => !d)}
-              className="min-h-[38px] rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-xs font-semibold text-slate-200 transition-colors hover:border-white/20 hover:bg-white/[0.08] whitespace-nowrap"
-            >
-              {darkStage ? 'Midnight Stage' : 'Deep Slate Stage'}
-            </button>
+            <div className="flex items-center gap-2 rounded-lg border border-indigo-400/30 bg-indigo-500/15 px-2.5 py-1 font-mono text-xs text-indigo-300 tabular-nums">
+              <span>{wordCount} words</span>
+              <span aria-hidden="true">·</span>
+              <span>~{estimatedSeconds}s @ 140 WPM</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[0.08] pt-3.5">
+            {/* Play / Pause / Reset & Timer */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button
+                type="button"
+                disabled={!scriptText.trim()}
+                onClick={() => setIsPlaying((p) => !p)}
+                className="inline-flex min-h-[42px] items-center gap-2 rounded-xl bg-cyan-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all hover:bg-cyan-300 disabled:opacity-40 whitespace-nowrap"
+              >
+                {isPlaying ? (
+                  <>
+                    <Pause className="h-4 w-4" aria-hidden="true" />
+                    <span>Pause</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4" aria-hidden="true" />
+                    <span>Start Read</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetTimer}
+                className="inline-flex min-h-[42px] items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-slate-200 transition-colors hover:border-white/20 hover:bg-white/[0.08] whitespace-nowrap"
+              >
+                <RotateCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                <span>Rewind</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleClearScript}
+                disabled={!scriptText}
+                className="inline-flex min-h-[42px] items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-slate-200 transition-colors hover:border-white/20 hover:bg-white/[0.08] disabled:opacity-40 whitespace-nowrap"
+              >
+                <Trash2 className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                <span>Clear Script</span>
+              </button>
+
+              <div className="rounded-xl border border-white/[0.08] bg-[#060913]/85 px-3.5 py-2 font-mono text-sm font-bold text-slate-50 tabular-nums">
+                <span className={isPlaying ? 'text-emerald-400' : 'text-slate-50'}>
+                  {formatTimer(elapsedSeconds)}
+                </span>{' '}
+                <span className="font-normal text-slate-500">
+                  / {formatTimer(targetSeconds)}
+                </span>
+              </div>
+            </div>
+
+            {/* Speed, Font Size & Contrast Controls */}
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+                <span>Speed</span>
+                <input
+                  type="range"
+                  min={0.5}
+                  max={2.5}
+                  step={0.25}
+                  value={scrollSpeed}
+                  onChange={(e) => setScrollSpeed(Number(e.target.value))}
+                  className="w-24 accent-cyan-400"
+                />
+                <span className="w-9 font-mono text-cyan-300 tabular-nums">
+                  {scrollSpeed.toFixed(2)}x
+                </span>
+              </label>
+
+              <div className="flex items-center gap-1 rounded-xl border border-white/[0.08] bg-[#060913]/85 p-0.5">
+                {(['md', 'lg', 'xl'] as const).map((sz) => (
+                  <button
+                    key={sz}
+                    type="button"
+                    onClick={() => setFontSize(sz)}
+                    className={`min-h-[34px] rounded-lg px-2.5 text-xs font-semibold uppercase transition-all ${
+                      fontSize === sz
+                        ? 'bg-cyan-400 text-slate-950 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-100'
+                    }`}
+                  >
+                    {sz}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setDarkStage((d) => !d)}
+                className="min-h-[38px] rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-xs font-semibold text-slate-200 transition-colors hover:border-white/20 hover:bg-white/[0.08] whitespace-nowrap"
+              >
+                {darkStage ? 'Midnight Stage' : 'Deep Slate Stage'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -264,27 +296,43 @@ export const VoiceSampleTool: React.FC = () => {
             ref={prompterRef}
             className={`h-72 overflow-y-auto pr-2 font-display font-medium ${fontSizeClass}`}
           >
-            <p className="whitespace-pre-line py-8">{scriptText}</p>
+            {scriptText.trim() ? (
+              <p className="whitespace-pre-line py-8">{scriptText}</p>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.08] p-6 text-center">
+                <Mic className="h-7 w-7 text-cyan-400/70" aria-hidden="true" />
+                <p className="mt-2.5 text-sm font-semibold text-slate-300">
+                  Teleprompter Ready
+                </p>
+                <p className="mt-1 max-w-sm text-xs leading-relaxed text-slate-500">
+                  Type or paste your audition script on the right, or select an optional practice template above.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/[0.08] bg-slate-900/75 p-5 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)] lg:col-span-5">
-          <label
-            htmlFor="voice-script-editor"
-            className="block font-display text-sm font-bold text-slate-50"
-          >
-            Edit Audition or Pitch Script
-          </label>
-          <p className="mt-1 text-xs text-slate-400">
-            Updates the teleprompter immediately and saves locally in your browser.
-          </p>
-          <textarea
-            id="voice-script-editor"
-            rows={10}
-            value={scriptText}
-            onChange={(e) => setScriptText(e.target.value)}
-            className="mt-3 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 p-3.5 text-sm leading-relaxed text-slate-100 placeholder:text-slate-600 transition-colors focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-          />
+        <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/75 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)] lg:col-span-5">
+          <div className="h-0.5 w-full bg-gradient-to-r from-cyan-400/60 via-indigo-400/40 to-transparent" />
+          <div className="p-5">
+            <label
+              htmlFor="voice-script-editor"
+              className="block font-display text-sm font-bold text-slate-50"
+            >
+              Audition or Pitch Script
+            </label>
+            <p className="mt-1 text-xs text-slate-400">
+              Updates the teleprompter immediately and saves locally in your browser.
+            </p>
+            <textarea
+              id="voice-script-editor"
+              rows={10}
+              value={scriptText}
+              onChange={(e) => setScriptText(e.target.value)}
+              placeholder="Paste your voice sample script, interview intro, or narration here..."
+              className="mt-3 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 p-3.5 text-sm leading-relaxed text-slate-100 placeholder:text-slate-500 transition-colors focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+            />
+          </div>
         </div>
       </div>
     </div>
