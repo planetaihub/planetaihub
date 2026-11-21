@@ -111,7 +111,6 @@ function loadInitialRubricState(): SavedRubricState {
   const saved = loadCareerState<Partial<SavedRubricState> | null>('rubric', null);
   if (!saved) return EMPTY_RUBRIC;
 
-  // Clear untouched legacy pre-filled sample data
   if (saved.targetLabel === 'Senior Frontend Engineer — Linearity Labs') {
     return EMPTY_RUBRIC;
   }
