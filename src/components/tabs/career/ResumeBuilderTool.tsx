@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Briefcase,
+  Camera,
   Check,
   Copy,
   FileText,
@@ -13,6 +14,7 @@ import {
   Sparkles,
   Trash2,
   User,
+  X,
 } from 'lucide-react';
 import { loadCareerState, saveCareerState } from '../../../utils/storage';
 
@@ -31,6 +33,8 @@ interface CareerDocumentState {
   email: string;
   location: string;
   portfolioUrl: string;
+  photoDataUrl: string;
+  photoShape: 'circle' | 'rounded';
   summary: string;
   skills: string;
   experiences: ExperienceItem[];
@@ -41,43 +45,31 @@ interface CareerDocumentState {
   coverLetterClosing: string;
 }
 
-const DEFAULT_DOC: CareerDocumentState = {
+const EMPTY_DOC: CareerDocumentState = {
   docType: 'resume',
-  fullName: 'Jordan Reyes',
-  targetTitle: 'Senior Frontend & Product Engineer',
-  email: 'jordan.reyes@example.com',
-  location: 'Remote · UTC-5 (Americas / EMEA Overlap)',
-  portfolioUrl: 'github.com/jordanreyes',
-  summary:
-    'Product-focused software engineer with 6+ years building accessible, offline-capable React and TypeScript web applications for distributed teams. Specialized in design systems, performance optimization, and clear async technical writing.',
-  skills:
-    'TypeScript, React 19, Tailwind CSS, Vite, PWA / Service Workers, Node.js, PostgreSQL, Playwright, WCAG AA',
+  fullName: '',
+  targetTitle: '',
+  email: '',
+  location: '',
+  portfolioUrl: '',
+  photoDataUrl: '',
+  photoShape: 'circle',
+  summary: '',
+  skills: '',
   experiences: [
     {
       id: 'exp-1',
-      role: 'Senior Frontend Engineer',
-      company: 'Northbound Systems',
-      period: '2023 – Present',
-      bullets:
-        'Architected shared React component library adopted across 4 product squads, cutting UI regressions by 38%.\nLed local-first IndexedDB sync initiative enabling zero-downtime field workflows on slow connections.\nReduced bundle size by 29% and improved p95 route transition latency under 90ms.',
-    },
-    {
-      id: 'exp-2',
-      role: 'Full-Stack Engineer',
-      company: 'MetricFlow',
-      period: '2020 – 2023',
-      bullets:
-        'Built self-serve billing and usage analytics dashboards in TypeScript and PostgreSQL.\nAutomated Playwright accessibility checks across 40+ customer-facing workflows.',
+      role: '',
+      company: '',
+      period: '',
+      bullets: '',
     },
   ],
-  recipientName: 'Hiring Team',
-  targetCompany: 'Linearity Labs',
-  coverLetterOpening:
-    'I am writing to apply for the Senior Frontend Engineer role at Linearity Labs. Having spent the past six years designing accessible component primitives and local-first React applications in fully remote engineering teams, your focus on sub-50ms interactive craft resonates strongly with my work.',
-  coverLetterBody:
-    'At Northbound Systems, I unified four fragmented frontends onto a single TypeScript design system and led our offline PWA caching architecture. Working across European and North American timezones taught me to document architectural decisions clearly in written RFCs and unblock teammates asynchronously.',
-  coverLetterClosing:
-    'I would welcome the opportunity to discuss how my experience with design systems and performance engineering can support Linearity Labs. Thank you for your time and consideration.',
+  recipientName: '',
+  targetCompany: '',
+  coverLetterOpening: '',
+  coverLetterBody: '',
+  coverLetterClosing: '',
 };
 
 const POWER_VERBS = [
@@ -85,20 +77,38 @@ const POWER_VERBS = [
   'Spearheaded',
   'Accelerated',
   'Automated',
-  'Reduced latency by 35%',
+  'Reduced latency by',
 ];
 
-const SAMPLE_SUMMARY =
-  'Senior product-minded engineer with 6+ years shipping resilient TypeScript, React, and AI-assisted web platforms in distributed remote teams. Track record of cutting p95 latency by 40%, scaling design systems across squads, and driving measurable activation lift.';
+function loadInitialCareerDoc(): CareerDocumentState {
+  const saved = loadCareerState<Partial<CareerDocumentState> | null>('doc', null);
+  if (!saved) return EMPTY_DOC;
 
-const SAMPLE_COVER_HOOK =
-  'I am excited to apply for this role—over the past six years building high-craft web applications for remote-first engineering organizations, I have specialized in turning complex workflows into sub-100ms user experiences.';
+  // Clear legacy pre-filled seed data if untouched
+  if (
+    saved.fullName === 'Jordan Reyes' &&
+    saved.email === 'jordan.reyes@example.com'
+  ) {
+    return EMPTY_DOC;
+  }
+
+  return {
+    ...EMPTY_DOC,
+    ...saved,
+    photoDataUrl: saved.photoDataUrl || '',
+    photoShape: saved.photoShape === 'rounded' ? 'rounded' : 'circle',
+    experiences:
+      Array.isArray(saved.experiences) && saved.experiences.length > 0
+        ? saved.experiences
+        : EMPTY_DOC.experiences,
+  };
+}
 
 export const ResumeBuilderTool: React.FC = () => {
-  const [doc, setDoc] = useState<CareerDocumentState>(() =>
-    loadCareerState<CareerDocumentState>('doc', DEFAULT_DOC)
-  );
+  const [doc, setDoc] = useState<CareerDocumentState>(loadInitialCareerDoc);
   const [copied, setCopied] = useState(false);
+  const [photoError, setPhotoError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     saveCareerState('doc', doc);
@@ -131,10 +141,10 @@ export const ResumeBuilderTool: React.FC = () => {
         ...prev.experiences,
         {
           id: `exp-${Date.now()}`,
-          role: 'Role Title',
-          company: 'Company Name',
-          period: '2022 – 2024',
-          bullets: 'Delivered measurable outcome, reducing cycle time by 25%.',
+          role: '',
+          company: '',
+          period: '',
+          bullets: '',
         },
       ],
     }));
@@ -153,10 +163,7 @@ export const ResumeBuilderTool: React.FC = () => {
       experiences: prev.experiences.map((exp) => {
         if (exp.id !== expId) return exp;
         const trimmed = exp.bullets.trim();
-        const addition =
-          chip === 'Reduced latency by 35%'
-            ? 'Reduced latency by 35% across core user workflows through caching and bundle splitting.'
-            : `${chip} cross-functional delivery, improving reliability and measurable team velocity.`;
+        const addition = `${chip} `;
         return {
           ...exp,
           bullets: trimmed ? `${trimmed}\n${addition}` : addition,
@@ -165,30 +172,91 @@ export const ResumeBuilderTool: React.FC = () => {
     }));
   };
 
-  const handleReset = () => {
-    setDoc(DEFAULT_DOC);
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setPhotoError('Please choose a PNG, JPG, or WebP image file.');
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      setPhotoError('Please select an image smaller than 4 MB.');
+      return;
+    }
+    setPhotoError('');
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        updateField('photoDataUrl', reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoError('');
+    updateField('photoDataUrl', '');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleClearForm = () => {
+    setPhotoError('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setDoc((prev) => ({
+      ...EMPTY_DOC,
+      docType: prev.docType,
+      experiences: [
+        {
+          id: `exp-${Date.now()}`,
+          role: '',
+          company: '',
+          period: '',
+          bullets: '',
+        },
+      ],
+    }));
   };
 
   const buildPlainText = (): string => {
-    const header = `${doc.fullName}\n${doc.targetTitle}\n${doc.email} | ${doc.location} | ${doc.portfolioUrl}`;
+    const contactLine = [doc.email, doc.location, doc.portfolioUrl]
+      .filter((s) => s.trim().length > 0)
+      .join(' | ');
+    const header = [doc.fullName, doc.targetTitle, contactLine]
+      .filter((s) => s.trim().length > 0)
+      .join('\n');
+
     if (doc.docType === 'cover-letter') {
+      const greeting = `Dear ${doc.recipientName.trim() || 'Hiring Team'}${
+        doc.targetCompany.trim() ? ` at ${doc.targetCompany.trim()}` : ''
+      },`;
       return [
         header,
-        '',
-        `Dear ${doc.recipientName || 'Hiring Team'} at ${doc.targetCompany || 'your team'},`,
+        header ? '' : null,
+        greeting,
         '',
         doc.coverLetterOpening,
-        '',
-        doc.coverLetterBody,
-        '',
-        doc.coverLetterClosing,
+        doc.coverLetterBody ? `\n${doc.coverLetterBody}` : null,
+        doc.coverLetterClosing ? `\n${doc.coverLetterClosing}` : null,
         '',
         'Sincerely,',
         doc.fullName,
-      ].join('\n');
+      ]
+        .filter((part): part is string => part !== null)
+        .join('\n');
     }
 
     const expText = doc.experiences
+      .filter(
+        (exp) =>
+          exp.role.trim() ||
+          exp.company.trim() ||
+          exp.period.trim() ||
+          exp.bullets.trim()
+      )
       .map((exp) => {
         const lines = exp.bullets
           .split('\n')
@@ -196,22 +264,20 @@ export const ResumeBuilderTool: React.FC = () => {
           .filter(Boolean)
           .map((l) => `- ${l}`)
           .join('\n');
-        return `${exp.role} — ${exp.company} (${exp.period})\n${lines}`;
+        const heading = [exp.role, exp.company].filter(Boolean).join(' — ');
+        const periodSuffix = exp.period ? ` (${exp.period})` : '';
+        return `${heading}${periodSuffix}${lines ? `\n${lines}` : ''}`;
       })
       .join('\n\n');
 
     return [
       header,
-      '',
-      'SUMMARY',
-      doc.summary,
-      '',
-      'EXPERIENCE',
-      expText,
-      '',
-      'SKILLS',
-      doc.skills,
-    ].join('\n');
+      doc.summary.trim() ? `\nSUMMARY\n${doc.summary.trim()}` : '',
+      expText ? `\nEXPERIENCE\n${expText}` : '',
+      doc.skills.trim() ? `\nSKILLS\n${doc.skills.trim()}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
   };
 
   const atsAnalysis = useMemo(() => {
@@ -246,26 +312,54 @@ export const ResumeBuilderTool: React.FC = () => {
       if (skillCount >= 5) score += 15;
       else if (skillCount >= 2) score += 8;
     } else {
-      if (doc.recipientName.trim() && doc.targetCompany.trim()) score += 15;
-      if (doc.coverLetterOpening.trim().length >= 80) score += 20;
-      if (doc.coverLetterBody.trim().length >= 100) score += 25;
-      if (doc.coverLetterClosing.trim().length >= 40) score += 15;
+      if (doc.recipientName.trim() || doc.targetCompany.trim()) score += 15;
+      if (doc.coverLetterOpening.trim().length >= 60) score += 20;
+      if (doc.coverLetterBody.trim().length >= 80) score += 25;
+      if (doc.coverLetterClosing.trim().length >= 30) score += 15;
     }
 
     const clamped = Math.min(100, Math.max(0, score));
     const status =
-      clamped >= 90 ? 'Optimal' : clamped >= 70 ? 'Strong' : 'Needs Detail';
+      clamped === 0
+        ? 'Empty Draft'
+        : clamped >= 85
+          ? 'Strong'
+          : clamped >= 50
+            ? 'In Progress'
+            : 'Needs Detail';
     return { score: clamped, status };
   }, [doc]);
 
   const wordCount = useMemo(() => {
-    const text = buildPlainText().trim();
-    return text ? text.split(/\s+/).length : 0;
+    const rawParts =
+      doc.docType === 'resume'
+        ? [
+            doc.fullName,
+            doc.targetTitle,
+            doc.summary,
+            doc.skills,
+            ...doc.experiences.map(
+              (e) => `${e.role} ${e.company} ${e.period} ${e.bullets}`
+            ),
+          ]
+        : [
+            doc.fullName,
+            doc.targetTitle,
+            doc.recipientName,
+            doc.targetCompany,
+            doc.coverLetterOpening,
+            doc.coverLetterBody,
+            doc.coverLetterClosing,
+          ];
+    const combined = rawParts.join(' ').trim();
+    return combined ? combined.split(/\s+/).length : 0;
   }, [doc]);
 
   const handleCopyText = async () => {
+    const text = buildPlainText().trim();
+    if (!text) return;
     try {
-      await navigator.clipboard.writeText(buildPlainText());
+      await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -280,9 +374,26 @@ export const ResumeBuilderTool: React.FC = () => {
   const labelClass =
     'flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400';
   const inputClass =
-    'mt-1.5 h-10 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 text-sm text-slate-100 placeholder:text-slate-600 transition-colors focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none';
+    'mt-1.5 h-10 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 text-sm text-slate-100 placeholder:text-slate-500 transition-colors focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none';
   const textareaClass =
-    'mt-1.5 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 py-2.5 text-sm leading-relaxed text-slate-100 placeholder:text-slate-600 transition-colors focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none';
+    'mt-1.5 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 py-2.5 text-sm leading-relaxed text-slate-100 placeholder:text-slate-500 transition-colors focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none';
+
+  const hasPopulatedExperience = doc.experiences.some(
+    (exp) =>
+      exp.role.trim() ||
+      exp.company.trim() ||
+      exp.period.trim() ||
+      exp.bullets.trim()
+  );
+
+  const hasHeaderContent = Boolean(
+    doc.fullName.trim() ||
+      doc.targetTitle.trim() ||
+      doc.email.trim() ||
+      doc.location.trim() ||
+      doc.portfolioUrl.trim() ||
+      doc.photoDataUrl
+  );
 
   return (
     <div className="space-y-5">
@@ -300,7 +411,7 @@ export const ResumeBuilderTool: React.FC = () => {
       {/* Floating Studio Toolbar */}
       <div className="no-print flex flex-col gap-3 rounded-2xl border border-white/[0.08] bg-slate-900/80 px-4 py-2.5 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)] lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-3">
-          {/* Segmented Pill Toggle */}
+          {/* Segmented Document Mode Toggle */}
           <div className="flex items-center gap-1 rounded-xl border border-white/[0.08] bg-[#060913]/85 p-1">
             <button
               type="button"
@@ -339,7 +450,7 @@ export const ResumeBuilderTool: React.FC = () => {
               />
             </div>
             <span className="font-mono text-xs font-semibold text-slate-200 tabular-nums whitespace-nowrap">
-              ATS Score:{' '}
+              Completeness:{' '}
               <span
                 className={
                   atsAnalysis.score >= 85 ? 'text-emerald-400' : 'text-cyan-400'
@@ -353,15 +464,15 @@ export const ResumeBuilderTool: React.FC = () => {
           </div>
         </div>
 
-        {/* Crisp Action Buttons */}
+        {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={handleReset}
+            onClick={handleClearForm}
             className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-slate-200 transition-colors hover:border-white/20 hover:bg-white/[0.08] whitespace-nowrap"
           >
             <RotateCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-            <span>Reset</span>
+            <span>Clear Form</span>
           </button>
 
           <button
@@ -388,421 +499,651 @@ export const ResumeBuilderTool: React.FC = () => {
             className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl bg-cyan-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all hover:bg-cyan-300 whitespace-nowrap"
           >
             <Printer className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>Export PDF</span>
+            <span>Export / Print PDF</span>
           </button>
         </div>
       </div>
 
-      {/* Split Workspace: Elevated Form Editor + Crisp White A4 Paper Sheet */}
+      {/* Split Workspace: Dark SaaS Form Editor + Crisp White Paper Document Preview */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
-        {/* Left: Elevated Form Editor */}
-        <div className="no-print space-y-5 rounded-2xl border border-white/[0.08] bg-slate-900/75 p-5 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)] sm:p-6 lg:col-span-6">
-          <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
-            <div>
-              <h2 className="font-display text-lg font-bold text-slate-50">
-                Candidate Details
-              </h2>
-              <p className="text-xs text-slate-400">
-                Single-column ATS structure · Instant browser auto-save
-              </p>
-            </div>
-            <span className="rounded-lg border border-indigo-400/30 bg-indigo-500/20 px-2.5 py-1 font-mono text-[11px] font-semibold text-indigo-300 tabular-nums">
-              {wordCount} words
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-            <div>
-              <label className={labelClass}>
-                <User className="h-3 w-3 text-cyan-400" aria-hidden="true" />
-                <span>Full Name</span>
-              </label>
-              <input
-                type="text"
-                value={doc.fullName}
-                onChange={(e) => updateField('fullName', e.target.value)}
-                className={inputClass}
-              />
+        {/* Left: Dark-Mode SaaS Editor */}
+        <div className="no-print overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/75 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)] lg:col-span-6">
+          <div className="h-1 w-full bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500" />
+          <div className="space-y-5 p-5 sm:p-6">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
+              <div>
+                <h2 className="font-display text-lg font-bold text-slate-50">
+                  {doc.docType === 'resume'
+                    ? 'Resume Details'
+                    : 'Cover Letter Details'}
+                </h2>
+                <p className="text-xs text-slate-400">
+                  Clean ATS-ready structure · Saved automatically in your browser
+                </p>
+              </div>
+              <span className="rounded-lg border border-indigo-400/30 bg-indigo-500/20 px-2.5 py-1 font-mono text-[11px] font-semibold text-indigo-300 tabular-nums">
+                {wordCount} words
+              </span>
             </div>
 
-            <div>
-              <label className={labelClass}>
-                <Briefcase className="h-3 w-3 text-cyan-400" aria-hidden="true" />
-                <span>Target Role Title</span>
-              </label>
-              <input
-                type="text"
-                value={doc.targetTitle}
-                onChange={(e) => updateField('targetTitle', e.target.value)}
-                className={inputClass}
-              />
+            {/* Optional Profile Photo Upload (Resume Mode) */}
+            {doc.docType === 'resume' && (
+              <div className="rounded-xl border border-cyan-500/20 bg-[#060913]/65 p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    {doc.photoDataUrl ? (
+                      <img
+                        src={doc.photoDataUrl}
+                        alt="Uploaded profile"
+                        className={`h-12 w-12 shrink-0 border border-cyan-400/40 object-cover ${
+                          doc.photoShape === 'circle'
+                            ? 'rounded-full'
+                            : 'rounded-xl'
+                        }`}
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-900 text-cyan-400">
+                        <Camera className="h-5 w-5" aria-hidden="true" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-xs font-semibold text-slate-100">
+                        Profile Photo (Optional)
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        Processed locally in your browser · Included in PDF export
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      aria-label="Upload profile photo"
+                      className="sr-only"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-cyan-400/35 bg-cyan-400/15 px-3 py-1.5 text-xs font-semibold text-cyan-200 transition-colors hover:bg-cyan-400/25 hover:text-white"
+                    >
+                      <Camera className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span>
+                        {doc.photoDataUrl ? 'Change Photo' : 'Upload Photo'}
+                      </span>
+                    </button>
+
+                    {doc.photoDataUrl && (
+                      <button
+                        type="button"
+                        onClick={handleRemovePhoto}
+                        className="inline-flex min-h-[36px] items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-red-400/40 hover:bg-red-500/15 hover:text-red-300"
+                      >
+                        <X className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span>Remove Photo</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Photo Shape Toggle */}
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] pt-3">
+                  <span className="text-[11px] font-medium text-slate-400">
+                    Photo Frame Shape
+                  </span>
+                  <div className="flex items-center gap-1 rounded-lg border border-white/[0.08] bg-slate-950/70 p-0.5">
+                    {(
+                      [
+                        { id: 'circle', label: 'Circle' },
+                        { id: 'rounded', label: 'Rounded Square' },
+                      ] as const
+                    ).map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => updateField('photoShape', opt.id)}
+                        className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                          doc.photoShape === opt.id
+                            ? 'bg-cyan-400 text-slate-950'
+                            : 'text-slate-400 hover:text-slate-100'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {photoError && (
+                  <p className="mt-2 text-xs text-red-400">{photoError}</p>
+                )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>
+                  <User className="h-3 w-3 text-cyan-400" aria-hidden="true" />
+                  <span>Full Name</span>
+                </label>
+                <input
+                  type="text"
+                  value={doc.fullName}
+                  onChange={(e) => updateField('fullName', e.target.value)}
+                  placeholder="e.g. Alex Rivera"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>
+                  <Briefcase className="h-3 w-3 text-cyan-400" aria-hidden="true" />
+                  <span>Target Role Title</span>
+                </label>
+                <input
+                  type="text"
+                  value={doc.targetTitle}
+                  onChange={(e) => updateField('targetTitle', e.target.value)}
+                  placeholder="e.g. Senior AI & Product Engineer"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>
+                  <Mail className="h-3 w-3 text-cyan-400" aria-hidden="true" />
+                  <span>Email Address</span>
+                </label>
+                <input
+                  type="email"
+                  value={doc.email}
+                  onChange={(e) => updateField('email', e.target.value)}
+                  placeholder="you@domain.com"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>
+                  <Globe className="h-3 w-3 text-cyan-400" aria-hidden="true" />
+                  <span>Portfolio / GitHub</span>
+                </label>
+                <input
+                  type="text"
+                  value={doc.portfolioUrl}
+                  onChange={(e) => updateField('portfolioUrl', e.target.value)}
+                  placeholder="github.com/yourhandle"
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className={labelClass}>
+                  <MapPin className="h-3 w-3 text-cyan-400" aria-hidden="true" />
+                  <span>Location &amp; Timezone Overlap</span>
+                </label>
+                <input
+                  type="text"
+                  value={doc.location}
+                  onChange={(e) => updateField('location', e.target.value)}
+                  placeholder="e.g. Remote · UTC+8 (Americas / EMEA Overlap)"
+                  className={inputClass}
+                />
+              </div>
             </div>
 
-            <div>
-              <label className={labelClass}>
-                <Mail className="h-3 w-3 text-cyan-400" aria-hidden="true" />
-                <span>Email Address</span>
-              </label>
-              <input
-                type="email"
-                value={doc.email}
-                onChange={(e) => updateField('email', e.target.value)}
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                <Globe className="h-3 w-3 text-cyan-400" aria-hidden="true" />
-                <span>Portfolio / GitHub</span>
-              </label>
-              <input
-                type="text"
-                value={doc.portfolioUrl}
-                onChange={(e) => updateField('portfolioUrl', e.target.value)}
-                className={inputClass}
-              />
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className={labelClass}>
-                <MapPin className="h-3 w-3 text-cyan-400" aria-hidden="true" />
-                <span>Location &amp; Timezone Overlap</span>
-              </label>
-              <input
-                type="text"
-                value={doc.location}
-                onChange={(e) => updateField('location', e.target.value)}
-                className={inputClass}
-              />
-            </div>
-          </div>
-
-          {doc.docType === 'resume' ? (
-            <>
-              <div className="border-t border-white/[0.08] pt-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
+            {doc.docType === 'resume' ? (
+              <>
+                <div className="border-t border-white/[0.08] pt-4">
                   <label className={labelClass}>
                     <Sparkles className="h-3 w-3 text-cyan-400" aria-hidden="true" />
                     <span>Executive Summary</span>
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => updateField('summary', SAMPLE_SUMMARY)}
-                    className="inline-flex items-center gap-1 rounded-lg border border-indigo-400/30 bg-indigo-500/15 px-2.5 py-1 text-[11px] font-semibold text-indigo-300 transition-colors hover:bg-indigo-500/25"
-                  >
-                    <Sparkles className="h-3 w-3" aria-hidden="true" />
-                    <span>Sample Fill</span>
-                  </button>
-                </div>
-                <textarea
-                  rows={3}
-                  value={doc.summary}
-                  onChange={(e) => updateField('summary', e.target.value)}
-                  className={textareaClass}
-                />
-              </div>
-
-              <div className="space-y-3 border-t border-white/[0.08] pt-4">
-                <div className="flex items-center justify-between">
-                  <span className={labelClass}>
-                    <Briefcase className="h-3 w-3 text-cyan-400" aria-hidden="true" />
-                    <span>Experience History</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={addExperience}
-                    className="inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300 transition-colors hover:bg-cyan-400/20"
-                  >
-                    <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span>Add Role</span>
-                  </button>
+                  <textarea
+                    rows={3}
+                    value={doc.summary}
+                    onChange={(e) => updateField('summary', e.target.value)}
+                    placeholder="Summarize your core experience, technical specialties, and measurable remote impact in 2–3 concise sentences..."
+                    className={textareaClass}
+                  />
                 </div>
 
-                {doc.experiences.map((exp, idx) => (
-                  <div
-                    key={exp.id}
-                    className="space-y-2.5 rounded-xl border border-white/[0.08] bg-[#060913]/55 p-3.5"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
-                        Role 0{idx + 1}
-                      </span>
-                      {doc.experiences.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeExperience(exp.id)}
-                          aria-label={`Remove experience ${idx + 1}`}
-                          className="inline-flex min-h-[30px] min-w-[30px] items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-red-500/15 hover:text-red-400"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                      <input
-                        type="text"
-                        value={exp.role}
-                        onChange={(e) =>
-                          updateExperience(exp.id, 'role', e.target.value)
-                        }
-                        placeholder="Role Title"
-                        className="h-9 rounded-lg border border-white/[0.08] bg-slate-950/75 px-2.5 text-xs font-medium text-slate-100 placeholder:text-slate-600 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-                      />
-                      <input
-                        type="text"
-                        value={exp.company}
-                        onChange={(e) =>
-                          updateExperience(exp.id, 'company', e.target.value)
-                        }
-                        placeholder="Company"
-                        className="h-9 rounded-lg border border-white/[0.08] bg-slate-950/75 px-2.5 text-xs font-medium text-slate-100 placeholder:text-slate-600 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-                      />
-                      <input
-                        type="text"
-                        value={exp.period}
-                        onChange={(e) =>
-                          updateExperience(exp.id, 'period', e.target.value)
-                        }
-                        placeholder="2023 – Present"
-                        className="h-9 rounded-lg border border-white/[0.08] bg-slate-950/75 px-2.5 font-mono text-xs text-slate-100 placeholder:text-slate-600 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-                      />
-                    </div>
-
-                    <textarea
-                      rows={3}
-                      value={exp.bullets}
-                      onChange={(e) =>
-                        updateExperience(exp.id, 'bullets', e.target.value)
-                      }
-                      placeholder="One quantified achievement per line..."
-                      className="w-full rounded-lg border border-white/[0.08] bg-slate-950/75 px-2.5 py-2 text-xs leading-relaxed text-slate-100 placeholder:text-slate-600 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-                    />
-
-                    {/* AI Power Verbs Quick-Insert Chips */}
-                    <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                        + Power Verbs:
-                      </span>
-                      {POWER_VERBS.map((verb) => (
-                        <button
-                          key={verb}
-                          type="button"
-                          onClick={() => appendBulletChip(exp.id, verb)}
-                          className="rounded-md border border-white/[0.08] bg-slate-900/90 px-2 py-0.5 text-[11px] font-medium text-slate-300 transition-colors hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-cyan-300"
-                        >
-                          + {verb}
-                        </button>
-                      ))}
-                    </div>
+                <div className="space-y-3 border-t border-white/[0.08] pt-4">
+                  <div className="flex items-center justify-between">
+                    <span className={labelClass}>
+                      <Briefcase className="h-3 w-3 text-cyan-400" aria-hidden="true" />
+                      <span>Experience History</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={addExperience}
+                      className="inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300 transition-colors hover:bg-cyan-400/20"
+                    >
+                      <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span>Add Role</span>
+                    </button>
                   </div>
-                ))}
-              </div>
 
-              <div className="border-t border-white/[0.08] pt-4">
-                <label className={labelClass}>
-                  <span>Core Skills (comma-separated)</span>
-                </label>
-                <textarea
-                  rows={2}
-                  value={doc.skills}
-                  onChange={(e) => updateField('skills', e.target.value)}
-                  className={textareaClass}
-                />
-              </div>
-            </>
-          ) : (
-            <div className="space-y-4 border-t border-white/[0.08] pt-4">
-              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-                <div>
+                  {doc.experiences.map((exp, idx) => (
+                    <div
+                      key={exp.id}
+                      className="space-y-2.5 rounded-xl border border-white/[0.08] bg-[#060913]/55 p-3.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
+                          Role 0{idx + 1}
+                        </span>
+                        {doc.experiences.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeExperience(exp.id)}
+                            aria-label={`Remove experience ${idx + 1}`}
+                            className="inline-flex min-h-[30px] min-w-[30px] items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-red-500/15 hover:text-red-400"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                        <input
+                          type="text"
+                          value={exp.role}
+                          onChange={(e) =>
+                            updateExperience(exp.id, 'role', e.target.value)
+                          }
+                          placeholder="Role Title"
+                          className="h-9 rounded-lg border border-white/[0.08] bg-slate-950/75 px-2.5 text-xs font-medium text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                        />
+                        <input
+                          type="text"
+                          value={exp.company}
+                          onChange={(e) =>
+                            updateExperience(exp.id, 'company', e.target.value)
+                          }
+                          placeholder="Company"
+                          className="h-9 rounded-lg border border-white/[0.08] bg-slate-950/75 px-2.5 text-xs font-medium text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                        />
+                        <input
+                          type="text"
+                          value={exp.period}
+                          onChange={(e) =>
+                            updateExperience(exp.id, 'period', e.target.value)
+                          }
+                          placeholder="e.g. 2023 – Present"
+                          className="h-9 rounded-lg border border-white/[0.08] bg-slate-950/75 px-2.5 font-mono text-xs text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                        />
+                      </div>
+
+                      <textarea
+                        rows={3}
+                        value={exp.bullets}
+                        onChange={(e) =>
+                          updateExperience(exp.id, 'bullets', e.target.value)
+                        }
+                        placeholder="Add one quantified achievement per line (e.g. Reduced API latency by 35%...)"
+                        className="w-full rounded-lg border border-white/[0.08] bg-slate-950/75 px-2.5 py-2 text-xs leading-relaxed text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                      />
+
+                      {/* Quick Action Verb Chips */}
+                      <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                          Insert Verb:
+                        </span>
+                        {POWER_VERBS.map((verb) => (
+                          <button
+                            key={verb}
+                            type="button"
+                            onClick={() => appendBulletChip(exp.id, verb)}
+                            className="rounded-md border border-white/[0.08] bg-slate-900/90 px-2 py-0.5 text-[11px] font-medium text-slate-300 transition-colors hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-cyan-300"
+                          >
+                            + {verb}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t border-white/[0.08] pt-4">
                   <label className={labelClass}>
-                    <span>Recipient / Hiring Manager</span>
+                    <span>Core Skills (comma-separated)</span>
                   </label>
-                  <input
-                    type="text"
-                    value={doc.recipientName}
-                    onChange={(e) =>
-                      updateField('recipientName', e.target.value)
-                    }
-                    className={inputClass}
+                  <textarea
+                    rows={2}
+                    value={doc.skills}
+                    onChange={(e) => updateField('skills', e.target.value)}
+                    placeholder="e.g. TypeScript, React, Tailwind CSS, Python, Prompt Evaluation, PostgreSQL"
+                    className={textareaClass}
                   />
                 </div>
-                <div>
-                  <label className={labelClass}>
-                    <span>Target Company</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={doc.targetCompany}
-                    onChange={(e) =>
-                      updateField('targetCompany', e.target.value)
-                    }
-                    className={inputClass}
-                  />
+              </>
+            ) : (
+              <div className="space-y-4 border-t border-white/[0.08] pt-4">
+                <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>
+                      <span>Recipient / Hiring Manager</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={doc.recipientName}
+                      onChange={(e) =>
+                        updateField('recipientName', e.target.value)
+                      }
+                      placeholder="e.g. Hiring Team or Manager Name"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>
+                      <span>Target Company</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={doc.targetCompany}
+                      onChange={(e) =>
+                        updateField('targetCompany', e.target.value)
+                      }
+                      placeholder="e.g. Anthropic"
+                      className={inputClass}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <div className="flex items-center justify-between gap-2">
+                <div>
                   <label className={labelClass}>
                     <span>Opening Hook</span>
                   </label>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      updateField('coverLetterOpening', SAMPLE_COVER_HOOK)
+                  <textarea
+                    rows={3}
+                    value={doc.coverLetterOpening}
+                    onChange={(e) =>
+                      updateField('coverLetterOpening', e.target.value)
                     }
-                    className="inline-flex items-center gap-1 rounded-lg border border-indigo-400/30 bg-indigo-500/15 px-2.5 py-1 text-[11px] font-semibold text-indigo-300 transition-colors hover:bg-indigo-500/25"
-                  >
-                    <Sparkles className="h-3 w-3" aria-hidden="true" />
-                    <span>Sample Hook</span>
-                  </button>
+                    placeholder="State the role you are applying for and why the company's mission or product aligns with your background..."
+                    className={textareaClass}
+                  />
                 </div>
-                <textarea
-                  rows={3}
-                  value={doc.coverLetterOpening}
-                  onChange={(e) =>
-                    updateField('coverLetterOpening', e.target.value)
-                  }
-                  className={textareaClass}
-                />
-              </div>
 
-              <div>
-                <label className={labelClass}>
-                  <span>Evidence &amp; Remote Fit Paragraph</span>
-                </label>
-                <textarea
-                  rows={4}
-                  value={doc.coverLetterBody}
-                  onChange={(e) =>
-                    updateField('coverLetterBody', e.target.value)
-                  }
-                  className={textareaClass}
-                />
-              </div>
+                <div>
+                  <label className={labelClass}>
+                    <span>Evidence &amp; Remote Fit Paragraph</span>
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={doc.coverLetterBody}
+                    onChange={(e) =>
+                      updateField('coverLetterBody', e.target.value)
+                    }
+                    placeholder="Highlight 1–2 concrete projects, measurable outcomes, and your async collaboration strengths..."
+                    className={textareaClass}
+                  />
+                </div>
 
-              <div>
-                <label className={labelClass}>
-                  <span>Closing Call to Action</span>
-                </label>
-                <textarea
-                  rows={2}
-                  value={doc.coverLetterClosing}
-                  onChange={(e) =>
-                    updateField('coverLetterClosing', e.target.value)
-                  }
-                  className={textareaClass}
-                />
+                <div>
+                  <label className={labelClass}>
+                    <span>Closing Call to Action</span>
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={doc.coverLetterClosing}
+                    onChange={(e) =>
+                      updateField('coverLetterClosing', e.target.value)
+                    }
+                    placeholder="Thank the team for reviewing your application and express interest in discussing next steps..."
+                    className={textareaClass}
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Right: Elevated Crisp White Executive A4 Paper Sheet */}
-        <div className="space-y-3 lg:col-span-6">
+        {/* Right: Live High-Contrast Crisp White A4 Paper Document Preview */}
+        <div className="space-y-3 lg:col-span-6 lg:sticky lg:top-24">
           <div className="no-print flex flex-wrap items-center justify-between gap-2 px-1">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300">
               <FileText className="h-3.5 w-3.5 text-cyan-400" aria-hidden="true" />
-              <span>Executive A4 Preview</span>
+              <span>
+                {doc.docType === 'resume'
+                  ? 'Live Resume Preview'
+                  : 'Live Cover Letter Preview'}
+              </span>
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 font-mono text-[11px] font-semibold text-emerald-400">
-              <span
-                aria-hidden="true"
-                className="h-1.5 w-1.5 rounded-full bg-emerald-400"
-              />
-              A4 Print Ready · Auto-Saved
-            </span>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCopyText}
+                className="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-slate-200 transition-colors hover:bg-white/[0.08]"
+              >
+                <Copy className="h-3 w-3 text-cyan-400" aria-hidden="true" />
+                <span>{copied ? 'Copied' : 'Copy'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="inline-flex items-center gap-1 rounded-lg bg-cyan-400 px-2.5 py-1 text-[11px] font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
+              >
+                <Printer className="h-3 w-3" aria-hidden="true" />
+                <span>Print / PDF</span>
+              </button>
+            </div>
           </div>
 
           <div
             id="printable-career-doc"
-            className="rounded-xl border border-slate-200/80 bg-white p-8 font-sans text-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.7)] sm:p-10"
+            className="min-h-[680px] rounded-xl border border-slate-200 bg-white p-8 font-sans text-slate-900 shadow-[0_24px_60px_rgba(0,0,0,0.72)] sm:p-10"
           >
-            {/* Header */}
-            <div className="border-b border-slate-200 pb-5">
-              <h3 className="text-2xl font-bold tracking-tight text-slate-950">
-                {doc.fullName || 'Your Name'}
-              </h3>
-              <p className="mt-0.5 text-sm font-semibold text-slate-700">
-                {doc.targetTitle || 'Target Role'}
-              </p>
-              <p className="mt-2 text-xs text-slate-600">
-                {[doc.email, doc.location, doc.portfolioUrl]
-                  .filter(Boolean)
-                  .join('  ·  ')}
-              </p>
+            {/* Document Top Header */}
+            <div className="flex items-center justify-between gap-5 border-b border-slate-200 pb-5">
+              <div className="min-w-0 flex-1">
+                {doc.fullName.trim() ? (
+                  <h3 className="text-2xl font-bold tracking-tight text-slate-950">
+                    {doc.fullName}
+                  </h3>
+                ) : (
+                  <h3 className="no-print text-2xl font-bold tracking-tight text-slate-300">
+                    Your Full Name
+                  </h3>
+                )}
+
+                {doc.targetTitle.trim() ? (
+                  <p className="mt-0.5 text-sm font-semibold text-slate-700">
+                    {doc.targetTitle}
+                  </p>
+                ) : (
+                  <p className="no-print mt-0.5 text-sm font-medium text-slate-300">
+                    Target Role Title
+                  </p>
+                )}
+
+                {doc.email.trim() || doc.location.trim() || doc.portfolioUrl.trim() ? (
+                  <p className="mt-2 text-xs text-slate-600">
+                    {[doc.email, doc.location, doc.portfolioUrl]
+                      .map((v) => v.trim())
+                      .filter(Boolean)
+                      .join('  ·  ')}
+                  </p>
+                ) : (
+                  <p className="no-print mt-2 text-xs text-slate-300">
+                    Email · Location · Portfolio URL
+                  </p>
+                )}
+              </div>
+
+              {/* Optional Uploaded Profile Photo (only rendered when uploaded) */}
+              {doc.docType === 'resume' && doc.photoDataUrl && (
+                <img
+                  src={doc.photoDataUrl}
+                  alt={doc.fullName || 'Candidate portrait'}
+                  className={`h-20 w-20 shrink-0 border border-slate-300 object-cover shadow-sm ${
+                    doc.photoShape === 'circle' ? 'rounded-full' : 'rounded-xl'
+                  }`}
+                />
+              )}
             </div>
 
             {doc.docType === 'resume' ? (
               <div className="mt-6 space-y-6 text-sm text-slate-800">
-                <div>
-                  <h4 className="border-b border-slate-200 pb-1 text-[11px] font-bold uppercase tracking-widest text-slate-500">
-                    Executive Summary
-                  </h4>
-                  <p className="mt-2 text-xs leading-relaxed text-slate-700">
-                    {doc.summary}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="border-b border-slate-200 pb-1 text-[11px] font-bold uppercase tracking-widest text-slate-500">
-                    Professional Experience
-                  </h4>
-                  <div className="mt-3 space-y-4">
-                    {doc.experiences.map((exp) => {
-                      const bulletLines = exp.bullets
-                        .split('\n')
-                        .map((l) => l.trim())
-                        .filter(Boolean);
-                      return (
-                        <div key={exp.id}>
-                          <div className="flex flex-wrap items-baseline justify-between gap-2">
-                            <p className="text-sm font-bold text-slate-950">
-                              {exp.role}
-                              <span className="font-medium text-slate-600">
-                                {' '}
-                                — {exp.company}
-                              </span>
-                            </p>
-                            <span className="font-mono text-xs text-slate-500 tabular-nums">
-                              {exp.period}
-                            </span>
-                          </div>
-                          <ul className="mt-1.5 list-disc space-y-1 pl-4 text-xs leading-relaxed text-slate-700">
-                            {bulletLines.map((line, i) => (
-                              <li key={i}>{line}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      );
-                    })}
+                {!hasHeaderContent &&
+                !doc.summary.trim() &&
+                !hasPopulatedExperience &&
+                !doc.skills.trim() ? (
+                  <div className="no-print rounded-lg border border-dashed border-slate-200 bg-slate-50/80 p-8 text-center">
+                    <p className="text-sm font-semibold text-slate-500">
+                      Start typing on the left to build your live resume
+                    </p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Every section updates here in real time and exports cleanly to PDF.
+                    </p>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    {(doc.summary.trim() || hasHeaderContent) && (
+                      <div>
+                        <h4 className="border-b border-slate-200 pb-1 text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                          Executive Summary
+                        </h4>
+                        {doc.summary.trim() ? (
+                          <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-slate-700">
+                            {doc.summary}
+                          </p>
+                        ) : (
+                          <p className="no-print mt-2 text-xs italic text-slate-300">
+                            Add an executive summary on the left...
+                          </p>
+                        )}
+                      </div>
+                    )}
 
-                <div>
-                  <h4 className="border-b border-slate-200 pb-1 text-[11px] font-bold uppercase tracking-widest text-slate-500">
-                    Technical &amp; Core Skills
-                  </h4>
-                  <p className="mt-2 text-xs leading-relaxed text-slate-700">
-                    {doc.skills}
-                  </p>
-                </div>
+                    {(hasPopulatedExperience || hasHeaderContent) && (
+                      <div>
+                        <h4 className="border-b border-slate-200 pb-1 text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                          Professional Experience
+                        </h4>
+                        <div className="mt-3 space-y-4">
+                          {hasPopulatedExperience ? (
+                            doc.experiences
+                              .filter(
+                                (exp) =>
+                                  exp.role.trim() ||
+                                  exp.company.trim() ||
+                                  exp.period.trim() ||
+                                  exp.bullets.trim()
+                              )
+                              .map((exp) => {
+                                const bulletLines = exp.bullets
+                                  .split('\n')
+                                  .map((l) => l.trim())
+                                  .filter(Boolean);
+                                return (
+                                  <div key={exp.id}>
+                                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                                      <p className="text-sm font-bold text-slate-950">
+                                        {exp.role || 'Role Title'}
+                                        {exp.company.trim() && (
+                                          <span className="font-medium text-slate-600">
+                                            {' '}
+                                            — {exp.company}
+                                          </span>
+                                        )}
+                                      </p>
+                                      {exp.period.trim() && (
+                                        <span className="font-mono text-xs text-slate-500 tabular-nums">
+                                          {exp.period}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {bulletLines.length > 0 && (
+                                      <ul className="mt-1.5 list-disc space-y-1 pl-4 text-xs leading-relaxed text-slate-700">
+                                        {bulletLines.map((line, i) => (
+                                          <li key={i}>{line}</li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </div>
+                                );
+                              })
+                          ) : (
+                            <p className="no-print text-xs italic text-slate-300">
+                              Add your roles and quantified achievements on the left...
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {(doc.skills.trim() || hasHeaderContent) && (
+                      <div>
+                        <h4 className="border-b border-slate-200 pb-1 text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                          Technical &amp; Core Skills
+                        </h4>
+                        {doc.skills.trim() ? (
+                          <p className="mt-2 text-xs leading-relaxed text-slate-700">
+                            {doc.skills}
+                          </p>
+                        ) : (
+                          <p className="no-print mt-2 text-xs italic text-slate-300">
+                            List your core skills separated by commas...
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             ) : (
               <div className="mt-6 space-y-4 text-sm leading-relaxed text-slate-700">
                 <p className="font-semibold text-slate-950">
-                  Dear {doc.recipientName || 'Hiring Team'} at{' '}
-                  {doc.targetCompany || 'your team'},
+                  Dear {doc.recipientName.trim() || 'Hiring Team'}
+                  {doc.targetCompany.trim() ? ` at ${doc.targetCompany.trim()}` : ''}
+                  ,
                 </p>
-                <p>{doc.coverLetterOpening}</p>
-                <p>{doc.coverLetterBody}</p>
-                <p>{doc.coverLetterClosing}</p>
-                <div className="pt-3">
+
+                {!doc.coverLetterOpening.trim() &&
+                !doc.coverLetterBody.trim() &&
+                !doc.coverLetterClosing.trim() ? (
+                  <div className="no-print rounded-lg border border-dashed border-slate-200 bg-slate-50/80 p-8 text-center">
+                    <p className="text-sm font-semibold text-slate-500">
+                      Start writing your cover letter on the left
+                    </p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Your formatted letter updates live here and prints cleanly to PDF.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {doc.coverLetterOpening.trim() && (
+                      <p className="whitespace-pre-line">
+                        {doc.coverLetterOpening}
+                      </p>
+                    )}
+                    {doc.coverLetterBody.trim() && (
+                      <p className="whitespace-pre-line">
+                        {doc.coverLetterBody}
+                      </p>
+                    )}
+                    {doc.coverLetterClosing.trim() && (
+                      <p className="whitespace-pre-line">
+                        {doc.coverLetterClosing}
+                      </p>
+                    )}
+                  </>
+                )}
+
+                <div className="pt-4">
                   <p className="text-slate-600">Sincerely,</p>
                   <p className="mt-1 font-bold text-slate-950">
-                    {doc.fullName}
+                    {doc.fullName.trim() || (
+                      <span className="no-print font-normal text-slate-300">
+                        Your Name
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
