@@ -12,8 +12,8 @@ import { readJson, STORAGE_KEYS, writeJson } from '../../../utils/storage';
 interface LineItem {
   id: string;
   description: string;
-  quantity: number;
-  rate: number;
+  quantity: string;
+  rate: string;
 }
 
 interface InvoiceState {
@@ -44,42 +44,91 @@ const INVOICE_CURRENCIES = [
   { code: 'AUD', symbol: '$' },
 ];
 
-const DEFAULT_INVOICE: InvoiceState = {
+const EMPTY_INVOICE: InvoiceState = {
   docKind: 'Invoice',
   currencySymbol: '$',
   currencyCode: 'USD',
-  docNumber: 'INV-2026-014',
+  docNumber: '',
   issueDate: new Date().toISOString().slice(0, 10),
-  dueDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
-  fromName: 'Jordan Reyes Studio',
-  fromDetails: 'jordan.reyes@example.com · Remote Engineering Consulting',
-  toName: 'Linearity Labs Inc.',
-  toDetails: 'accounts@linearitylabs.io · San Francisco, CA',
+  dueDate: '',
+  fromName: '',
+  fromDetails: '',
+  toName: '',
+  toDetails: '',
   taxEnabled: false,
   taxRatePct: 10,
   discountEnabled: false,
   discountPct: 5,
-  notes: 'Payment via Wise / ACH within 14 days. Thank you for your business.',
+  notes: '',
   items: [
     {
       id: 'li-1',
-      description: 'Frontend Architecture & Design System Sprint',
-      quantity: 32,
-      rate: 85,
-    },
-    {
-      id: 'li-2',
-      description: 'PWA Offline Sync & Accessibility Audit',
-      quantity: 12,
-      rate: 95,
+      description: '',
+      quantity: '',
+      rate: '',
     },
   ],
 };
 
-export const InvoiceGeneratorTool: React.FC = () => {
-  const [inv, setInv] = useState<InvoiceState>(() =>
-    readJson<InvoiceState>(STORAGE_KEYS.FINANCE_INVOICE, DEFAULT_INVOICE)
+function loadInitialInvoice(): InvoiceState {
+  const saved = readJson<Partial<InvoiceState> | null>(
+    STORAGE_KEYS.FINANCE_INVOICE,
+    null
   );
+  if (!saved) return EMPTY_INVOICE;
+
+  // Clear untouched legacy pre-filled sample invoice
+  if (
+    saved.fromName === 'Jordan Reyes Studio' ||
+    saved.toName === 'Linearity Labs Inc.'
+  ) {
+    return EMPTY_INVOICE;
+  }
+
+  const normalizedItems: LineItem[] =
+    Array.isArray(saved.items) && saved.items.length > 0
+      ? saved.items.map((item, idx) => ({
+          id: item.id || `li-${idx + 1}`,
+          description: typeof item.description === 'string' ? item.description : '',
+          quantity:
+            item.quantity === undefined || item.quantity === null
+              ? ''
+              : String(item.quantity),
+          rate:
+            item.rate === undefined || item.rate === null
+              ? ''
+              : String(item.rate),
+        }))
+      : EMPTY_INVOICE.items;
+
+  return {
+    ...EMPTY_INVOICE,
+    ...saved,
+    docKind: saved.docKind === 'Quote' ? 'Quote' : 'Invoice',
+    currencySymbol: saved.currencySymbol || '$',
+    currencyCode: saved.currencyCode || 'USD',
+    docNumber: typeof saved.docNumber === 'string' ? saved.docNumber : '',
+    issueDate:
+      typeof saved.issueDate === 'string'
+        ? saved.issueDate
+        : EMPTY_INVOICE.issueDate,
+    dueDate: typeof saved.dueDate === 'string' ? saved.dueDate : '',
+    fromName: typeof saved.fromName === 'string' ? saved.fromName : '',
+    fromDetails: typeof saved.fromDetails === 'string' ? saved.fromDetails : '',
+    toName: typeof saved.toName === 'string' ? saved.toName : '',
+    toDetails: typeof saved.toDetails === 'string' ? saved.toDetails : '',
+    notes: typeof saved.notes === 'string' ? saved.notes : '',
+    items: normalizedItems,
+  };
+}
+
+function toNum(value: string): number {
+  const n = parseFloat(value);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+export const InvoiceGeneratorTool: React.FC = () => {
+  const [inv, setInv] = useState<InvoiceState>(loadInitialInvoice);
 
   useEffect(() => {
     writeJson(STORAGE_KEYS.FINANCE_INVOICE, inv);
@@ -87,7 +136,7 @@ export const InvoiceGeneratorTool: React.FC = () => {
 
   const totals = useMemo(() => {
     const subtotal = inv.items.reduce(
-      (sum, item) => sum + item.quantity * item.rate,
+      (sum, item) => sum + toNum(item.quantity) * toNum(item.rate),
       0
     );
     const discountAmount = inv.discountEnabled
@@ -114,9 +163,9 @@ export const InvoiceGeneratorTool: React.FC = () => {
         ...prev.items,
         {
           id: `li-${Date.now()}`,
-          description: 'Consulting / Deliverable',
-          quantity: 1,
-          rate: 100,
+          description: '',
+          quantity: '',
+          rate: '',
         },
       ],
     }));
@@ -125,7 +174,7 @@ export const InvoiceGeneratorTool: React.FC = () => {
   const updateItem = (
     id: string,
     field: keyof LineItem,
-    value: string | number
+    value: string
   ) => {
     setInv((prev) => ({
       ...prev,
@@ -140,6 +189,14 @@ export const InvoiceGeneratorTool: React.FC = () => {
       ...prev,
       items: prev.items.filter((item) => item.id !== id),
     }));
+  };
+
+  const handleClearForm = () => {
+    setInv({
+      ...EMPTY_INVOICE,
+      issueDate: new Date().toISOString().slice(0, 10),
+      items: [{ id: `li-${Date.now()}`, description: '', quantity: '', rate: '' }],
+    });
   };
 
   const triggerDownload = (blob: Blob, filename: string) => {
@@ -164,12 +221,18 @@ export const InvoiceGeneratorTool: React.FC = () => {
       ['Bill To', inv.toName, inv.toDetails],
       [],
       ['Description', 'Quantity', 'Rate', 'Line Total'],
-      ...inv.items.map((item) => [
-        item.description,
-        item.quantity,
-        item.rate.toFixed(2),
-        (item.quantity * item.rate).toFixed(2),
-      ]),
+      ...inv.items
+        .filter((item) => item.description.trim() || toNum(item.rate) > 0)
+        .map((item) => {
+          const qty = toNum(item.quantity);
+          const rate = toNum(item.rate);
+          return [
+            item.description,
+            qty,
+            rate.toFixed(2),
+            (qty * rate).toFixed(2),
+          ];
+        }),
       [],
       ['Subtotal', '', '', totals.subtotal.toFixed(2)],
       ...(inv.discountEnabled
@@ -195,25 +258,32 @@ export const InvoiceGeneratorTool: React.FC = () => {
 
   const exportWordDoc = () => {
     const itemRowsHtml = inv.items
-      .map(
-        (item) => `
+      .filter((item) => item.description.trim() || toNum(item.rate) > 0)
+      .map((item) => {
+        const qty = toNum(item.quantity);
+        const rate = toNum(item.rate);
+        return `
         <tr>
           <td style="padding:8px;border-bottom:1px solid #e2e8f0;">${item.description}</td>
-          <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">${item.quantity}</td>
-          <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">${fmt(item.rate)}</td>
+          <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">${qty}</td>
+          <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">${fmt(rate)}</td>
           <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;"><strong>${fmt(
-            item.quantity * item.rate
+            qty * rate
           )}</strong></td>
-        </tr>`
-      )
+        </tr>`;
+      })
       .join('');
 
     const html = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><title>${inv.docKind} ${inv.docNumber}</title></head>
 <body style="font-family:Arial,sans-serif;color:#0f172a;padding:24px;">
-  <h1 style="margin:0 0 4px 0;">${inv.docKind.toUpperCase()} #${inv.docNumber}</h1>
-  <p style="color:#475569;margin:0 0 20px 0;">Issued: ${inv.issueDate} | Due: ${inv.dueDate}</p>
+  <h1 style="margin:0 0 4px 0;">${inv.docKind.toUpperCase()}${
+      inv.docNumber ? ` #${inv.docNumber}` : ''
+    }</h1>
+  <p style="color:#475569;margin:0 0 20px 0;">Issued: ${inv.issueDate || '—'}${
+      inv.dueDate ? ` | Due: ${inv.dueDate}` : ''
+    }</p>
   <table style="width:100%;margin-bottom:24px;">
     <tr>
       <td style="vertical-align:top;width:50%;">
@@ -253,7 +323,11 @@ export const InvoiceGeneratorTool: React.FC = () => {
   <h2 style="text-align:right;">Total (${inv.currencyCode}): ${fmt(
       totals.total
     )}</h2>
-  <p style="margin-top:24px;color:#475569;font-size:13px;">${inv.notes}</p>
+  ${
+    inv.notes
+      ? `<p style="margin-top:24px;color:#475569;font-size:13px;">${inv.notes}</p>`
+      : ''
+  }
 </body>
 </html>`;
 
@@ -261,10 +335,15 @@ export const InvoiceGeneratorTool: React.FC = () => {
     triggerDownload(blob, `${inv.docNumber || 'document'}.doc`);
   };
 
+  const populatedItems = inv.items.filter(
+    (item) =>
+      item.description.trim() || toNum(item.quantity) > 0 || toNum(item.rate) > 0
+  );
+
   const labelClass =
     'block text-[11px] font-semibold uppercase tracking-wider text-slate-400';
   const compactInputClass =
-    'h-10 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 text-xs text-slate-100 placeholder:text-slate-600 transition-colors focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none';
+    'h-10 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 text-xs text-slate-100 placeholder:text-slate-500 transition-colors focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none';
 
   return (
     <div className="space-y-5">
@@ -314,11 +393,11 @@ export const InvoiceGeneratorTool: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => setInv(DEFAULT_INVOICE)}
+            onClick={handleClearForm}
             className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-slate-200 transition-colors hover:border-white/20 hover:bg-white/[0.08] whitespace-nowrap"
           >
             <RotateCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-            <span>Reset</span>
+            <span>Clear Form</span>
           </button>
 
           <button
@@ -352,230 +431,229 @@ export const InvoiceGeneratorTool: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
         {/* Editor */}
-        <div className="no-print space-y-4 rounded-2xl border border-white/[0.08] bg-slate-900/75 p-5 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)] sm:p-6 lg:col-span-6">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div>
-              <label className={labelClass}>Document #</label>
-              <input
-                type="text"
-                value={inv.docNumber}
-                onChange={(e) =>
-                  setInv((p) => ({ ...p, docNumber: e.target.value }))
-                }
-                className="mt-1.5 h-10 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 font-mono text-xs text-slate-100 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Issue Date</label>
-              <input
-                type="date"
-                value={inv.issueDate}
-                onChange={(e) =>
-                  setInv((p) => ({ ...p, issueDate: e.target.value }))
-                }
-                className="mt-1.5 h-10 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 font-mono text-xs text-slate-100 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Due Date</label>
-              <input
-                type="date"
-                value={inv.dueDate}
-                onChange={(e) =>
-                  setInv((p) => ({ ...p, dueDate: e.target.value }))
-                }
-                className="mt-1.5 h-10 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 font-mono text-xs text-slate-100 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="space-y-2">
-              <label className={labelClass}>From (Sender)</label>
-              <input
-                type="text"
-                value={inv.fromName}
-                onChange={(e) =>
-                  setInv((p) => ({ ...p, fromName: e.target.value }))
-                }
-                placeholder="Your Name / Studio"
-                className={compactInputClass}
-              />
-              <input
-                type="text"
-                value={inv.fromDetails}
-                onChange={(e) =>
-                  setInv((p) => ({ ...p, fromDetails: e.target.value }))
-                }
-                placeholder="Email / Location"
-                className={compactInputClass}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className={labelClass}>Bill To (Client)</label>
-              <input
-                type="text"
-                value={inv.toName}
-                onChange={(e) =>
-                  setInv((p) => ({ ...p, toName: e.target.value }))
-                }
-                placeholder="Client Name"
-                className={compactInputClass}
-              />
-              <input
-                type="text"
-                value={inv.toDetails}
-                onChange={(e) =>
-                  setInv((p) => ({ ...p, toDetails: e.target.value }))
-                }
-                placeholder="Client Email / Address"
-                className={compactInputClass}
-              />
-            </div>
-          </div>
-
-          {/* Line Items */}
-          <div className="space-y-2.5 border-t border-white/[0.08] pt-3.5">
-            <div className="flex items-center justify-between">
-              <span className={labelClass}>Line Items</span>
-              <button
-                type="button"
-                onClick={addLineItem}
-                className="inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300 transition-colors hover:bg-cyan-400/20"
-              >
-                <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Add Item</span>
-              </button>
-            </div>
-
-            {inv.items.map((item) => (
-              <div
-                key={item.id}
-                className="grid grid-cols-12 items-center gap-2"
-              >
+        <div className="no-print overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/75 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)] lg:col-span-6">
+          <div className="h-1 w-full bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500" />
+          <div className="space-y-4 p-5 sm:p-6">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div>
+                <label className={labelClass}>Document #</label>
                 <input
                   type="text"
-                  value={item.description}
+                  value={inv.docNumber}
                   onChange={(e) =>
-                    updateItem(item.id, 'description', e.target.value)
+                    setInv((p) => ({ ...p, docNumber: e.target.value }))
                   }
-                  placeholder="Service description"
-                  className="col-span-6 h-10 rounded-lg border border-white/[0.08] bg-slate-950/60 px-2.5 text-xs text-slate-100 placeholder:text-slate-600 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                  placeholder="e.g. INV-2026-001"
+                  className="mt-1.5 h-10 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 font-mono text-xs text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Issue Date</label>
+                <input
+                  type="date"
+                  value={inv.issueDate}
+                  onChange={(e) =>
+                    setInv((p) => ({ ...p, issueDate: e.target.value }))
+                  }
+                  className="mt-1.5 h-10 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 font-mono text-xs text-slate-100 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Due Date</label>
+                <input
+                  type="date"
+                  value={inv.dueDate}
+                  onChange={(e) =>
+                    setInv((p) => ({ ...p, dueDate: e.target.value }))
+                  }
+                  className="mt-1.5 h-10 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 font-mono text-xs text-slate-100 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label className={labelClass}>From (Sender)</label>
+                <input
+                  type="text"
+                  value={inv.fromName}
+                  onChange={(e) =>
+                    setInv((p) => ({ ...p, fromName: e.target.value }))
+                  }
+                  placeholder="Your Name / Business"
+                  className={compactInputClass}
                 />
                 <input
-                  type="number"
-                  min={0}
-                  step="0.5"
-                  aria-label="Quantity"
-                  value={item.quantity}
+                  type="text"
+                  value={inv.fromDetails}
                   onChange={(e) =>
-                    updateItem(
-                      item.id,
-                      'quantity',
-                      Math.max(0, Number(e.target.value))
-                    )
+                    setInv((p) => ({ ...p, fromDetails: e.target.value }))
                   }
-                  className="col-span-2 h-10 rounded-lg border border-white/[0.08] bg-slate-950/60 px-2 font-mono text-xs text-slate-100 tabular-nums focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                  placeholder="Email · City / Country"
+                  className={compactInputClass}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className={labelClass}>Bill To (Client)</label>
+                <input
+                  type="text"
+                  value={inv.toName}
+                  onChange={(e) =>
+                    setInv((p) => ({ ...p, toName: e.target.value }))
+                  }
+                  placeholder="Client or Company Name"
+                  className={compactInputClass}
                 />
                 <input
-                  type="number"
-                  min={0}
-                  step="1"
-                  aria-label="Unit rate"
-                  value={item.rate}
+                  type="text"
+                  value={inv.toDetails}
                   onChange={(e) =>
-                    updateItem(
-                      item.id,
-                      'rate',
-                      Math.max(0, Number(e.target.value))
-                    )
+                    setInv((p) => ({ ...p, toDetails: e.target.value }))
                   }
-                  className="col-span-3 h-10 rounded-lg border border-white/[0.08] bg-slate-950/60 px-2 font-mono text-xs text-slate-100 tabular-nums focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                  placeholder="Client Email · Address"
+                  className={compactInputClass}
                 />
+              </div>
+            </div>
+
+            {/* Line Items */}
+            <div className="space-y-2.5 border-t border-white/[0.08] pt-3.5">
+              <div className="flex items-center justify-between">
+                <span className={labelClass}>Line Items</span>
                 <button
                   type="button"
-                  onClick={() => removeItem(item.id)}
-                  aria-label="Remove line item"
-                  disabled={inv.items.length <= 1}
-                  className="col-span-1 flex min-h-[40px] items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-red-500/15 hover:text-red-400 disabled:opacity-30"
+                  onClick={addLineItem}
+                  className="inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300 transition-colors hover:bg-cyan-400/20"
                 >
-                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Add Item</span>
                 </button>
               </div>
-            ))}
-          </div>
 
-          {/* Tax & Discount Toggles */}
-          <div className="grid grid-cols-1 gap-3 border-t border-white/[0.08] pt-3.5 sm:grid-cols-2">
-            <div className="flex items-center justify-between gap-2 rounded-xl border border-white/[0.08] bg-[#060913]/65 px-3 py-2">
-              <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-slate-300">
+              {inv.items.map((item) => (
+                <div
+                  key={item.id}
+                  className="grid grid-cols-12 items-center gap-2"
+                >
+                  <input
+                    type="text"
+                    value={item.description}
+                    onChange={(e) =>
+                      updateItem(item.id, 'description', e.target.value)
+                    }
+                    placeholder="Service or deliverable description"
+                    className="col-span-6 h-10 rounded-lg border border-white/[0.08] bg-slate-950/60 px-2.5 text-xs text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.5"
+                    aria-label="Quantity"
+                    value={item.quantity}
+                    onChange={(e) =>
+                      updateItem(item.id, 'quantity', e.target.value)
+                    }
+                    placeholder="Qty"
+                    className="col-span-2 h-10 rounded-lg border border-white/[0.08] bg-slate-950/60 px-2 font-mono text-xs text-slate-100 placeholder:text-slate-500 tabular-nums focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    step="1"
+                    aria-label="Unit rate"
+                    value={item.rate}
+                    onChange={(e) =>
+                      updateItem(item.id, 'rate', e.target.value)
+                    }
+                    placeholder="Rate"
+                    className="col-span-3 h-10 rounded-lg border border-white/[0.08] bg-slate-950/60 px-2 font-mono text-xs text-slate-100 placeholder:text-slate-500 tabular-nums focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeItem(item.id)}
+                    aria-label="Remove line item"
+                    disabled={inv.items.length <= 1}
+                    className="col-span-1 flex min-h-[40px] items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-red-500/15 hover:text-red-400 disabled:opacity-30"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Tax & Discount Toggles */}
+            <div className="grid grid-cols-1 gap-3 border-t border-white/[0.08] pt-3.5 sm:grid-cols-2">
+              <div className="flex items-center justify-between gap-2 rounded-xl border border-white/[0.08] bg-[#060913]/65 px-3 py-2">
+                <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={inv.discountEnabled}
+                    onChange={(e) =>
+                      setInv((p) => ({
+                        ...p,
+                        discountEnabled: e.target.checked,
+                      }))
+                    }
+                    className="h-4 w-4 accent-cyan-400"
+                  />
+                  <span>Discount %</span>
+                </label>
                 <input
-                  type="checkbox"
-                  checked={inv.discountEnabled}
+                  type="number"
+                  min={0}
+                  max={100}
+                  disabled={!inv.discountEnabled}
+                  value={inv.discountPct}
                   onChange={(e) =>
                     setInv((p) => ({
                       ...p,
-                      discountEnabled: e.target.checked,
+                      discountPct: Math.max(0, Number(e.target.value)),
                     }))
                   }
-                  className="h-4 w-4 accent-cyan-400"
+                  className="h-8 w-16 rounded-lg border border-white/[0.08] bg-slate-900 px-2 text-right font-mono text-xs text-slate-100 tabular-nums disabled:opacity-40 focus:border-cyan-400/60 focus:outline-none"
                 />
-                <span>Discount %</span>
-              </label>
-              <input
-                type="number"
-                min={0}
-                max={100}
-                disabled={!inv.discountEnabled}
-                value={inv.discountPct}
-                onChange={(e) =>
-                  setInv((p) => ({
-                    ...p,
-                    discountPct: Math.max(0, Number(e.target.value)),
-                  }))
-                }
-                className="h-8 w-16 rounded-lg border border-white/[0.08] bg-slate-900 px-2 text-right font-mono text-xs text-slate-100 tabular-nums disabled:opacity-40 focus:border-cyan-400/60 focus:outline-none"
-              />
-            </div>
+              </div>
 
-            <div className="flex items-center justify-between gap-2 rounded-xl border border-white/[0.08] bg-[#060913]/65 px-3 py-2">
-              <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-slate-300">
+              <div className="flex items-center justify-between gap-2 rounded-xl border border-white/[0.08] bg-[#060913]/65 px-3 py-2">
+                <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={inv.taxEnabled}
+                    onChange={(e) =>
+                      setInv((p) => ({ ...p, taxEnabled: e.target.checked }))
+                    }
+                    className="h-4 w-4 accent-cyan-400"
+                  />
+                  <span>Tax %</span>
+                </label>
                 <input
-                  type="checkbox"
-                  checked={inv.taxEnabled}
+                  type="number"
+                  min={0}
+                  max={100}
+                  disabled={!inv.taxEnabled}
+                  value={inv.taxRatePct}
                   onChange={(e) =>
-                    setInv((p) => ({ ...p, taxEnabled: e.target.checked }))
+                    setInv((p) => ({
+                      ...p,
+                      taxRatePct: Math.max(0, Number(e.target.value)),
+                    }))
                   }
-                  className="h-4 w-4 accent-cyan-400"
+                  className="h-8 w-16 rounded-lg border border-white/[0.08] bg-slate-900 px-2 text-right font-mono text-xs text-slate-100 tabular-nums disabled:opacity-40 focus:border-cyan-400/60 focus:outline-none"
                 />
-                <span>Tax %</span>
-              </label>
-              <input
-                type="number"
-                min={0}
-                max={100}
-                disabled={!inv.taxEnabled}
-                value={inv.taxRatePct}
-                onChange={(e) =>
-                  setInv((p) => ({
-                    ...p,
-                    taxRatePct: Math.max(0, Number(e.target.value)),
-                  }))
-                }
-                className="h-8 w-16 rounded-lg border border-white/[0.08] bg-slate-900 px-2 text-right font-mono text-xs text-slate-100 tabular-nums disabled:opacity-40 focus:border-cyan-400/60 focus:outline-none"
+              </div>
+            </div>
+
+            <div>
+              <label className={labelClass}>Payment Terms / Notes</label>
+              <textarea
+                rows={2}
+                value={inv.notes}
+                onChange={(e) => setInv((p) => ({ ...p, notes: e.target.value }))}
+                placeholder="e.g. Payment via bank transfer or Wise within 14 days."
+                className="mt-1.5 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 py-2 text-xs leading-relaxed text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
               />
             </div>
-          </div>
-
-          <div>
-            <label className={labelClass}>Payment Terms / Notes</label>
-            <textarea
-              rows={2}
-              value={inv.notes}
-              onChange={(e) => setInv((p) => ({ ...p, notes: e.target.value }))}
-              className="mt-1.5 w-full rounded-xl border border-white/[0.08] bg-slate-950/60 px-3 py-2 text-xs leading-relaxed text-slate-100 placeholder:text-slate-600 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/15 focus:outline-none"
-            />
           </div>
         </div>
 
@@ -604,13 +682,19 @@ export const InvoiceGeneratorTool: React.FC = () => {
                 <p className="font-mono text-xs font-bold uppercase tracking-widest text-slate-500">
                   {inv.docKind}
                 </p>
-                <h3 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-950">
-                  {inv.docNumber}
-                </h3>
+                {inv.docNumber.trim() ? (
+                  <h3 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-950">
+                    {inv.docNumber}
+                  </h3>
+                ) : (
+                  <h3 className="no-print mt-0.5 text-2xl font-bold tracking-tight text-slate-300">
+                    INV-001
+                  </h3>
+                )}
               </div>
               <div className="text-right font-mono text-xs text-slate-600 tabular-nums">
-                <p>Issued: {inv.issueDate}</p>
-                <p className="mt-0.5">Due: {inv.dueDate}</p>
+                {inv.issueDate && <p>Issued: {inv.issueDate}</p>}
+                {inv.dueDate && <p className="mt-0.5">Due: {inv.dueDate}</p>}
               </div>
             </div>
 
@@ -619,19 +703,35 @@ export const InvoiceGeneratorTool: React.FC = () => {
                 <p className="font-bold uppercase tracking-wider text-slate-400">
                   From
                 </p>
-                <p className="mt-1 text-sm font-bold text-slate-950">
-                  {inv.fromName}
-                </p>
-                <p className="mt-0.5 text-slate-600">{inv.fromDetails}</p>
+                {inv.fromName.trim() ? (
+                  <p className="mt-1 text-sm font-bold text-slate-950">
+                    {inv.fromName}
+                  </p>
+                ) : (
+                  <p className="no-print mt-1 text-sm font-semibold text-slate-300">
+                    Sender Name
+                  </p>
+                )}
+                {inv.fromDetails.trim() && (
+                  <p className="mt-0.5 text-slate-600">{inv.fromDetails}</p>
+                )}
               </div>
               <div>
                 <p className="font-bold uppercase tracking-wider text-slate-400">
                   Bill To
                 </p>
-                <p className="mt-1 text-sm font-bold text-slate-950">
-                  {inv.toName}
-                </p>
-                <p className="mt-0.5 text-slate-600">{inv.toDetails}</p>
+                {inv.toName.trim() ? (
+                  <p className="mt-1 text-sm font-bold text-slate-950">
+                    {inv.toName}
+                  </p>
+                ) : (
+                  <p className="no-print mt-1 text-sm font-semibold text-slate-300">
+                    Client Name
+                  </p>
+                )}
+                {inv.toDetails.trim() && (
+                  <p className="mt-0.5 text-slate-600">{inv.toDetails}</p>
+                )}
               </div>
             </div>
 
@@ -646,22 +746,37 @@ export const InvoiceGeneratorTool: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 text-slate-700">
-                  {inv.items.map((item) => (
-                    <tr key={item.id}>
-                      <td className="px-2 py-2.5 pr-3 font-medium text-slate-900">
-                        {item.description}
-                      </td>
-                      <td className="px-2 py-2.5 text-right font-mono tabular-nums">
-                        {item.quantity}
-                      </td>
-                      <td className="px-2 py-2.5 text-right font-mono tabular-nums">
-                        {fmt(item.rate)}
-                      </td>
-                      <td className="px-2 py-2.5 text-right font-mono font-bold text-slate-950 tabular-nums">
-                        {fmt(item.quantity * item.rate)}
+                  {populatedItems.length === 0 ? (
+                    <tr className="no-print">
+                      <td
+                        colSpan={4}
+                        className="px-2 py-6 text-center text-xs text-slate-400"
+                      >
+                        Add line items on the left to calculate totals.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    populatedItems.map((item) => {
+                      const qty = toNum(item.quantity);
+                      const rate = toNum(item.rate);
+                      return (
+                        <tr key={item.id}>
+                          <td className="px-2 py-2.5 pr-3 font-medium text-slate-900">
+                            {item.description || 'Item'}
+                          </td>
+                          <td className="px-2 py-2.5 text-right font-mono tabular-nums">
+                            {qty}
+                          </td>
+                          <td className="px-2 py-2.5 text-right font-mono tabular-nums">
+                            {fmt(rate)}
+                          </td>
+                          <td className="px-2 py-2.5 text-right font-mono font-bold text-slate-950 tabular-nums">
+                            {fmt(qty * rate)}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
@@ -697,7 +812,7 @@ export const InvoiceGeneratorTool: React.FC = () => {
               </div>
             </div>
 
-            {inv.notes && (
+            {inv.notes.trim() && (
               <p className="mt-6 border-t border-slate-200 pt-4 text-xs leading-relaxed text-slate-500">
                 {inv.notes}
               </p>
