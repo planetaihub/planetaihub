@@ -5,7 +5,8 @@ export type TabId =
   | 'dev-tools'
   | 'finance-docs'
   | 'productivity'
-  | 'health-weather';
+  | 'health-weather'
+  | 'live-earning';
 
 export type JobCategory =
   | 'AI Training & RLHF'
