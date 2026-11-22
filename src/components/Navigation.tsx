@@ -190,8 +190,8 @@ export const Navigation: React.FC<NavigationProps> = ({
             ))}
           </nav>
 
-          {/* Right: Share, Install App, Saved (0), Browse USD Roles */}
-          <div className="flex shrink-0 items-center gap-2">
+                   {/* Right: Share, Install App, Saved (0), Browse USD Roles */}
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <div className="hidden sm:flex items-center gap-2">
               <ShareAppButton variant="light" />
               <PWAInstallButton variant="light" />
@@ -201,7 +201,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               type="button"
               onClick={onOpenSavedJobs}
               aria-label={`Saved jobs (${savedCount})`}
-              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8] whitespace-nowrap shrink-0"
+              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8] whitespace-nowrap shrink-0"
             >
               <Bookmark className="h-3.5 w-3.5 text-[#1D4ED8]" aria-hidden="true" />
               <span className="hidden md:inline">Saved</span>
@@ -213,9 +213,11 @@ export const Navigation: React.FC<NavigationProps> = ({
             <button
               type="button"
               onClick={() => onSelectTab('jobs')}
-              className="inline-flex min-h-[38px] items-center justify-center rounded-full bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8] whitespace-nowrap shrink-0"
+              aria-label="Browse USD Roles"
+              className="inline-flex min-h-[38px] items-center justify-center rounded-full bg-[#1D4ED8] px-3 sm:px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8] whitespace-nowrap shrink-0"
             >
-              Browse USD Roles
+              <span className="sm:hidden">Browse</span>
+              <span className="hidden sm:inline">Browse USD Roles</span>
             </button>
           </div>
         </div>
