@@ -10,24 +10,24 @@ export function parsePlayableVideoSource(rawUrl: string): ParsedVideoSource {
     return { type: 'unknown', embedUrl: '', originalUrl: '' };
   }
 
-  // YouTube (standard watch, youtu.be, shorts, embed)
+  // YouTube (watch, youtu.be, shorts, embed)
   const ytMatch = url.match(
     /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
   );
-  if (ytMatch && ytMatch[1]) {
+  if (ytMatch && ytMatch) {
     return {
       type: 'youtube',
-      embedUrl: `https://youtube.com{ytMatch[1]}?rel=0&modestbranding=1`,
+      embedUrl: `https://youtube.com{ytMatch}?rel=0&modestbranding=1`,
       originalUrl: url,
     };
   }
 
   // Vimeo
   const vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-  if (vimeoMatch && vimeoMatch[1]) {
+  if (vimeoMatch && vimeoMatch) {
     return {
       type: 'vimeo',
-      embedUrl: `https://vimeo.com{vimeoMatch[1]}`,
+      embedUrl: `https://vimeo.com{vimeoMatch}`,
       originalUrl: url,
     };
   }
@@ -47,4 +47,3 @@ export function parsePlayableVideoSource(rawUrl: string): ParsedVideoSource {
     originalUrl: url,
   };
 }
-
