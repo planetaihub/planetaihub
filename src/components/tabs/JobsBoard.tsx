@@ -818,11 +818,12 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
           </div>
         </div>
 
-        {/* Horizontally Scrollable Category Strip */}
+              {/* Responsive Category Strip: Horizontal scroll on mobile, clean wrap on desktop */}
         <div
           aria-label="Filter by category"
-          className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade px-3 pr-8 pb-1 md:px-0 md:pr-0"
+          className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade px-3 pr-8 pb-1 md:flex-wrap md:overflow-visible md:px-0 md:pr-0 md:pb-0"
         >
+
           {CATEGORIES.map((category) => {
             const isActive = selectedCategory === category;
             return (
