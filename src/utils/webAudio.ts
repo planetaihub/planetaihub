@@ -28,7 +28,6 @@ export function playChime(frequency = 880, duration = 0.35): void {
     osc.start();
     osc.stop(ctx.currentTime + duration);
   } catch {
-    // Ignore audio context autoplay restrictions if blocked by browser
+    // Ignore audio context restrictions if blocked by browser
   }
 }
-
