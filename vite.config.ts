@@ -9,25 +9,38 @@ export default defineConfig(() => {
     plugins: [
       react(),
       tailwindcss(),
-      // Copies src/assets into dist/ so root-relative URLs like
-      // "/src/assets/images/..." (e.g. generate_image output) still resolve
-      // in production builds. Do not remove.
+      // Copies public/ and src/assets into dist/ so static assets (ads.txt, robots.txt,
+      // sitemap.xml, PWA assets, and unbundled images) are guaranteed to be present in dist/
       {
-        name: 'copy-unbundled-src-assets',
+        name: 'guarantee-dist-static-assets',
         apply: 'build',
         closeBundle(error?: Error): void {
           if (error) {
             return;
           }
           const distDir = path.resolve(process.cwd(), 'dist');
+          const publicDir = path.resolve(process.cwd(), 'public');
           const srcAssets = path.resolve(process.cwd(), 'src/assets');
           const distAssets = path.resolve(distDir, 'src/assets');
-          if (fs.existsSync(distDir) && fs.existsSync(srcAssets)) {
-            fs.cpSync(srcAssets, distAssets, {recursive: true, force: true});
+
+          if (fs.existsSync(distDir)) {
+            // Guarantee all static files from public/ are copied to root of dist/
+            if (fs.existsSync(publicDir)) {
+              fs.cpSync(publicDir, distDir, {recursive: true, force: true});
+            }
+            // Preserve unbundled src/assets
+            if (fs.existsSync(srcAssets)) {
+              fs.cpSync(srcAssets, distAssets, {recursive: true, force: true});
+            }
           }
         },
       },
     ],
+    publicDir: path.resolve(process.cwd(), 'public'),
+    build: {
+      outDir: 'dist',
+      copyPublicDir: true,
+    },
     resolve: {
       dedupe: ['react', 'react-dom'],
       alias: {
