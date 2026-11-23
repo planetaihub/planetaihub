@@ -540,7 +540,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen bg-white text-slate-900 max-w-[100vw] overflow-x-hidden">
       <Navigation
         activeTab={activeTab}
         onSelectTab={(tab) => handleSelectTab(tab)}
