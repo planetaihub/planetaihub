@@ -19,13 +19,16 @@ export const HealthWeatherTab: React.FC = () => {
   const [activeTool, setActiveTool] = useState<HealthToolId>('vitals');
 
   return (
-    <section aria-labelledby="health-weather-heading" className="space-y-6">
+    <section
+      aria-labelledby="health-weather-heading"
+      className="w-full max-w-full overflow-x-hidden space-y-6"
+    >
       <div className="border-b border-slate-200 pb-6">
         <div className="flex items-center gap-3.5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 text-[#1D4ED8]">
             <CloudSun className="h-5 w-5" aria-hidden="true" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-[#1D4ED8]">
               Wellness &amp; Climate
             </p>
@@ -42,12 +45,12 @@ export const HealthWeatherTab: React.FC = () => {
         </p>
       </div>
 
-      {/* Horizontally Scrollable Sub-Tab Bar */}
-      <div className="w-full max-w-full rounded-2xl border border-slate-200 bg-slate-50 shadow-2xs">
+      {/* Clean 2-Column Sub-Tab Grid (Zero Horizontal Scroll) */}
+      <div className="w-full max-w-full rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-2xs">
         <div
           role="tablist"
           aria-label="Health and Lifestyle tools"
-          className="flex w-full items-center overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch gap-2 px-3 pr-8 py-1.5"
+          className="grid grid-cols-2 gap-2.5"
         >
           {HEALTH_TOOLS.map(({ id, label, Icon }) => {
             const isSelected = activeTool === id;
@@ -57,23 +60,14 @@ export const HealthWeatherTab: React.FC = () => {
                 type="button"
                 role="tab"
                 aria-selected={isSelected}
-                onClick={(e) => {
-                  setActiveTool(id);
-                  if (window.innerWidth <= 768) {
-                    e.currentTarget.scrollIntoView({
-                      behavior: 'smooth',
-                      inline: 'center',
-                      block: 'nearest',
-                    });
-                  }
-                }}
-                className={`snap-center inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all ${
+                onClick={() => setActiveTool(id)}
+                className={`flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-center text-xs font-semibold leading-snug whitespace-normal transition-all ${
                   isSelected
                     ? 'bg-[#1D4ED8] text-white shadow-sm'
-                    : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                    : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
-                <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>{label}</span>
               </button>
             );
