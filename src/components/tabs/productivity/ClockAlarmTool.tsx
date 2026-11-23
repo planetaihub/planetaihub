@@ -148,22 +148,30 @@ export const ClockAlarmTool: React.FC = () => {
           <div className="h-1 w-full bg-[#1D4ED8]" />
           <div className="p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap sm:inline-flex items-center gap-1 max-w-full rounded-xl border border-slate-200 bg-slate-50 p-1">
+              <div
+                role="tablist"
+                aria-label="Clock timezones"
+                className="grid w-full grid-cols-2 gap-1.5 rounded-xl border border-slate-200 bg-slate-50 p-1.5 sm:inline-flex sm:w-auto"
+              >
                 {(
                   [
                     { id: 'local', label: `Local (${localTzName})` },
                     { id: 'Asia/Manila', label: 'Asia/Manila' },
                     { id: 'UTC', label: 'UTC' },
                   ] as const
-                ).map((tz) => (
+                ).map((tz, idx) => (
                   <button
                     key={tz.id}
                     type="button"
+                    role="tab"
+                    aria-selected={activeTz === tz.id}
                     onClick={() => setActiveTz(tz.id)}
-                    className={`min-h-[36px] rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+                    className={`min-h-[38px] min-w-0 truncate rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition-all ${
+                      idx === 0 ? 'col-span-2 sm:col-span-1' : ''
+                    } ${
                       activeTz === tz.id
                         ? 'bg-[#1D4ED8] text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900'
+                        : 'text-slate-600 hover:bg-white hover:text-slate-900'
                     }`}
                   >
                     {tz.label}
