@@ -298,7 +298,7 @@ export const VaAcademyTab: React.FC = () => {
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar pb-1">
+        <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1.5">
           {[
             'All VA Tracks',
             'Executive & Admin VA',
