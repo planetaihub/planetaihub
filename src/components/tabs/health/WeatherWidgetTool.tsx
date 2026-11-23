@@ -305,7 +305,7 @@ export const WeatherWidgetTool: React.FC = () => {
         )}
 
         {/* Quick City Presets */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
+        <div className="flex w-full min-w-0 max-w-full items-center gap-1.5 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-6 pt-1">
           {QUICK_CITIES.map((city) => (
             <button
               key={city.name}
