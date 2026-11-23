@@ -401,7 +401,7 @@ export const AIAssistantsTab: React.FC = () => {
               />
             </div>
 
-            <div className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar pb-1">
+            <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1.5">
               {CATEGORIES.map((cat) => {
                 const isActive = category === cat;
                 return (
