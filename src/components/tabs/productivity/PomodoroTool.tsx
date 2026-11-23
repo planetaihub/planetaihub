@@ -82,16 +82,24 @@ export const PomodoroTool: React.FC = () => {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm lg:col-span-7">
         {/* Mode Switcher */}
-        <div className="mx-auto flex flex-wrap sm:inline-flex items-center justify-center gap-1 max-w-full rounded-xl border border-slate-200 bg-slate-50 p-1">
-          {(['focus', 'short', 'long'] as const).map((m) => (
+        <div
+          role="tablist"
+          aria-label="Pomodoro timer modes"
+          className="mx-auto grid w-full grid-cols-2 gap-1.5 rounded-xl border border-slate-200 bg-slate-50 p-1.5 sm:inline-flex sm:w-auto"
+        >
+          {(['focus', 'short', 'long'] as const).map((m, idx) => (
             <button
               key={m}
               type="button"
+              role="tab"
+              aria-selected={mode === m}
               onClick={() => selectMode(m)}
-              className={`min-h-[38px] rounded-lg px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+              className={`min-h-[38px] rounded-lg px-3.5 py-1.5 text-center text-xs font-semibold transition-all ${
+                idx === 0 ? 'col-span-2 sm:col-span-1' : ''
+              } ${
                 mode === m
                   ? 'bg-[#1D4ED8] text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  : 'text-slate-600 hover:bg-white hover:text-slate-900'
               }`}
             >
               {MODES[m].label}
