@@ -558,7 +558,7 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
           {/* Quick Filter Pills */}
           <div
             aria-label="Quick job filters"
-            className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade px-1 pr-8 pb-1 sm:px-0 sm:pr-0"
+            className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1 sm:px-0 sm:pr-0"
           >
             {QUICK_FILTERS.map((pill) => {
               const active = isQuickFilterActive(pill.key);
@@ -767,7 +767,7 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
               <div
                 role="tablist"
                 aria-label="Job board views"
-                className="flex items-center gap-1 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade p-1 max-md:px-3 max-md:pr-8"
+                className="flex items-center gap-1 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch p-1 max-md:px-3 max-md:pr-8"
               >
                 <button
                   type="button"
@@ -818,12 +818,11 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
           </div>
         </div>
 
-              {/* Responsive Category Strip: Horizontal scroll on mobile, clean wrap on desktop */}
+        {/* Horizontally Scrollable Category Strip */}
         <div
           aria-label="Filter by category"
-          className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade px-3 pr-8 pb-1 md:flex-wrap md:overflow-visible md:px-0 md:pr-0 md:pb-0"
+          className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-3 pr-8 pb-1 md:px-0 md:pr-0"
         >
-
           {CATEGORIES.map((category) => {
             const isActive = selectedCategory === category;
             return (
