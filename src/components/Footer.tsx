@@ -10,7 +10,7 @@ export type LegalModalType = 'about' | 'contact' | 'privacy' | 'terms' | null;
 
 interface FooterProps {
   onSelectTab: (tab: TabId) => void;
-  onScrollToBriefings: () => void;
+  onScrollToBriefings?: () => void;
   onOpenPostJob: () => void;
   legalModal: LegalModalType;
   onChangeLegalModal: (modal: LegalModalType) => void;
@@ -18,7 +18,6 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({
   onSelectTab,
-  onScrollToBriefings,
   onOpenPostJob,
   legalModal,
   onChangeLegalModal,
@@ -76,15 +75,6 @@ export const Footer: React.FC<FooterProps> = ({
                     </button>
                   </li>
                 ))}
-                <li>
-                  <button
-                    type="button"
-                    onClick={onScrollToBriefings}
-                    className="text-left font-medium text-slate-600 transition-colors hover:text-[#1D4ED8] whitespace-nowrap"
-                  >
-                    Briefings
-                  </button>
-                </li>
               </ul>
             </div>
 
