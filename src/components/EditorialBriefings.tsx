@@ -749,12 +749,12 @@ export const EditorialBriefings: React.FC<EditorialBriefingsProps> = ({
   return (
     <section
       aria-labelledby="briefings-heading"
-      className="scroll-mt-16 space-y-8"
+      className="scroll-mt-[52px] pt-4 space-y-8"
     >
       {/* Editorial Section Header */}
       <div
         id="editorial-briefings-header"
-        className="scroll-mt-16 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+        className="scroll-mt-[52px] flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
       >
         <div>
           <p className="text-xs font-semibold tracking-wider uppercase text-[#1D4ED8]">
