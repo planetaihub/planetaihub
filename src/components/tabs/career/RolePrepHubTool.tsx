@@ -15,7 +15,11 @@ import {
   
 } from 'lucide-react';
   import type { CareerPrepPayload } from '../../../utils/careerPrepTemplates';
-  import { ROLE_BUNDLES, getRoleBundleById } from "../../../utils/roleBundles";
+  import {
+  ROLE_BUNDLES,
+  getRoleBundleById,
+  type RoleBundleId,
+} from '../../../utils/roleBundles';
 
 interface RolePrepHubToolProps {
   prepPayload?: CareerPrepPayload | null;
