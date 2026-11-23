@@ -69,7 +69,7 @@ export const ProductivityTab: React.FC = () => {
         <div
           role="tablist"
           aria-label="Daily Productivity tools"
-          className="flex w-full items-center overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade gap-2 px-3 pr-8 py-1.5"
+          className="flex w-full items-center overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch gap-2 px-3 pr-8 py-1.5"
         >
           {PRODUCTIVITY_TOOLS.map(({ id, label, Icon }) => {
             const isSelected = activeTool === id;
