@@ -489,14 +489,14 @@ export const ResumeBuilderTool: React.FC<ResumeBuilderToolProps> = ({
       )}
 
       {/* Floating Studio Toolbar */}
-      <div className="no-print flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-2xs lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="no-print flex w-full max-w-full min-w-0 flex-col gap-3 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 shadow-2xs sm:px-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex w-full max-w-full min-w-0 flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 lg:w-auto">
           {/* Segmented Document Mode Toggle */}
-          <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1">
+          <div className="grid w-full grid-cols-2 gap-1 rounded-xl border border-slate-200 bg-white p-1 sm:inline-flex sm:w-auto">
             <button
               type="button"
               onClick={() => updateField('docType', 'resume')}
-              className={`min-h-[36px] rounded-lg px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+              className={`min-h-[36px] rounded-lg px-2.5 py-1.5 text-center text-xs font-semibold transition-all sm:px-4 ${
                 doc.docType === 'resume'
                   ? 'bg-[#1D4ED8] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -507,7 +507,7 @@ export const ResumeBuilderTool: React.FC<ResumeBuilderToolProps> = ({
             <button
               type="button"
               onClick={() => updateField('docType', 'cover-letter')}
-              className={`min-h-[36px] rounded-lg px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+              className={`min-h-[36px] rounded-lg px-2.5 py-1.5 text-center text-xs font-semibold transition-all sm:px-4 ${
                 doc.docType === 'cover-letter'
                   ? 'bg-[#1D4ED8] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -518,8 +518,8 @@ export const ResumeBuilderTool: React.FC<ResumeBuilderToolProps> = ({
           </div>
 
           {/* Live ATS Readability & Completeness Meter */}
-          <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5">
-            <div className="h-2 w-16 overflow-hidden rounded-full bg-slate-200">
+          <div className="flex w-full max-w-full min-w-0 flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 sm:w-auto sm:gap-2.5 sm:px-3">
+            <div className="h-2 w-12 shrink-0 overflow-hidden rounded-full bg-slate-200 sm:w-16">
               <div
                 className={`h-full rounded-full transition-all duration-300 ${
                   atsAnalysis.score >= 85
@@ -529,7 +529,7 @@ export const ResumeBuilderTool: React.FC<ResumeBuilderToolProps> = ({
                 style={{ width: `${atsAnalysis.score}%` }}
               />
             </div>
-            <span className="font-mono text-xs font-semibold text-slate-700 tabular-nums whitespace-nowrap">
+            <span className="min-w-0 flex-1 break-words font-mono text-[11px] font-semibold leading-snug text-slate-700 tabular-nums sm:flex-initial sm:text-xs">
               Completeness:{' '}
               <span
                 className={
@@ -545,7 +545,7 @@ export const ResumeBuilderTool: React.FC<ResumeBuilderToolProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full max-w-full flex-wrap items-center gap-2 lg:w-auto lg:justify-end">
           <button
             type="button"
             onClick={handleClearForm}
