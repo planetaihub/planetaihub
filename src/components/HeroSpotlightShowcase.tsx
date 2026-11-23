@@ -18,6 +18,7 @@ import {
 } from '../utils/careerPrepTemplates';
 import { parsePlayableVideoSource } from '../utils/videoUrl';
 import { BrandAvatar } from './BrandAvatar';
+import { PartnerSpotlightFrame } from './PartnerSpotlightFrame';
 
 interface HeroSpotlightShowcaseProps {
   customSpotlight?: SpotlightVideoConfig | null;
@@ -138,21 +139,21 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
             </h1>
           </div>
           <p className="max-w-md text-xs leading-relaxed text-slate-600 sm:text-sm">
-            Watch vetted company walkthroughs, launch your tailored resume &amp; mock interview script, and apply direct via verified USD ATS links.
+            Explore verified employer spotlights, launch your tailored resume &amp; mock interview script, and apply direct via verified USD ATS links.
           </p>
         </div>
 
         {/* 2-Column Side-by-Side Split Showcase (Immediate Above-the-Fold View) */}
         <div className="mt-6 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12 lg:gap-7">
-          {/* LEFT COLUMN: Featured Company Video Theatre */}
+          {/* LEFT COLUMN: Featured Employer Spotlight */}
           <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-md lg:col-span-7 sm:p-6">
             <div className="space-y-3.5">
-              {/* Company Switcher Pills + Employer CTA */}
-              <div className="flex flex-wrap items-center justify-between gap-2.5">
+              {/* Company Switcher Grid + Employer Video CTA */}
+              <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
                 <div
                   role="tablist"
                   aria-label="Featured company spotlights"
-                  className="flex flex-wrap items-center gap-2"
+                  className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center"
                 >
                   {HERO_COMPANY_SPOTLIGHTS.map((item) => {
                     const isSelected = selectedId === item.id;
@@ -163,7 +164,7 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
                         role="tab"
                         aria-selected={isSelected}
                         onClick={() => setSelectedId(item.id)}
-                        className={`inline-flex min-h-[36px] items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+                        className={`inline-flex min-h-[38px] items-center justify-center gap-2 rounded-xl sm:rounded-full border px-3 sm:px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
                           isSelected
                             ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-xs'
                             : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
@@ -180,13 +181,13 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
                       role="tab"
                       aria-selected={selectedId === 'custom'}
                       onClick={() => setSelectedId('custom')}
-                      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+                      className={`col-span-3 sm:col-span-1 inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl sm:rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
                         selectedId === 'custom'
                           ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-xs'
                           : 'border-blue-200 bg-blue-50 text-[#1D4ED8] hover:bg-blue-100'
                       }`}
                     >
-                      <Sparkles className="h-3 w-3" aria-hidden="true" />
+                      <Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />
                       <span>{customSpotlight.company}</span>
                     </button>
                   )}
@@ -195,17 +196,17 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
                 <button
                   type="button"
                   onClick={onOpenFeatureVideoModal}
-                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-[#1D4ED8]/40 hover:bg-blue-50/50 hover:text-[#1D4ED8] whitespace-nowrap"
+                  className="inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl sm:rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-[#1D4ED8]/40 hover:bg-blue-50/50 hover:text-[#1D4ED8] whitespace-nowrap"
                 >
-                  <Video className="h-3.5 w-3.5" aria-hidden="true" />
+                  <Video className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                   <span>Feature Your Company Video</span>
                 </button>
               </div>
 
-              {/* 16:9 Playable Privacy-Enhanced Video Frame */}
-              <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-sm">
-                {isCustomActive && customPlayable ? (
-                  customPlayable.kind === 'html5' ? (
+              {/* Custom Uploaded Video OR Branded Official Partner Spotlight Card */}
+              {isCustomActive && customPlayable ? (
+                <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-sm">
+                  {customPlayable.kind === 'html5' ? (
                     <video
                       key={customPlayable.src}
                       src={customPlayable.src}
@@ -222,38 +223,44 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
                       allowFullScreen
                       className="h-full w-full border-0"
                     />
-                  )
-                ) : (
-                  <iframe
-                    key={selectedPreset.youtubeId}
-                    src={`https://www.youtube-nocookie.com/embed/${selectedPreset.youtubeId}?rel=0`}
-                    title={`${selectedPreset.company} — ${selectedPreset.videoLabel}`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    className="h-full w-full border-0"
-                  />
-                )}
-              </div>
+                  )}
+                </div>
+              ) : (
+                <PartnerSpotlightFrame
+                  company={selectedPreset.company}
+                  roleTitle={selectedPreset.roleTitle}
+                  payBand={selectedPreset.payBand}
+                  applyUrl={directApplyHref}
+                  screeningFocus={selectedPreset.screeningFocus}
+                />
+              )}
             </div>
 
-            {/* Clean Unboxed Metadata Footer */}
+            {/* Clean Metadata Footer */}
             <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-[#1D4ED8]">
-                  Role Walkthrough
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-semibold text-[#1D4ED8] shrink-0">
+                  {isCustomActive ? 'Featured Commercial' : 'Official Partner'}
                 </span>
                 <span aria-hidden="true" className="text-slate-300">
                   ·
                 </span>
-                <span className="font-medium text-slate-800">
+                <span className="truncate font-medium text-slate-800">
                   {isCustomActive
                     ? `${displayCompany} Commercial Video Spotlight`
-                    : selectedPreset.videoLabel}
+                    : `${displayCompany} · ${displayRole}`}
                 </span>
               </div>
-              <span className="text-[11px] text-slate-500">
-                100% Browser-Local · Zero Sign-Up
-              </span>
+              {isCustomActive ? (
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 shrink-0">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
+                  <span>100% Transparent Pay Standard</span>
+                </span>
+              ) : (
+                <span className="text-[11px] font-medium text-slate-500 shrink-0">
+                  Direct Employer ATS Verification
+                </span>
+              )}
             </div>
           </div>
 
