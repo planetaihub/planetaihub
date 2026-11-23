@@ -12,9 +12,10 @@ import {
   PlayCircle,
   Printer,
   ShieldCheck,
+  
 } from 'lucide-react';
-import type { CareerPrepPayload } from '../../../utils/careerPrepTemplates';
-import {
+  import type { CareerPrepPayload } from '../../../utils/careerPrepTemplates';
+  import {
   ROLE_BUNDLES,
   getRoleBundleById,
   type RoleBundleId,
