@@ -734,7 +734,7 @@ export const InvoiceGeneratorTool: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 overflow-x-auto">
+            <div className="mt-6 overflow-x-auto scroll-touch">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b-2 border-slate-900 bg-slate-50 text-slate-600">
