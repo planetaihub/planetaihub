@@ -5,25 +5,28 @@
 
 import React, { useState } from 'react';
 import {
-  BookOpen,
   CheckCircle2,
+  Clock,
   ExternalLink,
+  FileText,
   GraduationCap,
   PlayCircle,
-  ShieldCheck,
   Sparkles,
-  Users,
-  Video,
   X,
-  FileText,
-  Clock,
 } from 'lucide-react';
+
+type VaCategory =
+  | 'All VA Tracks'
+  | 'Executive & Admin VA'
+  | 'AI-Powered VA Tools'
+  | 'Client Outreach & Discovery Calls'
+  | 'E-Commerce & Social VA';
 
 interface VaVideo {
   id: string;
   title: string;
   speaker: string;
-  category: 'Executive & Admin VA' | 'AI-Powered VA Tools' | 'Client Outreach & Discovery Calls' | 'E-Commerce & Social VA';
+  category: Exclude<VaCategory, 'All VA Tracks'>;
   youtubeId: string;
   duration: string;
   summary: string;
@@ -40,6 +43,14 @@ interface VaGuide {
   content: string[];
 }
 
+const VA_CATEGORIES: VaCategory[] = [
+  'All VA Tracks',
+  'Executive & Admin VA',
+  'AI-Powered VA Tools',
+  'Client Outreach & Discovery Calls',
+  'E-Commerce & Social VA',
+];
+
 const VA_VIDEOS: VaVideo[] = [
   {
     id: 'va-vid-1',
@@ -48,7 +59,8 @@ const VA_VIDEOS: VaVideo[] = [
     category: 'Executive & Admin VA',
     youtubeId: 'Mf2rWWxzoe4',
     duration: '22 min',
-    summary: 'A step-by-step roadmap for absolute beginners to set up their remote VA profile, identify high-demand skills, and land their first client.',
+    summary:
+      'A step-by-step roadmap for absolute beginners to set up their remote VA profile, identify high-demand skills, and land their first client.',
     studyNotes: [
       'Transitioning transferable administrative & communication skills into professional VA offerings.',
       'Setting up a high-converting portfolio without prior formal corporate VA experience.',
@@ -67,7 +79,8 @@ const VA_VIDEOS: VaVideo[] = [
     category: 'Executive & Admin VA',
     youtubeId: 'JVZ227_OWaU',
     duration: '28 min',
-    summary: 'Master the specialized technical stack and executive workflow management required to command $30 to $35+ per hour.',
+    summary:
+      'Master the specialized technical stack and executive workflow management required to command $30 to $35+ per hour.',
     studyNotes: [
       'Moving beyond basic data entry to high-leverage calendar architecture and CRM administration.',
       'Mastering Google Workspace, Notion, Slack, and Airtable power workflows.',
@@ -86,7 +99,8 @@ const VA_VIDEOS: VaVideo[] = [
     category: 'Executive & Admin VA',
     youtubeId: 'dPC7eo7AYwA',
     duration: '25 min',
-    summary: 'The ultimate blueprint for zeroing client inboxes daily, drafting ghost-written replies, and protecting executive focus time.',
+    summary:
+      'The ultimate blueprint for zeroing client inboxes daily, drafting ghost-written replies, and protecting executive focus time.',
     studyNotes: [
       'Implementing a 4-folder triage system (Action, Waiting, Reference, Archive).',
       'Drafting email responses matching your principal’s exact tone and voice.',
@@ -105,7 +119,8 @@ const VA_VIDEOS: VaVideo[] = [
     category: 'Executive & Admin VA',
     youtubeId: 'ftI53fz6En0',
     duration: '20 min',
-    summary: 'How to manage complex multi-timezone executive calendars, prevent double-bookings, and enforce deep work blocks.',
+    summary:
+      'How to manage complex multi-timezone executive calendars, prevent double-bookings, and enforce deep work blocks.',
     studyNotes: [
       'Configuring Calendly and Google Calendar scheduling rules across time zones.',
       'Defending founder focus time and blocking recurring strategy sessions.',
@@ -124,7 +139,8 @@ const VA_VIDEOS: VaVideo[] = [
     category: 'AI-Powered VA Tools',
     youtubeId: 'JgYeQTVzFOI',
     duration: '32 min',
-    summary: 'Leverage ChatGPT, Claude, Otter.ai, and Zapier automation connectors to double your daily output in half the time.',
+    summary:
+      'Leverage ChatGPT, Claude, Otter.ai, and Zapier automation connectors to double your daily output in half the time.',
     studyNotes: [
       'Using LLMs to draft executive correspondence and summarize lengthy meeting transcripts.',
       'Automating recurring handoffs with no-code Zapier/Make connectors.',
@@ -138,12 +154,53 @@ const VA_VIDEOS: VaVideo[] = [
   },
   {
     id: 'va-vid-6',
+    title: 'Notion for Virtual Assistants: Client Command Centers & AI Workflows',
+    speaker: 'Workspace Ops Academy',
+    category: 'AI-Powered VA Tools',
+    youtubeId: 'FfHB4z2eC-M',
+    duration: '19 min',
+    summary:
+      'Build centralized Notion client hubs with relational task databases, meeting notes rollups, and automated SOP checklists.',
+    studyNotes: [
+      'Structuring a multi-client Notion dashboard without leaking confidential workspaces.',
+      'Using Notion AI summaries to convert raw founder voice memos into assigned sprints.',
+      'Creating reusable onboarding checklists for recurring client retainers.',
+    ],
+    checklist: [
+      'Duplicate a clean Client Hub template with Task, SOP, and Asset databases.',
+      'Configure weekly status rollup filters for client EOD reporting.',
+      'Set granular workspace sharing permissions per client domain.',
+    ],
+  },
+  {
+    id: 'va-vid-7',
+    title: 'Systematic AI Prompting Workflows for Executive Ops & Documentation',
+    speaker: 'DeepLearning.AI (Andrew Ng)',
+    category: 'AI-Powered VA Tools',
+    youtubeId: '8ib4Qnh2HFE',
+    duration: '45 min',
+    summary:
+      'Apply structured delimiters, JSON/Markdown output formatting, and iterative prompt templates to standardize client deliverables.',
+    studyNotes: [
+      'Separating client data from task instructions using clear XML or triple-backtick delimiters.',
+      'Generating consistent Markdown SOPs, tables, and executive briefs in seconds.',
+      'Verifying intermediate outputs before sending drafts to founders or stakeholders.',
+    ],
+    checklist: [
+      'Build 5 delimiter-wrapped prompt templates in your local Snippets Vault.',
+      'Standardize meeting recap outputs with Owner, Action, and Deadline columns.',
+      'Audit all AI-assisted drafts for client brand voice accuracy.',
+    ],
+  },
+  {
+    id: 'va-vid-8',
     title: 'How to Lead a VA Discovery Call Like a Pro & Close Clients',
     speaker: 'Sarah Jenkins & Elena Rostova',
     category: 'Client Outreach & Discovery Calls',
     youtubeId: '5n6sV6uUhfU',
     duration: '29 min',
-    summary: 'The consultative sales framework to diagnose founder bottlenecks, build instant trust, and close 3-figure monthly retainers.',
+    summary:
+      'The consultative sales framework to diagnose founder bottlenecks, build instant trust, and close 3-figure monthly retainers.',
     studyNotes: [
       'The 80/20 discovery call script: listening to founder pain points.',
       'Handling budget objections and proposing structured monthly retainers.',
@@ -155,13 +212,94 @@ const VA_VIDEOS: VaVideo[] = [
       'Practice handling common pushbacks on retainer rates.',
     ],
   },
+  {
+    id: 'va-vid-9',
+    title: 'Structuring Client Interview & Screening Stories with the STAR Method',
+    speaker: 'Aced (Exponent)',
+    category: 'Client Outreach & Discovery Calls',
+    youtubeId: 'd2AnPgnCNZM',
+    duration: '12 min',
+    summary:
+      'Frame past operational wins concisely during founder vetting calls and async video screens using measurable outcomes.',
+    studyNotes: [
+      'Keeping Situation and Task setup under 25% of your speaking time.',
+      'Replacing vague team language with clear first-person operational ownership.',
+      'Anchoring results in hours saved, response-time SLAs, and inbox turnaround.',
+    ],
+    checklist: [
+      'Write 3 crisp 90-second STAR stories covering inbox triage, scheduling, and SOPs.',
+      'Quantify every outcome (e.g., cut founder email load by 10 hrs/week).',
+      'Rehearse answers calmly on camera before live discovery calls.',
+    ],
+  },
+  {
+    id: 'va-vid-10',
+    title: 'Avoiding Common Interview Traps & Pitching High-Value VA Retainers',
+    speaker: 'Carol Forde-Johnston • Career Strategist',
+    category: 'Client Outreach & Discovery Calls',
+    youtubeId: 'gUQn50iEPqg',
+    duration: '11 min',
+    summary:
+      'Eliminate rambling background explanations on client calls and pivot directly to operational value and next-step scopes.',
+    studyNotes: [
+      'Moving straight to the client’s core constraint instead of reciting your resume chronologically.',
+      'Using concrete past examples rather than hypothetical "I would try to..." answers.',
+      'Closing calls with a clear 2-hour follow-up summary email and trial proposal.',
+    ],
+    checklist: [
+      'Trim your 60-second personal intro down to niche, tools, and client result.',
+      'Draft a post-call recap email template ready to customize in 5 minutes.',
+      'Prepare a 5-hour paid trial scope option for hesitant founders.',
+    ],
+  },
+  {
+    id: 'va-vid-11',
+    title: 'Prompt Engineering & Content Automation Systems for Social Media VAs',
+    speaker: 'freeCodeCamp Operations Workshop',
+    category: 'E-Commerce & Social VA',
+    youtubeId: '_ZvnD73m40o',
+    duration: '40 min',
+    summary:
+      'Design repeatable content repurposing pipelines, product description generators, and social calendar workflows for e-commerce brands.',
+    studyNotes: [
+      'Turning 1 founder podcast or product launch brief into 10 platform-tailored social posts.',
+      'Using structured prompt constraints for Shopify product copy and SEO metadata.',
+      'Maintaining consistent brand voice across Instagram, LinkedIn, and email newsletters.',
+    ],
+    checklist: [
+      'Create a brand voice style guide sheet for every e-commerce or creator client.',
+      'Build a weekly content approval pipeline with Draft, Review, and Scheduled statuses.',
+      'Batch-prepare 14 days of social captions and UTM tracking links in one session.',
+    ],
+  },
+  {
+    id: 'va-vid-12',
+    title: 'Scaling Client Support Queues & Order Operations for E-Commerce Teams',
+    speaker: 'Remote Support & Ops Guild',
+    category: 'E-Commerce & Social VA',
+    youtubeId: 'oQw3MauKik8',
+    duration: '18 min',
+    summary:
+      'Organize customer ticket macros, return/exchange escalations, and weekly store analytics reporting for DTC e-commerce founders.',
+    studyNotes: [
+      'Tagging recurring customer support tickets (shipping, sizing, refunds) to spot store friction.',
+      'Writing empathetic, fast-resolution support macros for Zendesk, Gorgias, and Help Scout.',
+      'Delivering a weekly Friday operations brief summarizing CSAT, ticket volume, and stock alerts.',
+    ],
+    checklist: [
+      'Build 12 reusable support response templates covering WISMO, returns, and VIP orders.',
+      'Set a strict SLA target (under 4 business hours) for priority inbox tickets.',
+      'Create a Friday e-commerce ops KPI summary table.',
+    ],
+  },
 ];
 
 const VA_GUIDES: VaGuide[] = [
   {
     id: 'guide-1',
     title: 'How to Land Your First $15–$30/hr Remote VA Client',
-    subtitle: 'A step-by-step roadmap to sourcing high-intent founders, crafting irresistible outreach, and bypassing low-wage platforms.',
+    subtitle:
+      'A step-by-step roadmap to sourcing high-intent founders, crafting irresistible outreach, and bypassing low-wage platforms.',
     readTime: '8 min read',
     category: 'Client Acquisition',
     content: [
@@ -176,7 +314,8 @@ const VA_GUIDES: VaGuide[] = [
   {
     id: 'guide-2',
     title: 'Mastering Executive Inbox & Calendar Management',
-    subtitle: 'The ultimate blueprint for protecting founder focus time, zeroing inboxes daily, and running airtight schedules.',
+    subtitle:
+      'The ultimate blueprint for protecting founder focus time, zeroing inboxes daily, and running airtight schedules.',
     readTime: '9 min read',
     category: 'Executive Operations',
     content: [
@@ -191,7 +330,8 @@ const VA_GUIDES: VaGuide[] = [
   {
     id: 'guide-3',
     title: 'AI Tools Every Modern Virtual Assistant Should Master',
-    subtitle: 'Leverage LLMs, transcription engines, and automation connectors to double your billable output in half the time.',
+    subtitle:
+      'Leverage LLMs, transcription engines, and automation connectors to double your billable output in half the time.',
     readTime: '10 min read',
     category: 'AI Tooling',
     content: [
@@ -206,7 +346,8 @@ const VA_GUIDES: VaGuide[] = [
   {
     id: 'guide-4',
     title: 'How to Pass VA Discovery Calls & Trial Tasks',
-    subtitle: 'Psychological frameworks and practical tests to convert 90% of prospective client interviews into paid contracts.',
+    subtitle:
+      'Psychological frameworks and practical tests to convert 90% of prospective client interviews into paid contracts.',
     readTime: '8 min read',
     category: 'Client Conversion',
     content: [
@@ -221,7 +362,8 @@ const VA_GUIDES: VaGuide[] = [
   {
     id: 'guide-5',
     title: 'Setting Up Your Freelance VA Portfolio & Rates',
-    subtitle: 'How to price hourly vs. monthly retainers, package your services, and build a high-converting portfolio in 48 hours.',
+    subtitle:
+      'How to price hourly vs. monthly retainers, package your services, and build a high-converting portfolio in 48 hours.',
     readTime: '9 min read',
     category: 'Pricing & Portfolio',
     content: [
@@ -236,7 +378,8 @@ const VA_GUIDES: VaGuide[] = [
   {
     id: 'guide-6',
     title: 'Remote Client Communication & SOP Documentation',
-    subtitle: 'The masterclass in asynchronous communication, markdown standard operating procedures, and spotless accountability.',
+    subtitle:
+      'The masterclass in asynchronous communication, markdown standard operating procedures, and spotless accountability.',
     readTime: '8 min read',
     category: 'Operations & SOPs',
     content: [
@@ -251,7 +394,7 @@ const VA_GUIDES: VaGuide[] = [
 ];
 
 export const VaAcademyTab: React.FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('All VA Tracks');
+  const [selectedCategory, setSelectedCategory] = useState<VaCategory>('All VA Tracks');
   const [activeVideo, setActiveVideo] = useState<VaVideo>(VA_VIDEOS[0]);
   const [activeGuide, setActiveGuide] = useState<VaGuide | null>(null);
 
@@ -260,23 +403,43 @@ export const VaAcademyTab: React.FC = () => {
       ? VA_VIDEOS
       : VA_VIDEOS.filter((v) => v.category === selectedCategory);
 
+  const handleSelectCategory = (cat: VaCategory) => {
+    setSelectedCategory(cat);
+    const matching =
+      cat === 'All VA Tracks'
+        ? VA_VIDEOS
+        : VA_VIDEOS.filter((v) => v.category === cat);
+    if (matching.length > 0 && !matching.some((v) => v.id === activeVideo.id)) {
+      setActiveVideo(matching[0]);
+    }
+  };
+
+  const handleWatchModule = (vid: VaVideo) => {
+    setActiveVideo(vid);
+    if (typeof document !== 'undefined') {
+      document
+        .getElementById('va-video-theatre')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
-    <section aria-labelledby="va-academy-heading" className="space-y-12 pb-12">
+    <section aria-labelledby="va-academy-heading" className="w-full max-w-full space-y-12 pb-12 overflow-x-hidden">
       {/* Header Banner */}
-      <div className="rounded-3xl border border-slate-200 bg-gradient-to-r from-blue-900 via-slate-900 to-indigo-950 p-6 text-white shadow-xl sm:p-10">
+      <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-blue-50/80 p-6 text-slate-900 shadow-sm sm:p-10">
         <div className="max-w-3xl space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/20 border border-blue-400/30 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-blue-200">
-            <GraduationCap className="h-4 w-4" aria-hidden="true" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#1D4ED8]">
+            <GraduationCap className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>VA Academy &amp; Operations Hub</span>
           </div>
           <h1
             id="va-academy-heading"
-            className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl"
+            className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl"
           >
             Master High-Paid Remote Virtual Assistance
           </h1>
-          <p className="text-sm leading-relaxed text-slate-300 sm:text-base">
-            Access expert-led video tutorials with exact topic-matched YouTube embeds, structured study checklists, and 6 in-depth editorial career guides to build a thriving remote VA practice.
+          <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
+            Access {VA_VIDEOS.length} expert-led video tutorials with topic-matched YouTube embeds, structured study notes, action checklists, and 6 in-depth editorial career guides to build a thriving remote VA practice.
           </p>
         </div>
       </div>
@@ -293,50 +456,72 @@ export const VaAcademyTab: React.FC = () => {
             </h2>
           </div>
           <p className="text-xs text-slate-500">
-            Select a session to watch and review step-by-step study notes
+            Showing <strong className="text-slate-800">{filteredVideos.length}</strong> modules in{' '}
+            <strong className="text-[#1D4ED8]">{selectedCategory}</strong>
           </p>
         </div>
 
-        {/* Category Filter Pills */}
-        <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1.5">
-          {[
-            'All VA Tracks',
-            'Executive & Admin VA',
-            'AI-Powered VA Tools',
-            'Client Outreach & Discovery Calls',
-            'E-Commerce & Social VA',
-          ].map((cat) => {
+        {/* Category Filter Grid (Clean 2-column grid on mobile, 5 columns on desktop) */}
+        <div
+          role="tablist"
+          aria-label="Filter VA Academy modules by track"
+          className="grid grid-cols-2 gap-2.5 lg:grid-cols-5"
+        >
+          {VA_CATEGORIES.map((cat) => {
             const isActive = selectedCategory === cat;
+            const count =
+              cat === 'All VA Tracks'
+                ? VA_VIDEOS.length
+                : VA_VIDEOS.filter((v) => v.category === cat).length;
+
             return (
               <button
                 key={cat}
                 type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={`snap-center shrink-0 min-h-[38px] rounded-full border px-4 py-1.5 text-xs font-semibold transition-all ${
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => handleSelectCategory(cat)}
+                className={`flex min-h-[44px] items-center justify-center rounded-xl border px-3 py-2 text-center text-xs font-semibold leading-snug transition-all ${
+                  cat === 'All VA Tracks' ? 'col-span-2 lg:col-span-1' : ''
+                } ${
                   isActive
                     ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-sm'
-                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                 }`}
               >
-                {cat}
+                {cat} ({count})
               </button>
             );
           })}
         </div>
 
-        {/* Main Video Theatre Layout */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Main Active Video Theatre Layout */}
+        <div
+          id="va-video-theatre"
+          className="scroll-mt-24 grid grid-cols-1 gap-6 lg:grid-cols-12"
+        >
           {/* Left: 16:9 YouTube Player */}
-          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-md lg:col-span-7 sm:p-6">
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-md lg:col-span-7 sm:p-6">
             <div className="space-y-4">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-[#1D4ED8]">
                   {activeVideo.category}
                 </span>
-                <span className="inline-flex items-center gap-1 font-mono text-xs font-medium text-slate-500">
-                  <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>{activeVideo.duration}</span>
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center gap-1 font-mono text-xs font-medium text-slate-500">
+                    <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>{activeVideo.duration}</span>
+                  </span>
+                  <a
+                    href={`https://www.youtube.com/watch?v=${activeVideo.youtubeId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#1D4ED8] hover:underline whitespace-nowrap"
+                  >
+                    <span>YouTube</span>
+                    <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                  </a>
+                </div>
               </div>
 
               <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-sm">
@@ -365,7 +550,7 @@ export const VaAcademyTab: React.FC = () => {
           </div>
 
           {/* Right: Study Notes & Action Checklist */}
-          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-md lg:col-span-5 sm:p-6">
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-md lg:col-span-5 sm:p-6">
             <div className="space-y-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-[#1D4ED8]">
@@ -373,8 +558,14 @@ export const VaAcademyTab: React.FC = () => {
                 </p>
                 <ul className="mt-3 space-y-2.5">
                   {activeVideo.studyNotes.map((note, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 text-xs leading-relaxed text-slate-700">
-                      <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#1D4ED8]" aria-hidden="true" />
+                    <li
+                      key={idx}
+                      className="flex items-start gap-2.5 text-xs leading-relaxed text-slate-700"
+                    >
+                      <Sparkles
+                        className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#1D4ED8]"
+                        aria-hidden="true"
+                      />
                       <span>{note}</span>
                     </li>
                   ))}
@@ -387,8 +578,14 @@ export const VaAcademyTab: React.FC = () => {
                 </p>
                 <ul className="mt-3 space-y-2.5">
                   {activeVideo.checklist.map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 text-xs leading-relaxed text-slate-700">
-                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" aria-hidden="true" />
+                    <li
+                      key={idx}
+                      className="flex items-start gap-2.5 text-xs leading-relaxed text-slate-700"
+                    >
+                      <CheckCircle2
+                        className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600"
+                        aria-hidden="true"
+                      />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -404,44 +601,114 @@ export const VaAcademyTab: React.FC = () => {
           </div>
         </div>
 
-        {/* Video Playlist Grid */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredVideos.map((vid) => {
-            const isSelected = activeVideo.id === vid.id;
-            return (
-              <button
-                key={vid.id}
-                type="button"
-                onClick={() => setActiveVideo(vid)}
-                className={`group flex flex-col justify-between rounded-2xl border p-4 text-left transition-all ${
-                  isSelected
-                    ? 'border-[#1D4ED8] bg-blue-50/50 shadow-md ring-2 ring-[#1D4ED8]/20'
-                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 shadow-2xs'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                      {vid.category}
-                    </span>
-                    <span className="font-mono text-[11px] font-medium text-slate-500">
-                      {vid.duration}
-                    </span>
+        {/* Full Filtered Module Feed with Embedded Players & Step-by-Step Study Notes */}
+        <div className="space-y-4 pt-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-display text-lg font-bold text-slate-900 sm:text-xl">
+              {selectedCategory} ({filteredVideos.length} Curated Training Modules)
+            </h3>
+            <span className="text-xs text-slate-500">
+              Play inline or load into the main theatre
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {filteredVideos.map((vid) => {
+              const isSelected = activeVideo.id === vid.id;
+              return (
+                <article
+                  key={vid.id}
+                  className={`flex flex-col justify-between overflow-hidden rounded-2xl border bg-white transition-all ${
+                    isSelected
+                      ? 'border-[#1D4ED8] ring-2 ring-[#1D4ED8]/20 shadow-md'
+                      : 'border-slate-200 shadow-2xs hover:border-[#1D4ED8]/40 hover:shadow-md'
+                  }`}
+                >
+                  <div>
+                    {/* Working YouTube Video Embed */}
+                    <div className="relative aspect-video w-full overflow-hidden border-b border-slate-100 bg-slate-900">
+                      <iframe
+                        loading="lazy"
+                        src={`https://www.youtube-nocookie.com/embed/${vid.youtubeId}?rel=0`}
+                        title={vid.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="h-full w-full border-0"
+                      />
+                    </div>
+
+                    <div className="p-4 sm:p-5 space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-[#1D4ED8]">
+                          {vid.category}
+                        </span>
+                        <span className="font-mono text-[11px] font-medium text-slate-500">
+                          {vid.duration}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 className="font-display text-sm font-bold leading-snug text-slate-900 sm:text-base">
+                          {vid.title}
+                        </h4>
+                        <p className="mt-1 text-[11px] font-semibold text-slate-500">
+                          {vid.speaker}
+                        </p>
+                        <p className="mt-2 text-xs leading-relaxed text-slate-600">
+                          {vid.summary}
+                        </p>
+                      </div>
+
+                      {/* Step-by-Step Study Notes */}
+                      <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-3 space-y-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-[#1D4ED8]">
+                          Step-by-Step Study Notes
+                        </p>
+                        <ul className="space-y-1.5">
+                          {vid.studyNotes.map((note, idx) => (
+                            <li
+                              key={idx}
+                              className="flex items-start gap-2 text-[11px] leading-relaxed text-slate-700"
+                            >
+                              <span className="mt-0.5 font-mono text-[10px] font-bold text-[#1D4ED8] shrink-0">
+                                0{idx + 1}.
+                              </span>
+                              <span>{note}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
-                  <h4 className="mt-3 font-display text-sm font-bold text-slate-900 group-hover:text-[#1D4ED8] line-clamp-2">
-                    {vid.title}
-                  </h4>
-                  <p className="mt-1 text-xs text-slate-600 line-clamp-2">
-                    {vid.summary}
-                  </p>
-                </div>
-                <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-[#1D4ED8]">
-                  <PlayCircle className="h-4 w-4" aria-hidden="true" />
-                  <span>{isSelected ? 'Now Playing' : 'Watch Module'}</span>
-                </div>
-              </button>
-            );
-          })}
+
+                  <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-4 py-3 sm:px-5">
+                    <button
+                      type="button"
+                      onClick={() => handleWatchModule(vid)}
+                      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        isSelected
+                          ? 'bg-blue-50 text-[#1D4ED8]'
+                          : 'bg-[#1D4ED8] text-white hover:bg-[#1E40AF]'
+                      }`}
+                    >
+                      <PlayCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      <span>{isSelected ? 'Loaded in Theatre' : 'Focus in Theatre'}</span>
+                    </button>
+
+                    <a
+                      href={`https://www.youtube.com/watch?v=${vid.youtubeId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 hover:text-[#1D4ED8]"
+                    >
+                      <span>Watch on YT</span>
+                      <ExternalLink className="h-3 w-3 shrink-0" aria-hidden="true" />
+                    </a>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -489,7 +756,7 @@ export const VaAcademyTab: React.FC = () => {
                   onClick={() => setActiveGuide(guide)}
                   className="inline-flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#1E40AF]"
                 >
-                  <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+                  <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                   <span>Read Full Guide →</span>
                 </button>
               </div>
@@ -526,7 +793,7 @@ export const VaAcademyTab: React.FC = () => {
                 type="button"
                 onClick={() => setActiveGuide(null)}
                 aria-label="Close guide modal"
-                className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                className="inline-flex min-h-[40px] min-w-[40px] shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>
