@@ -60,31 +60,31 @@ export const FinanceDocsTab: React.FC = () => {
           </p>
         </div>
 
-        {/* Clean Primary Sub-Switcher */}
-        <div className="flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 shrink-0">
+        {/* Clean Primary Sub-Switcher (Wraps cleanly on mobile, non-clipping) */}
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setFinanceSection('legal-insurance')}
-            className={`inline-flex items-center gap-1.5 min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+            className={`inline-flex flex-1 sm:flex-initial justify-center items-center gap-1.5 min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
               financeSection === 'legal-insurance'
                 ? 'bg-[#1D4ED8] text-white shadow-sm'
                 : 'text-slate-700 hover:bg-white hover:text-slate-900'
             }`}
           >
-            <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+            <ShieldCheck className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span>Insurance &amp; Legal Estimators</span>
           </button>
 
           <button
             type="button"
             onClick={() => setFinanceSection('financial-ops')}
-            className={`inline-flex items-center gap-1.5 min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+            className={`inline-flex flex-1 sm:flex-initial justify-center items-center gap-1.5 min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
               financeSection === 'financial-ops'
                 ? 'bg-[#1D4ED8] text-white shadow-sm'
                 : 'text-slate-700 hover:bg-white hover:text-slate-900'
             }`}
           >
-            <Receipt className="h-3.5 w-3.5" aria-hidden="true" />
+            <Receipt className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span>Financial Ops &amp; Invoicing</span>
           </button>
         </div>
@@ -99,7 +99,7 @@ export const FinanceDocsTab: React.FC = () => {
             <div
               role="tablist"
               aria-label="Finance and Document tools"
-              className="flex w-full items-center overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade gap-2 px-3 pr-8 py-1.5"
+              className="flex w-full items-center overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch gap-2 px-3 pr-8 py-1.5"
             >
               {FINANCE_TOOLS.map(({ id, label, Icon }) => {
                 const isSelected = activeTool === id;
