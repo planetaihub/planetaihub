@@ -221,31 +221,31 @@ export const DevToolsTab: React.FC = () => {
           </p>
         </div>
 
-        {/* Clean Primary Sub-Switcher */}
-        <div className="flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 shrink-0">
+        {/* Clean Primary Sub-Switcher (Wraps cleanly on mobile, non-clipping) */}
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setDevSection('b2b-utilities')}
-            className={`inline-flex items-center gap-1.5 min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+            className={`inline-flex flex-1 sm:flex-initial justify-center items-center gap-1.5 min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
               devSection === 'b2b-utilities'
                 ? 'bg-[#1D4ED8] text-white shadow-sm'
                 : 'text-slate-700 hover:bg-white hover:text-slate-900'
             }`}
           >
-            <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
+            <Wrench className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span>B2B Cloud &amp; Web Utilities</span>
           </button>
 
           <button
             type="button"
             onClick={() => setDevSection('directory')}
-            className={`inline-flex items-center gap-1.5 min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+            className={`inline-flex flex-1 sm:flex-initial justify-center items-center gap-1.5 min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
               devSection === 'directory'
                 ? 'bg-[#1D4ED8] text-white shadow-sm'
                 : 'text-slate-700 hover:bg-white hover:text-slate-900'
             }`}
           >
-            <Layers className="h-3.5 w-3.5" aria-hidden="true" />
+            <Layers className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span>Builder Directory ({DEV_TOOLS.length})</span>
           </button>
         </div>
@@ -257,12 +257,12 @@ export const DevToolsTab: React.FC = () => {
       ) : (
         /* Mode 2: Curated Builder Directory */
         <div className="space-y-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between w-full min-w-0">
             {/* Category Filter */}
             <div
               role="tablist"
               aria-label="Filter developer tools by category"
-              className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade px-1 pb-1"
+              className="flex w-full min-w-0 items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1"
             >
               {CATEGORIES.map((cat) => {
                 const isSelected = category === cat;
