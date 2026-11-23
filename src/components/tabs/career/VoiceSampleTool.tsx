@@ -160,29 +160,33 @@ export const VoiceSampleTool: React.FC<VoiceSampleToolProps> = ({
         : 'text-base sm:text-lg leading-relaxed';
 
   return (
-    <div className="space-y-5">
+    <div className="w-full max-w-full min-w-0 space-y-5">
       {/* Presets & Stage Controls */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-2xs">
+      <div className="w-full max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-2xs">
         <div className="h-1 w-full bg-[#1D4ED8]" />
-        <div className="space-y-4 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex w-full min-w-0 max-w-full items-center gap-1.5 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-6 pb-0.5">
-              <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500 whitespace-nowrap">
+        <div className="w-full min-w-0 space-y-4 p-4">
+          <div className="flex w-full min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="w-full min-w-0 space-y-2 lg:flex lg:w-auto lg:flex-wrap lg:items-center lg:gap-2 lg:space-y-0">
+              <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 lg:mr-1">
                 Templates:
               </span>
-              {SCRIPT_PRESETS.map((preset) => (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => handleSelectPreset(preset)}
-                  className="min-h-[36px] rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-[#1D4ED8]/40 hover:bg-blue-50 hover:text-[#1D4ED8] whitespace-nowrap shrink-0"
-                >
-                  {preset.label}
-                </button>
-              ))}
+              <div className="grid w-full max-w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:w-auto lg:flex-wrap lg:items-center">
+                {SCRIPT_PRESETS.map((preset, idx) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => handleSelectPreset(preset)}
+                    className={`flex min-h-[44px] w-full min-w-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-center text-xs font-semibold leading-snug whitespace-normal text-slate-700 transition-colors hover:border-[#1D4ED8]/40 hover:bg-blue-50 hover:text-[#1D4ED8] lg:w-auto ${
+                      idx === SCRIPT_PRESETS.length - 1 ? 'sm:col-span-2 lg:col-span-1' : ''
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 font-mono text-xs text-[#1D4ED8] tabular-nums">
+            <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 font-mono text-xs text-[#1D4ED8] tabular-nums">
               <span>{wordCount} words</span>
               <span aria-hidden="true">·</span>
               <span>~{estimatedSeconds}s @ 140 WPM</span>
