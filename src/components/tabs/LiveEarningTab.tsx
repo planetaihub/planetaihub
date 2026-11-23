@@ -133,7 +133,7 @@ export const LiveEarningTab: React.FC = () => {
       <div
         role="tablist"
         aria-label="Filter live earning opportunities by category"
-        className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade px-1 pb-1"
+        className="flex w-full max-w-full items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1.5"
       >
         {EARNING_CATEGORIES.map((category) => {
           const isSelected = selectedCategory === category;
