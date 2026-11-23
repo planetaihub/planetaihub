@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import {
   AlertTriangle,
-  Calculator,
-  Coins,
   FileCheck,
   Scale,
-  Shield,
   ShieldCheck,
 } from 'lucide-react';
 import { InsuranceEstimatorTool } from './InsuranceEstimatorTool';
@@ -47,7 +44,7 @@ export const LegalInsuranceSuite: React.FC = () => {
   const [activeTool, setActiveTool] = useState<LegalToolId>('insurance');
 
   return (
-    <div className="space-y-8">
+    <div className="w-full max-w-full overflow-x-hidden space-y-8">
       {/* Educational Planning Tool Disclaimer Box */}
       <div
         role="region"
@@ -67,14 +64,14 @@ export const LegalInsuranceSuite: React.FC = () => {
         </div>
       </div>
 
-      {/* Sub-Switcher Bar */}
-      <div className="w-full max-w-full rounded-2xl border border-slate-200 bg-slate-50/90 shadow-2xs p-1.5">
+      {/* Sub-Switcher Grid */}
+      <div className="w-full max-w-full rounded-2xl border border-slate-200 bg-slate-50/90 p-2 shadow-2xs">
         <div
           role="tablist"
           aria-label="Business Insurance and Legal Estimators"
-          className="flex w-full items-center overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch gap-1.5 px-1 pr-8 py-0.5"
+          className="grid grid-cols-2 gap-2.5 sm:grid-cols-3"
         >
-          {LEGAL_TOOLS.map(({ id, label, shortLabel, icon: Icon }) => {
+          {LEGAL_TOOLS.map(({ id, label, shortLabel, icon: Icon }, idx) => {
             const isSelected = activeTool === id;
             return (
               <button
@@ -82,25 +79,18 @@ export const LegalInsuranceSuite: React.FC = () => {
                 type="button"
                 role="tab"
                 aria-selected={isSelected}
-                onClick={(e) => {
-                  setActiveTool(id);
-                  if (window.innerWidth <= 768) {
-                    e.currentTarget.scrollIntoView({
-                      behavior: 'smooth',
-                      inline: 'center',
-                      block: 'nearest',
-                    });
-                  }
-                }}
-                className={`snap-center inline-flex items-center gap-2 shrink-0 whitespace-nowrap min-h-[40px] rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
+                onClick={() => setActiveTool(id)}
+                className={`flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-center text-xs font-semibold leading-snug whitespace-normal transition-all ${
+                  idx === LEGAL_TOOLS.length - 1 ? 'col-span-2 sm:col-span-1' : ''
+                } ${
                   isSelected
                     ? 'bg-[#1D4ED8] text-white shadow-sm'
-                    : 'text-slate-700 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900'
+                    : 'border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span className="hidden sm:inline">{label}</span>
-                <span className="sm:hidden">{shortLabel}</span>
+                <span className="hidden md:inline">{label}</span>
+                <span className="md:hidden">{shortLabel}</span>
               </button>
             );
           })}
