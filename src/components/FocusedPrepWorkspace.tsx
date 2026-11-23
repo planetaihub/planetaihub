@@ -59,7 +59,7 @@ export const FocusedPrepWorkspace: React.FC<FocusedPrepWorkspaceProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 max-w-[100vw] overflow-x-hidden">
       {/* Clean Sticky Single Top Bar — Zero Nested Browser Tab Bars */}
       <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
@@ -94,11 +94,11 @@ export const FocusedPrepWorkspace: React.FC<FocusedPrepWorkspaceProps> = ({
           </div>
 
           {/* Right: Reset / Clear to Blank + Apply Direct */}
-          <div className="order-2 flex shrink-0 items-center gap-2 md:order-3">
+          <div className="order-2 flex flex-wrap items-center gap-2 w-full sm:w-auto md:order-3">
             <button
               type="button"
               onClick={handleResetToBlank}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 whitespace-nowrap"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 shrink-0"
             >
               <RotateCcw className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
               <span>Reset / Clear to Blank</span>
@@ -108,7 +108,7 @@ export const FocusedPrepWorkspace: React.FC<FocusedPrepWorkspaceProps> = ({
               href={profile.applyUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-[#1D4ED8] px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF] whitespace-nowrap"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-[#1D4ED8] px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF] shrink-0"
             >
               <span>Apply Direct (Verified ATS)</span>
               <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
@@ -308,41 +308,43 @@ export const FocusedPrepWorkspace: React.FC<FocusedPrepWorkspaceProps> = ({
               </p>
             </div>
 
-            {/* Simple 2-Pill Toggle */}
-            <div
-              role="tablist"
-              aria-label="Company kit preparation tools"
-              className="inline-flex self-start rounded-full border border-slate-200 bg-white p-1 shadow-2xs sm:self-auto"
-            >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeKitTool === 'resume'}
-                onClick={() => setActiveKitTool('resume')}
-                className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap ${
-                  activeKitTool === 'resume'
-                    ? 'bg-[#1D4ED8] text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
+            {/* Simple 2-Pill Toggle with Independent Touch-Scrolling & Padding */}
+            <div className="w-full max-w-full overflow-x-auto scroll-touch no-scrollbar py-0.5 sm:w-auto">
+              <div
+                role="tablist"
+                aria-label="Company kit preparation tools"
+                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white p-1 shadow-2xs shrink-0 pr-4 sm:pr-1"
               >
-                <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Tailored Resume &amp; Cover Letter</span>
-              </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeKitTool === 'resume'}
+                  onClick={() => setActiveKitTool('resume')}
+                  className={`inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap ${
+                    activeKitTool === 'resume'
+                      ? 'bg-[#1D4ED8] text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span>Tailored Resume &amp; Cover Letter</span>
+                </button>
 
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeKitTool === 'interview'}
-                onClick={() => setActiveKitTool('interview')}
-                className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap ${
-                  activeKitTool === 'interview'
-                    ? 'bg-[#1D4ED8] text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Mock Interview Script</span>
-              </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeKitTool === 'interview'}
+                  onClick={() => setActiveKitTool('interview')}
+                  className={`inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap ${
+                    activeKitTool === 'interview'
+                      ? 'bg-[#1D4ED8] text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <MessageSquare className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span>Mock Interview Script</span>
+                </button>
+              </div>
             </div>
           </div>
 
