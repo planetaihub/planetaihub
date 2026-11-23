@@ -9,7 +9,8 @@ export type TabId =
   | 'live-earning'
   | 'video-academy'
   | 'va-academy'
-  | 'security-vault';
+  | 'security-vault'
+  | 'editorial-briefings';
 
 export interface SpotlightVideoConfig {
   company: string;
