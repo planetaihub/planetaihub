@@ -108,6 +108,11 @@ const SUITE_SEO_DATA: Record<TabId, { title: string; description: string }> = {
     description:
       'Zero-knowledge password generator, cryptographic entropy meter, and AES-encrypted local storage for remote credentials.',
   },
+  'editorial-briefings': {
+    title: '18 Editorial AI Briefings & Remote Work Field Notes | PlanetAI Hub',
+    description:
+      'Deep-dive editorial guides covering RLHF evaluation rubrics, studio voice acoustics, structured prompt schemas, and remote USD contractor math.',
+  },
 };
 
 interface RouteResolution {
@@ -123,7 +128,7 @@ const normalizeRouteToTab = (routeCandidate: string): RouteResolution => {
     .split('?')[0];
 
   if (clean === 'editorial-briefings' || clean === 'briefings') {
-    return { tab: 'jobs', isBriefing: true };
+    return { tab: 'editorial-briefings', isBriefing: true };
   }
 
   if (
@@ -183,9 +188,13 @@ const normalizeRouteToTab = (routeCandidate: string): RouteResolution => {
 
 const resolveInitialTab = (): TabId => {
   if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('briefing')) {
+      return 'editorial-briefings';
+    }
     const path = window.location.pathname.replace(/^\/+/, '');
     const hash = window.location.hash.replace(/^#\/?/, '');
-    const queryTab = new URLSearchParams(window.location.search).get('tab');
+    const queryTab = params.get('tab');
     const candidate = path || queryTab || hash;
     return normalizeRouteToTab(candidate).tab;
   }
@@ -277,8 +286,8 @@ export default function App() {
 
       const routeInfo = normalizeRouteToTab(candidate);
       if (routeInfo.isBriefing) {
-        setActiveTab('jobs');
-        setTimeout(() => scrollToBriefings(), 100);
+        setActiveTab('editorial-briefings');
+        window.scrollTo({ top: 0, behavior: 'auto' });
       } else if (routeInfo.tab !== activeTab) {
         setActiveTab(routeInfo.tab);
       }
@@ -295,12 +304,11 @@ export default function App() {
         const routeInfo = normalizeRouteToTab(hash);
         if (routeInfo.isBriefing) {
           window.history.replaceState(null, '', '/editorial-briefings');
-          setTimeout(() => scrollToBriefings(), 120);
+          setActiveTab('editorial-briefings');
+          window.scrollTo({ top: 0, behavior: 'auto' });
         } else {
           window.history.replaceState(null, '', `/${routeInfo.tab}`);
         }
-      } else if (path === 'editorial-briefings' || path === 'briefings') {
-        setTimeout(() => scrollToBriefings(), 120);
       }
     }
 
@@ -327,31 +335,6 @@ export default function App() {
     const rect = el.getBoundingClientRect();
     const targetTop = Math.max(0, window.scrollY + rect.top - headerOffset);
     window.scrollTo({ top: targetTop, behavior: 'smooth' });
-  };
-
-  const scrollToBriefings = (instant = false) => {
-    if (typeof window === 'undefined' || typeof document === 'undefined') return;
-    const performScroll = () => {
-      const targetEl =
-        document.getElementById('editorial-briefings') ||
-        document.getElementById('editorial-briefings-header');
-      if (!targetEl) return;
-      // Sticky top bar is 64px; subtracting 52px tucks the top edge cleanly behind the bar
-      // so zero blue CTA banner sliver ever appears above PLANETAI EDITORIAL • 18 GUIDES.
-      const headerHeight = 52;
-      const y = Math.max(
-        0,
-        targetEl.getBoundingClientRect().top + window.scrollY - headerHeight
-      );
-      window.scrollTo({
-        top: y,
-        behavior: instant ? 'auto' : 'smooth',
-      });
-    };
-
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(performScroll);
-    });
   };
 
   const handleToggleSaveJob = (jobId: string) => {
@@ -399,7 +382,7 @@ export default function App() {
       const nextUrl = tab === 'jobs' ? '/jobs' : `/${tab}`;
       window.history.pushState(null, '', nextUrl);
       if (tab !== 'jobs') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'auto' });
         return;
       }
     }
@@ -412,7 +395,7 @@ export default function App() {
     setActiveTab('jobs');
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
   };
 
@@ -429,15 +412,11 @@ export default function App() {
   };
 
   const handleScrollToBriefings = () => {
-    const switchingTab = activeTab !== 'jobs';
-    setActiveTab('jobs');
+    setActiveTab('editorial-briefings');
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/editorial-briefings');
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
-    window.setTimeout(
-      () => scrollToBriefings(switchingTab),
-      switchingTab ? 140 : 40
-    );
   };
 
   const handleLoadCareerPrep = (payload: CareerPrepPayload) => {
@@ -445,14 +424,14 @@ export default function App() {
     setActiveTab('career-studio');
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/career-studio');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
   };
 
   const handleOpenFocusedPrep = (payload: CareerPrepPayload) => {
     setFocusedPrep(payload);
     if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
   };
 
@@ -468,21 +447,17 @@ export default function App() {
     setActiveTab('video-academy');
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/video-academy');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
   };
 
   const handleOpenBriefingById = (briefingId: string) => {
-    const switchingTab = activeTab !== 'jobs';
     setBriefingTrigger({ id: briefingId, nonce: Date.now() });
-    setActiveTab('jobs');
+    setActiveTab('editorial-briefings');
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/editorial-briefings');
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
-    window.setTimeout(
-      () => scrollToBriefings(switchingTab),
-      switchingTab ? 140 : 40
-    );
   };
 
   const handleOpenCareerStudioTool = (tool: CareerToolId = 'role-prep') => {
@@ -536,6 +511,17 @@ export default function App() {
         return <VaAcademyTab />;
       case 'security-vault':
         return <SecurityVaultTab />;
+      case 'editorial-briefings':
+        return (
+          <div className="space-y-8">
+            <EditorialBriefings
+              externalBriefingTrigger={briefingTrigger}
+              onOpenVideoAcademy={handleOpenVideoAcademy}
+              onOpenCareerStudio={handleOpenCareerStudioTool}
+            />
+            <AdBanner variant="light" />
+          </div>
+        );
       default:
         return null;
     }
@@ -706,15 +692,6 @@ export default function App() {
                   </button>
                 );
               })}
-
-              <button
-                type="button"
-                onClick={handleScrollToBriefings}
-                className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-all hover:border-[#1D4ED8]/40 hover:bg-blue-50/40 hover:text-[#1D4ED8] text-center"
-              >
-                <BookOpen className="h-3.5 w-3.5 shrink-0 text-[#1D4ED8]" aria-hidden="true" />
-                <span className="truncate">18 Briefings</span>
-              </button>
             </div>
           </div>
 
@@ -835,20 +812,13 @@ export default function App() {
           </div>
         </section>
 
-        {/* 5. LIGHT-SLATE EDITORIAL BRIEFINGS HUB (#F8FAFC) */}
+        {/* 5. LIGHT-SLATE PUBLISHER SPONSORSHIP / AD UNIT */}
         <section
-          id="editorial-briefings"
-          className="no-print scroll-mt-[52px] bg-[#F8FAFC] pt-3 pb-16 sm:pt-5 sm:pb-20"
+          aria-label="Sponsored placement"
+          className="no-print bg-[#F8FAFC] py-8"
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <EditorialBriefings
-              externalBriefingTrigger={briefingTrigger}
-              onOpenVideoAcademy={handleOpenVideoAcademy}
-              onOpenCareerStudio={handleOpenCareerStudioTool}
-            />
-            <div className="mt-10">
-              <AdBanner variant="light" />
-            </div>
+            <AdBanner variant="light" />
           </div>
         </section>
 
