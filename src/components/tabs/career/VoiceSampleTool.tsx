@@ -166,7 +166,7 @@ export const VoiceSampleTool: React.FC<VoiceSampleToolProps> = ({
         <div className="h-1 w-full bg-[#1D4ED8]" />
         <div className="space-y-4 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+            <div className="flex w-full min-w-0 max-w-full items-center gap-1.5 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-6 pb-0.5">
               <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500 whitespace-nowrap">
                 Templates:
               </span>
