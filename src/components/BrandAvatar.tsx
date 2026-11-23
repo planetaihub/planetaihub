@@ -104,9 +104,9 @@ const SIGNATURE_BRAND_TILES: Record<string, SignatureBrandTileStyle> = {
   },
   mercor: {
     mark: 'M',
-    bgClass: 'bg-[#1E1B4B]',
+    bgClass: 'bg-[#4F46E5]',
     textClass: 'text-white',
-    borderClass: 'border border-indigo-900',
+    borderClass: 'border border-[#4338CA]',
   },
   dataannotation: {
     mark: 'DA',
@@ -291,6 +291,27 @@ export function getCompanyMark(name: string = ''): string {
   return getTwoLetterMonogram(name);
 }
 
+export const MercorMarkSvg: React.FC<{ className?: string }> = ({
+  className = 'h-6 w-6',
+}) => (
+  <svg
+    viewBox="0 0 32 32"
+    fill="none"
+    aria-hidden="true"
+    className={className}
+  >
+    <path
+      d="M5.5 23V9.6C5.5 7.9 7.5 7 8.8 8.2L16 14.9L13.5 18.4L9.3 14.4V23C9.3 24.1 8.45 25 7.4 25C6.35 25 5.5 24.1 5.5 23Z"
+      fill="white"
+      fillOpacity="0.82"
+    />
+    <path
+      d="M22.7 23V14.4L17.4 19.4C16.6 20.15 15.4 20.15 14.6 19.4L12.6 17.5L15.1 14L16 14.9L23.2 8.2C24.5 7 26.5 7.9 26.5 9.6V23C26.5 24.1 25.65 25 24.6 25C23.55 25 22.7 24.1 22.7 23Z"
+      fill="white"
+    />
+  </svg>
+);
+
 export interface BrandTileProps {
   name: string;
   size?: 'md' | 'lg';
@@ -307,6 +328,7 @@ export const BrandTile: React.FC<BrandTileProps> = ({
   className = '',
 }) => {
   const normalized = name.trim().toLowerCase();
+  const isMercor = normalized.includes('mercor');
   const matched =
     SIGNATURE_BRAND_TILES[normalized] ||
     Object.entries(SIGNATURE_BRAND_TILES).find(([key]) =>
@@ -331,7 +353,11 @@ export const BrandTile: React.FC<BrandTileProps> = ({
       aria-hidden="true"
       className={`shrink-0 flex items-center justify-center font-display font-bold tracking-tight shadow-sm select-none ${sizeClass} ${bgClass} ${textClass} ${borderClass} ${className}`}
     >
-      <span>{mark}</span>
+      {isMercor ? (
+        <MercorMarkSvg className={size === 'md' ? 'h-7 w-7' : 'h-8 w-8'} />
+      ) : (
+        <span>{mark}</span>
+      )}
     </div>
   );
 };
@@ -357,7 +383,9 @@ export const BrandAvatar: React.FC<BrandAvatarProps> = ({
 }) => {
   const resolvedDomain = resolveBrandDomain(name, domain);
   const [hasError, setHasError] = useState(false);
-  const isMicro1 = (name || '').trim().toLowerCase().includes('micro1');
+  const normalizedName = (name || '').trim().toLowerCase();
+  const isMicro1 = normalizedName.includes('micro1');
+  const isMercor = normalizedName.includes('mercor');
 
   useEffect(() => {
     setHasError(false);
@@ -377,6 +405,26 @@ export const BrandAvatar: React.FC<BrandAvatarProps> = ({
         className={`shrink-0 flex items-center justify-center bg-black font-display font-bold tracking-tight text-white shadow-sm select-none ${micro1SizeClasses} ${className}`}
       >
         <span>m.</span>
+      </div>
+    );
+  }
+
+  if (isMercor) {
+    const mercorSizeClasses =
+      size === 'xs'
+        ? 'w-6 h-6 rounded-md'
+        : size === 'sm'
+        ? 'w-9 h-9 rounded-lg'
+        : 'w-11 h-11 rounded-xl';
+    const svgSizeClasses =
+      size === 'xs' ? 'h-4 w-4' : size === 'sm' ? 'h-5 w-5' : 'h-6 w-6';
+
+    return (
+      <div
+        aria-hidden="true"
+        className={`shrink-0 flex items-center justify-center border border-[#4338CA] bg-[#4F46E5] text-white shadow-sm select-none ${mercorSizeClasses} ${className}`}
+      >
+        <MercorMarkSvg className={svgSizeClasses} />
       </div>
     );
   }
@@ -452,8 +500,8 @@ const COMPANY_THEMES: Record<string, CompanyTheme> = {
     watermarkColor: 'text-emerald-600',
   },
   mercor: {
-    cardBgClass: 'bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/60',
-    watermarkColor: 'text-blue-700',
+    cardBgClass: 'bg-gradient-to-br from-indigo-50/85 via-white to-blue-50/60',
+    watermarkColor: 'text-[#4F46E5]',
   },
   dataannotation: {
     cardBgClass: 'bg-gradient-to-br from-teal-50/80 via-white to-emerald-50/50',
@@ -539,4 +587,3 @@ export function getCompanyTheme(name: string = ''): CompanyTheme {
     }
   );
 }
-
