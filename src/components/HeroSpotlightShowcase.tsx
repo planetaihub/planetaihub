@@ -35,32 +35,20 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
   );
 
   const customPlayable = useMemo(
-    () =>
-      customSpotlight?.videoUrl
-        ? parsePlayableVideoSource(customSpotlight.videoUrl)
-        : null,
+    () => (customSpotlight?.videoUrl ? parsePlayableVideoSource(customSpotlight.videoUrl) : null),
     [customSpotlight?.videoUrl]
   );
 
   const selectedPreset: HeroCompanySpotlight = useMemo(() => {
-    const found = HERO_COMPANY_SPOTLIGHTS.find((c) => c.id === selectedId);
-    return found ?? HERO_COMPANY_SPOTLIGHTS[0];
+    return HERO_COMPANY_SPOTLIGHTS.find((c) => c.id === selectedId) ?? HERO_COMPANY_SPOTLIGHTS;
   }, [selectedId]);
 
   const isCustomActive = selectedId === 'custom' && Boolean(customSpotlight && customPlayable);
 
-  const displayCompany = isCustomActive && customSpotlight
-    ? customSpotlight.company
-    : selectedPreset.company;
-  const displayDomain = isCustomActive && customSpotlight
-    ? customSpotlight.domain
-    : selectedPreset.domain;
-  const displayRole = isCustomActive && customSpotlight
-    ? customSpotlight.tagline
-    : selectedPreset.roleTitle;
-  const displayPayBand = isCustomActive && customSpotlight
-    ? customSpotlight.payRange
-    : selectedPreset.payBand;
+  const displayCompany = isCustomActive && customSpotlight ? customSpotlight.company : selectedPreset.company;
+  const displayDomain = isCustomActive && customSpotlight ? customSpotlight.domain : selectedPreset.domain;
+  const displayRole = isCustomActive && customSpotlight ? customSpotlight.tagline : selectedPreset.roleTitle;
+  const displayPayBand = isCustomActive && customSpotlight ? customSpotlight.payRange : selectedPreset.payBand;
   const displayRequirements = isCustomActive && customSpotlight
     ? [
         customSpotlight.summary,
@@ -69,10 +57,7 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
       ]
     : selectedPreset.requirements;
 
-  const activeVideoUrl = isCustomActive && customSpotlight
-    ? customSpotlight.videoUrl
-    : selectedPreset.videoUrl;
-
+  const activeVideoUrl = isCustomActive && customSpotlight ? customSpotlight.videoUrl : selectedPreset.videoUrl;
   const playableSource = useMemo(
     () => (activeVideoUrl ? parsePlayableVideoSource(activeVideoUrl) : null),
     [activeVideoUrl]
@@ -82,56 +67,25 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
     ? `https://${customSpotlight.domain.replace(/^https?:\/\//, '')}`
     : resolveSpotlightApplyUrl(selectedPreset);
 
-  const handleLoadResume = () => {
-    const template = selectedPreset.resumeTemplate;
-    onLoadPrepKit({
-      nonce: Date.now(),
-      targetTool: 'resume',
-      sourceLabel: `${displayCompany} · ${displayRole}`,
-      roleBundleId: selectedPreset.roleBundleId,
-      companyDomain: displayDomain,
-      applyUrl: directApplyHref,
-      payBand: displayPayBand,
-      customVideoUrl:
-        isCustomActive && customSpotlight ? customSpotlight.videoUrl : undefined,
-      resume: {
-        targetTitle: isCustomActive ? displayRole : template.targetTitle,
-        targetCompany: displayCompany,
-        summary: isCustomActive && customSpotlight
-          ? customSpotlight.summary
-          : template.summary,
-        skills: template.skills,
-        experienceRole: template.role,
-        experienceBullets: template.bullets,
-      },
-      interview: selectedPreset.interviewTemplate,
-    });
-  };
-
-  const handleLoadInterview = () => {
-    onLoadPrepKit({
-      nonce: Date.now(),
-      targetTool: 'interview',
-      sourceLabel: `${displayCompany} · Mock Interview Script`,
-      roleBundleId: selectedPreset.roleBundleId,
-      companyDomain: displayDomain,
-      applyUrl: directApplyHref,
-      payBand: displayPayBand,
-      customVideoUrl:
-        isCustomActive && customSpotlight ? customSpotlight.videoUrl : undefined,
-      resume: {
-        targetTitle: isCustomActive ? displayRole : selectedPreset.resumeTemplate.targetTitle,
-        targetCompany: displayCompany,
-        summary: isCustomActive && customSpotlight
-          ? customSpotlight.summary
-          : selectedPreset.resumeTemplate.summary,
-        skills: selectedPreset.resumeTemplate.skills,
-        experienceRole: selectedPreset.resumeTemplate.role,
-        experienceBullets: selectedPreset.resumeTemplate.bullets,
-      },
-      interview: selectedPreset.interviewTemplate,
-    });
-  };
+  const buildPayload = (targetTool: 'resume' | 'interview'): CareerPrepPayload => ({
+    nonce: Date.now(),
+    targetTool,
+    sourceLabel: targetTool === 'resume' ? `${displayCompany} · ${displayRole}` : `${displayCompany} · Mock Interview Script`,
+    roleBundleId: selectedPreset.roleBundleId,
+    companyDomain: displayDomain,
+    applyUrl: directApplyHref,
+    payBand: displayPayBand,
+    customVideoUrl: isCustomActive && customSpotlight ? customSpotlight.videoUrl : undefined,
+    resume: {
+      targetTitle: isCustomActive ? displayRole : selectedPreset.resumeTemplate.targetTitle,
+      targetCompany: displayCompany,
+      summary: isCustomActive && customSpotlight ? customSpotlight.summary : selectedPreset.resumeTemplate.summary,
+      skills: selectedPreset.resumeTemplate.skills,
+      experienceRole: selectedPreset.resumeTemplate.role,
+      experienceBullets: selectedPreset.resumeTemplate.bullets,
+    },
+    interview: selectedPreset.interviewTemplate,
+  });
   return (
     <section className="no-print bg-gradient-to-b from-slate-50 via-white to-white text-slate-900">
       <div className="mx-auto max-w-7xl px-4 pt-7 pb-9 sm:px-6 sm:pt-10 sm:pb-12">
@@ -153,11 +107,7 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
           <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-md lg:col-span-7 sm:p-6">
             <div className="space-y-3.5">
               <div className="flex flex-wrap items-center justify-between gap-2.5">
-                <div
-                  role="tablist"
-                  aria-label="Featured company spotlights"
-                  className="flex flex-wrap items-center gap-2"
-                >
+                <div role="tablist" aria-label="Featured company spotlights" className="flex flex-wrap items-center gap-2">
                   {HERO_COMPANY_SPOTLIGHTS.map((item) => {
                     const isSelected = selectedId === item.id;
                     return (
@@ -253,16 +203,12 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
                   <BrandAvatar name={displayCompany} domain={displayDomain} size="md" />
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-base font-bold text-slate-900 sm:text-lg">
-                        {displayCompany}
-                      </h2>
+                      <h2 className="text-base font-bold text-slate-900 sm:text-lg">{displayCompany}</h2>
                       <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
                         {displayPayBand}
                       </span>
                     </div>
-                    <p className="text-xs font-medium text-slate-600 sm:text-sm">
-                      {displayRole}
-                    </p>
+                    <p className="text-xs font-medium text-slate-600 sm:text-sm">{displayRole}</p>
                   </div>
                 </div>
               </div>
@@ -274,10 +220,7 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
                 <ul className="mt-2.5 space-y-2">
                   {displayRequirements.map((req, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-xs leading-relaxed text-slate-700 sm:text-sm">
-                      <CheckCircle2
-                        className="mt-0.5 h-4 w-4 shrink-0 text-[#1D4ED8]"
-                        aria-hidden="true"
-                      />
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#1D4ED8]" aria-hidden="true" />
                       <span>{req}</span>
                     </li>
                   ))}
@@ -289,7 +232,7 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <button
                   type="button"
-                  onClick={handleLoadResume}
+                  onClick={() => onLoadPrepKit(buildPayload('resume'))}
                   className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-800 shadow-2xs transition-all hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
                 >
                   <FileText className="h-4 w-4 text-[#1D4ED8]" aria-hidden="true" />
@@ -298,7 +241,7 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
 
                 <button
                   type="button"
-                  onClick={handleLoadInterview}
+                  onClick={() => onLoadPrepKit(buildPayload('interview'))}
                   className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-800 shadow-2xs transition-all hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
                 >
                   <MessageSquare className="h-4 w-4 text-[#1D4ED8]" aria-hidden="true" />
