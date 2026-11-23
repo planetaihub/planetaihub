@@ -196,21 +196,23 @@ export const RateCalculatorsTool: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Sub-Navigation for Financial Calculators */}
-      <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1.5">
+      {/* Sub-Navigation Grid for Financial Calculators */}
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
         {[
           { id: 'income', label: 'Income & Tax Reserve Calculator', Icon: Calculator },
           { id: 'wealth', label: 'Wealth & Emergency Fund Simulator', Icon: TrendingUp },
           { id: 'debt', label: 'Debt Payoff Accelerator (Snowball vs Avalanche)', Icon: CreditCard },
-        ].map((sub) => {
+        ].map((sub, idx) => {
           const Icon = sub.Icon;
           const isActive = activeSubTab === sub.id;
           return (
             <button
               key={sub.id}
               type="button"
-              onClick={() => setActiveSubTab(sub.id as any)}
-              className={`snap-center shrink-0 inline-flex min-h-[40px] items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold transition-all ${
+              onClick={() => setActiveSubTab(sub.id as 'income' | 'wealth' | 'debt')}
+              className={`flex min-h-[44px] items-center justify-center gap-2 rounded-xl border px-3 py-2 text-center text-xs font-semibold leading-snug transition-all ${
+                idx === 2 ? 'col-span-2 sm:col-span-1' : ''
+              } ${
                 isActive
                   ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-sm'
                   : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
@@ -227,7 +229,7 @@ export const RateCalculatorsTool: React.FC = () => {
       {activeSubTab === 'income' && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-7 sm:p-8 space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h3 className="font-display text-lg font-bold text-slate-900">
                   Remote Income &amp; Tax Reserve Calculator
@@ -236,11 +238,11 @@ export const RateCalculatorsTool: React.FC = () => {
                   Calculate gross earnings, platform transfer deductions, quarterly tax reserves, and net take-home pay.
                 </p>
               </div>
-              <div className="flex rounded-lg border border-slate-200 bg-slate-100 p-1">
+              <div className="grid grid-cols-2 gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 shrink-0 sm:inline-flex">
                 <button
                   type="button"
                   onClick={() => setEarningsMode('hourly')}
-                  className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
+                  className={`min-h-[34px] rounded-lg px-3 py-1 text-center text-xs font-semibold transition-colors ${
                     earningsMode === 'hourly' ? 'bg-[#1D4ED8] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -249,7 +251,7 @@ export const RateCalculatorsTool: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setEarningsMode('monthly')}
-                  className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
+                  className={`min-h-[34px] rounded-lg px-3 py-1 text-center text-xs font-semibold transition-colors ${
                     earningsMode === 'monthly' ? 'bg-[#1D4ED8] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -293,14 +295,18 @@ export const RateCalculatorsTool: React.FC = () => {
 
             <div>
               <span className={labelClass}>Platform Transfer Fee</span>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {FEE_PRESETS.map((p) => (
+              <div className="mt-2 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+                {FEE_PRESETS.map((p, idx) => (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => setFeePct(p.feePct)}
-                    className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all ${
-                      feePct === p.feePct ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white' : 'border-slate-200 bg-slate-50 text-slate-700'
+                    className={`min-h-[40px] rounded-xl border px-3 py-2 text-center text-xs font-semibold transition-all ${
+                      idx === FEE_PRESETS.length - 1 ? 'col-span-2 sm:col-span-1' : ''
+                    } ${
+                      feePct === p.feePct
+                        ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-xs'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
                     }`}
                   >
                     {p.label}
