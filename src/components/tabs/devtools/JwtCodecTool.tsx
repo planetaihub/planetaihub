@@ -382,7 +382,7 @@ export const JwtCodecTool: React.FC = () => {
                       )}
                     </button>
                   </div>
-                  <pre className="overflow-x-auto p-4 font-mono text-xs text-slate-800 bg-slate-50/30">
+                  <pre className="overflow-x-auto scroll-touch p-4 font-mono text-xs text-slate-800 bg-slate-50/30">
                     {parsedJwt.headerJson}
                   </pre>
                 </div>
@@ -414,7 +414,7 @@ export const JwtCodecTool: React.FC = () => {
                       )}
                     </button>
                   </div>
-                  <pre className="overflow-x-auto p-4 font-mono text-xs text-slate-800 bg-slate-50/30 max-h-72">
+                  <pre className="overflow-x-auto scroll-touch p-4 font-mono text-xs text-slate-800 bg-slate-50/30 max-h-72">
                     {parsedJwt.payloadJson}
                   </pre>
                 </div>
