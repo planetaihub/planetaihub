@@ -278,7 +278,7 @@ export default function App() {
       const routeInfo = normalizeRouteToTab(candidate);
       if (routeInfo.isBriefing) {
         setActiveTab('jobs');
-        setTimeout(() => scrollToElement('editorial-briefings'), 80);
+        setTimeout(() => scrollToBriefings(), 100);
       } else if (routeInfo.tab !== activeTab) {
         setActiveTab(routeInfo.tab);
       }
@@ -295,12 +295,12 @@ export default function App() {
         const routeInfo = normalizeRouteToTab(hash);
         if (routeInfo.isBriefing) {
           window.history.replaceState(null, '', '/editorial-briefings');
-          setTimeout(() => scrollToElement('editorial-briefings'), 100);
+          setTimeout(() => scrollToBriefings(), 120);
         } else {
           window.history.replaceState(null, '', `/${routeInfo.tab}`);
         }
       } else if (path === 'editorial-briefings' || path === 'briefings') {
-        setTimeout(() => scrollToElement('editorial-briefings'), 100);
+        setTimeout(() => scrollToBriefings(), 120);
       }
     }
 
@@ -320,12 +320,25 @@ export default function App() {
     writeJson(STORAGE_KEYS.SPOTLIGHT_VIDEO, config);
   };
 
-  const scrollToElement = (elementId: string) => {
-    if (typeof document === 'undefined') return;
+  const scrollToElement = (elementId: string, headerOffset = 72) => {
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
     const el = document.getElementById(elementId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const targetTop = Math.max(0, window.scrollY + rect.top - headerOffset);
+    window.scrollTo({ top: targetTop, behavior: 'smooth' });
+  };
+
+  const scrollToBriefings = () => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    window.requestAnimationFrame(() => {
+      const headerTarget = document.getElementById('editorial-briefings-header');
+      if (headerTarget) {
+        scrollToElement('editorial-briefings-header', 76);
+      } else {
+        scrollToElement('editorial-briefings', 64);
+      }
+    });
   };
 
   const handleToggleSaveJob = (jobId: string) => {
@@ -407,7 +420,7 @@ export default function App() {
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/editorial-briefings');
     }
-    setTimeout(() => scrollToElement('editorial-briefings'), 80);
+    setTimeout(() => scrollToBriefings(), 100);
   };
 
   const handleLoadCareerPrep = (payload: CareerPrepPayload) => {
@@ -448,7 +461,7 @@ export default function App() {
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/editorial-briefings');
     }
-    setTimeout(() => scrollToElement('editorial-briefings'), 80);
+    setTimeout(() => scrollToBriefings(), 100);
   };
 
   const handleOpenCareerStudioTool = (tool: CareerToolId = 'role-prep') => {
@@ -804,7 +817,7 @@ export default function App() {
         {/* 5. LIGHT-SLATE EDITORIAL BRIEFINGS HUB (#F8FAFC) */}
         <section
           id="editorial-briefings"
-          className="no-print scroll-mt-20 bg-[#F8FAFC] py-16 sm:py-20"
+          className="no-print scroll-mt-16 bg-[#F8FAFC] pt-10 pb-16 sm:pt-14 sm:pb-20"
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <EditorialBriefings
