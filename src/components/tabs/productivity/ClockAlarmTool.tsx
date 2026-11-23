@@ -148,7 +148,7 @@ export const ClockAlarmTool: React.FC = () => {
           <div className="h-1 w-full bg-[#1D4ED8]" />
           <div className="p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar rounded-xl border border-slate-200 bg-slate-50 p-1">
+              <div className="flex flex-wrap sm:inline-flex items-center gap-1 max-w-full rounded-xl border border-slate-200 bg-slate-50 p-1">
                 {(
                   [
                     { id: 'local', label: `Local (${localTzName})` },
