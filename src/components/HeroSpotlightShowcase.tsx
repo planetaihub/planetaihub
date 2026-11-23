@@ -325,7 +325,7 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
               <button
                 type="button"
                 onClick={handleLoadResume}
-                className="inline-flex min-h-[42px] w-full items-center justify-center gap-2 rounded-full bg-[#1D4ED8] px-5 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF] whitespace-nowrap"
+                className="inline-flex min-h-[42px] w-full items-center justify-center gap-2 rounded-full bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF] text-center"
               >
                 <FileText className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>Load Tailored Resume Template</span>
@@ -335,7 +335,7 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
               <button
                 type="button"
                 onClick={handleLoadInterview}
-                className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-full border border-blue-200 bg-blue-50/70 px-5 py-2 text-xs font-semibold text-[#1D4ED8] transition-colors hover:border-[#1D4ED8] hover:bg-blue-100/70 whitespace-nowrap"
+                className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-full border border-blue-200 bg-blue-50/70 px-4 py-2 text-xs font-semibold text-[#1D4ED8] transition-colors hover:border-[#1D4ED8] hover:bg-blue-100/70 text-center"
               >
                 <MessageSquare className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>Open Mock Interview Script</span>
@@ -345,7 +345,7 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
                 href={directApplyHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-800 transition-colors hover:border-slate-300 hover:bg-slate-50 whitespace-nowrap"
+                className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-800 transition-colors hover:border-slate-300 hover:bg-slate-50 text-center"
               >
                 <span>Apply Direct (Verified ATS)</span>
                 <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
