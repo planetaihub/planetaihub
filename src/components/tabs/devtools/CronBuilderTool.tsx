@@ -421,7 +421,7 @@ export const CronBuilderTool: React.FC = () => {
                 {copiedSnippet === 'crontab' ? 'Copied' : 'Copy'}
               </button>
             </div>
-            <pre className="overflow-x-auto rounded-lg bg-slate-50 p-2 font-mono text-[11px] text-slate-700">
+            <pre className="overflow-x-auto scroll-touch rounded-lg bg-slate-50 p-2 font-mono text-[11px] text-slate-700">
               {`${cronExpression} /usr/local/bin/worker.sh >> /var/log/worker.log 2>&1`}
             </pre>
           </div>
@@ -446,7 +446,7 @@ export const CronBuilderTool: React.FC = () => {
                 {copiedSnippet === 'gha' ? 'Copied' : 'Copy'}
               </button>
             </div>
-            <pre className="overflow-x-auto rounded-lg bg-slate-50 p-2 font-mono text-[11px] text-slate-700">
+            <pre className="overflow-x-auto scroll-touch rounded-lg bg-slate-50 p-2 font-mono text-[11px] text-slate-700">
               {`on:\n  schedule:\n    - cron: '${cronExpression}'`}
             </pre>
           </div>
