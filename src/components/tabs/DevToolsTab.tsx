@@ -197,14 +197,17 @@ export const DevToolsTab: React.FC = () => {
   }, [category, query]);
 
   return (
-    <section aria-labelledby="dev-tools-heading" className="space-y-6">
+    <section
+      aria-labelledby="dev-tools-heading"
+      className="w-full max-w-full min-w-0 space-y-6"
+    >
       <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-2xl">
+        <div className="min-w-0 max-w-2xl">
           <div className="flex items-center gap-3.5">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 text-[#1D4ED8]">
               <Code2 className="h-5 w-5" aria-hidden="true" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-wider text-[#1D4ED8]">
                 Builder Launchpad &amp; Cloud Desk
               </p>
@@ -221,12 +224,12 @@ export const DevToolsTab: React.FC = () => {
           </p>
         </div>
 
-        {/* Clean Primary Sub-Switcher (Wraps cleanly on mobile, non-clipping) */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 w-full sm:w-auto">
+        {/* Clean Primary Sub-Switcher (2-column grid on mobile, inline on desktop) */}
+        <div className="grid w-full max-w-full shrink-0 grid-cols-2 gap-2.5 rounded-2xl border border-slate-200 bg-slate-100/90 p-2 lg:w-auto">
           <button
             type="button"
             onClick={() => setDevSection('b2b-utilities')}
-            className={`inline-flex flex-1 sm:flex-initial justify-center items-center gap-1.5 min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+            className={`flex min-h-[44px] w-full min-w-0 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-center text-xs font-semibold leading-snug whitespace-normal transition-all ${
               devSection === 'b2b-utilities'
                 ? 'bg-[#1D4ED8] text-white shadow-sm'
                 : 'text-slate-700 hover:bg-white hover:text-slate-900'
@@ -239,7 +242,7 @@ export const DevToolsTab: React.FC = () => {
           <button
             type="button"
             onClick={() => setDevSection('directory')}
-            className={`inline-flex flex-1 sm:flex-initial justify-center items-center gap-1.5 min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+            className={`flex min-h-[44px] w-full min-w-0 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-center text-xs font-semibold leading-snug whitespace-normal transition-all ${
               devSection === 'directory'
                 ? 'bg-[#1D4ED8] text-white shadow-sm'
                 : 'text-slate-700 hover:bg-white hover:text-slate-900'
@@ -256,13 +259,13 @@ export const DevToolsTab: React.FC = () => {
         <B2BCloudWebSuite />
       ) : (
         /* Mode 2: Curated Builder Directory */
-        <div className="space-y-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between w-full min-w-0">
-            {/* Category Filter */}
+        <div className="w-full max-w-full min-w-0 space-y-6">
+          <div className="flex w-full max-w-full min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            {/* Category Filter 2-Column Mobile Grid (Zero Horizontal Scrolling) */}
             <div
               role="tablist"
               aria-label="Filter developer tools by category"
-              className="flex w-full min-w-0 items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1"
+              className="grid w-full max-w-full grid-cols-2 gap-2.5 lg:flex lg:w-auto lg:flex-wrap lg:items-center"
             >
               {CATEGORIES.map((cat) => {
                 const isSelected = category === cat;
@@ -272,20 +275,13 @@ export const DevToolsTab: React.FC = () => {
                     type="button"
                     role="tab"
                     aria-selected={isSelected}
-                    onClick={(e) => {
-                      setCategory(cat);
-                      if (window.innerWidth <= 768) {
-                        e.currentTarget.scrollIntoView({
-                          behavior: 'smooth',
-                          inline: 'center',
-                          block: 'nearest',
-                        });
-                      }
-                    }}
-                    className={`snap-center min-h-[38px] rounded-full border px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+                    onClick={() => setCategory(cat)}
+                    className={`flex min-h-[44px] w-full min-w-0 items-center justify-center rounded-xl border px-3 py-2 text-center text-xs font-semibold leading-snug whitespace-normal transition-all lg:w-auto lg:px-3.5 ${
+                      cat === 'All' ? 'col-span-2 lg:col-span-1' : ''
+                    } ${
                       isSelected
                         ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-sm'
-                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
                     {cat === 'All' ? `All Tools (${DEV_TOOLS.length})` : cat}
@@ -295,7 +291,7 @@ export const DevToolsTab: React.FC = () => {
             </div>
 
             {/* Search Input */}
-            <div className="relative w-full sm:w-72">
+            <div className="relative w-full min-w-0 lg:w-72">
               <Search
                 className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400"
                 aria-hidden="true"
