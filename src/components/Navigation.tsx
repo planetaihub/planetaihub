@@ -106,6 +106,13 @@ export const TABS: NavTabItem[] = [
     shortLabel: 'Security',
     icon: Shield,
   },
+  {
+    id: 'editorial-briefings',
+    label: 'Editorial Briefings',
+    desktopLabel: '18 Briefings',
+    shortLabel: 'Briefings',
+    icon: BookOpen,
+  },
 ];
 
 // Backward-compatible export alias if referenced elsewhere
@@ -267,18 +274,6 @@ export const Navigation: React.FC<NavigationProps> = ({
                   </button>
                 );
               })}
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileSuitesOpen(false);
-                  onScrollToBriefings();
-                }}
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-semibold text-slate-800 hover:border-[#1D4ED8]/40 hover:bg-white"
-              >
-                <BookOpen className="h-4 w-4 shrink-0 text-[#1D4ED8]" aria-hidden="true" />
-                <span className="truncate">18 Briefings</span>
-              </button>
             </div>
           </div>
         </div>
