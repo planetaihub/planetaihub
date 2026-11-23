@@ -300,7 +300,7 @@ export const InterviewPrepTool: React.FC<InterviewPrepToolProps> = ({
 
       {/* Floating Role Track Selector */}
       <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 shadow-2xs sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+        <div className="flex w-full min-w-0 max-w-full items-center gap-1.5 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-6 pb-0.5">
           {TRACKS.map((track) => (
             <button
               key={track}
