@@ -126,7 +126,7 @@ export const CareerStudioTab: React.FC<CareerStudioTabProps> = ({
         <div
           role="tablist"
           aria-label="Career Studio tools"
-          className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar"
+          className="flex w-full max-w-full items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1.5"
         >
           {CAREER_TOOLS.map(({ id, label, Icon }) => {
             const isSelected = activeTool === id;
