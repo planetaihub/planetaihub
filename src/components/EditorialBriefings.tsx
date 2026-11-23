@@ -752,7 +752,10 @@ export const EditorialBriefings: React.FC<EditorialBriefingsProps> = ({
       className="space-y-8"
     >
       {/* Editorial Section Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div
+        id="editorial-briefings-header"
+        className="scroll-mt-20 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+      >
         <div>
           <p className="text-xs font-semibold tracking-wider uppercase text-[#1D4ED8]">
             PlanetAI Editorial · {BRIEFINGS.length} Guides
