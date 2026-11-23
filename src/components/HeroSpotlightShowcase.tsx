@@ -23,23 +23,23 @@ interface HeroSpotlightShowcaseProps {
   onOpenFeatureVideoModal: () => void;
 }
 
-function extractYouTubeEmbedUrl(url?: string, fallbackId?: string): string {
+function extractYouTubeId(url?: string, fallbackId = 'jPKTo1iGQiE'): string {
   const cleanUrl = (url || '').trim();
   if (cleanUrl) {
     const watchMatch = cleanUrl.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-    if (watchMatch && watchMatch[1]) {
-      return `https://youtube.com{watchMatch[1]}?rel=0`;
+    if (watchMatch?.[1]) {
+      return watchMatch[1];
     }
     const shortMatch = cleanUrl.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-    if (shortMatch && shortMatch[1]) {
-      return `https://youtube.com{shortMatch[1]}?rel=0`;
+    if (shortMatch?.[1]) {
+      return shortMatch[1];
     }
-    const embedMatch = cleanUrl.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/);
-    if (embedMatch && embedMatch[1]) {
-      return `https://youtube.com{embedMatch[1]}?rel=0`;
+    const embedMatch = cleanUrl.match(/youtube\.com\/(?:embed|v)\/([a-zA-Z0-9_-]{11})/);
+    if (embedMatch?.[1]) {
+      return embedMatch[1];
     }
   }
-  return `https://youtube.com{fallbackId || 'jPKTo1iGQiE'}?rel=0`;
+  return fallbackId;
 }
 
 export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
@@ -78,9 +78,11 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
   const displayRequirements = activePreset.requirements;
   const displayApplyUrl = activePreset.applyUrl;
 
-  const embedUrl = isCustomActive
-    ? extractYouTubeEmbedUrl(customSpotlight?.videoUrl, activePreset.youtubeId)
-    : `https://youtube.com{activePreset.youtubeId}?rel=0`;
+  const activeVideoId = isCustomActive
+    ? extractYouTubeId(customSpotlight?.videoUrl, activePreset.youtubeId)
+    : activePreset.youtubeId;
+  const embedUrl = `https://www.youtube.com/embed/${activeVideoId}?rel=0`;
+  const thumbnailUrl = `https://img.youtube.com/vi/${activeVideoId}/hqdefault.jpg`;
 
   const buildPayload = (
     targetTool: 'resume' | 'interview' | 'role-prep'
@@ -110,6 +112,7 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
       result: activePreset.interviewTemplate.result,
     },
   });
+
   return (
     <section className="w-full max-w-full overflow-x-hidden border-b border-slate-200 bg-gradient-to-b from-slate-50/90 to-white">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
@@ -183,7 +186,7 @@ export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
                     className="group relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-blue-950 p-6 text-center"
                   >
                     <img
-                      src={`https://ytimg.com{activePreset.youtubeId}/hqdefault.jpg`}
+                      src={thumbnailUrl}
                       alt={`${displayCompany} walkthrough preview`}
                       className="absolute inset-0 h-full w-full object-cover opacity-35 transition-transform duration-300 group-hover:scale-105"
                     />
