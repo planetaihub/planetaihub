@@ -555,32 +555,25 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
             </button>
           </div>
 
-          {/* Quick Filter Pills */}
+          {/* Quick Filter Grid */}
           <div
             aria-label="Quick job filters"
-            className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1 sm:px-0 sm:pr-0"
+            className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:items-center"
           >
-            {QUICK_FILTERS.map((pill) => {
+            {QUICK_FILTERS.map((pill, idx) => {
               const active = isQuickFilterActive(pill.key);
               return (
                 <button
                   key={pill.key}
                   type="button"
-                  onClick={(e) => {
-                    toggleQuickFilter(pill.key);
-                    if (window.innerWidth <= 768) {
-                      e.currentTarget.scrollIntoView({
-                        behavior: 'smooth',
-                        inline: 'center',
-                        block: 'nearest',
-                      });
-                    }
-                  }}
+                  onClick={() => toggleQuickFilter(pill.key)}
                   aria-pressed={active}
-                  className={`snap-center shrink-0 whitespace-nowrap min-h-[38px] rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all ${
+                  className={`flex min-h-[40px] items-center justify-center rounded-xl border px-3.5 py-2 text-center text-xs font-medium leading-snug transition-all ${
+                    idx === QUICK_FILTERS.length - 1 ? 'col-span-2 sm:col-span-1' : ''
+                  } ${
                     active
                       ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white font-semibold shadow-sm'
-                      : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
                   {pill.label}
@@ -767,23 +760,14 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
               <div
                 role="tablist"
                 aria-label="Job board views"
-                className="flex items-center gap-1 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch p-1 max-md:px-3 max-md:pr-8"
+                className="grid grid-cols-2 gap-1 p-1"
               >
                 <button
                   type="button"
                   role="tab"
                   aria-selected={viewMode === 'all'}
-                  onClick={(e) => {
-                    onChangeViewMode('all');
-                    if (window.innerWidth <= 768) {
-                      e.currentTarget.scrollIntoView({
-                        behavior: 'smooth',
-                        inline: 'center',
-                        block: 'nearest',
-                      });
-                    }
-                  }}
-                  className={`snap-center min-h-[36px] rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+                  onClick={() => onChangeViewMode('all')}
+                  className={`min-h-[36px] rounded-lg px-3.5 py-1.5 text-center text-xs font-semibold transition-all whitespace-nowrap ${
                     viewMode === 'all'
                       ? 'bg-[#1D4ED8] text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900'
@@ -795,17 +779,8 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
                   type="button"
                   role="tab"
                   aria-selected={viewMode === 'saved'}
-                  onClick={(e) => {
-                    onChangeViewMode('saved');
-                    if (window.innerWidth <= 768) {
-                      e.currentTarget.scrollIntoView({
-                        behavior: 'smooth',
-                        inline: 'center',
-                        block: 'nearest',
-                      });
-                    }
-                  }}
-                  className={`snap-center min-h-[36px] rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+                  onClick={() => onChangeViewMode('saved')}
+                  className={`min-h-[36px] rounded-lg px-3.5 py-1.5 text-center text-xs font-semibold transition-all whitespace-nowrap ${
                     viewMode === 'saved'
                       ? 'bg-[#1D4ED8] text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900'
@@ -818,10 +793,10 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
           </div>
         </div>
 
-        {/* Horizontally Scrollable Category Strip */}
+        {/* Category Filter Grid */}
         <div
           aria-label="Filter by category"
-          className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-3 pr-8 pb-1 md:px-0 md:pr-0"
+          className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:items-center"
         >
           {CATEGORIES.map((category) => {
             const isActive = selectedCategory === category;
@@ -829,20 +804,11 @@ export const JobsBoard: React.FC<JobsBoardProps> = ({
               <button
                 key={category}
                 type="button"
-                onClick={(e) => {
-                  setSelectedCategory(category);
-                  if (window.innerWidth <= 768) {
-                    e.currentTarget.scrollIntoView({
-                      behavior: 'smooth',
-                      inline: 'center',
-                      block: 'nearest',
-                    });
-                  }
-                }}
-                className={`snap-center min-h-[38px] rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+                onClick={() => setSelectedCategory(category)}
+                className={`flex min-h-[40px] items-center justify-center rounded-xl border px-3 py-2 text-center text-xs font-semibold leading-snug transition-all ${
                   isActive
                     ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-sm'
-                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
                 {category === 'All' ? 'All Categories' : category}
