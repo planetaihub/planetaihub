@@ -216,52 +216,64 @@ export const JsonYamlTool: React.FC = () => {
         </div>
 
         {/* Action Selector Buttons */}
-        <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 p-1">
+        <div
+          role="tablist"
+          aria-label="JSON and YAML actions"
+          className="grid w-full grid-cols-2 gap-1.5 rounded-xl border border-slate-200 bg-slate-100 p-1.5 sm:inline-flex sm:w-auto shrink-0"
+        >
           <button
             type="button"
+            role="tab"
+            aria-selected={actionType === 'format-json'}
             onClick={() => setActionType('format-json')}
-            className={`min-h-[34px] rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
+            className={`min-h-[38px] rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition-all ${
               actionType === 'format-json'
-                ? 'bg-white text-slate-900 shadow-2xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#1D4ED8] text-white shadow-2xs'
+                : 'text-slate-600 hover:bg-white hover:text-slate-900'
             }`}
           >
             Format JSON
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={actionType === 'minify-json'}
             onClick={() => setActionType('minify-json')}
-            className={`min-h-[34px] rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
+            className={`min-h-[38px] rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition-all ${
               actionType === 'minify-json'
-                ? 'bg-white text-slate-900 shadow-2xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#1D4ED8] text-white shadow-2xs'
+                : 'text-slate-600 hover:bg-white hover:text-slate-900'
             }`}
           >
             Minify JSON
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={actionType === 'json-to-yaml'}
             onClick={() => setActionType('json-to-yaml')}
-            className={`min-h-[34px] rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
+            className={`min-h-[38px] rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition-all ${
               actionType === 'json-to-yaml'
-                ? 'bg-white text-slate-900 shadow-2xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#1D4ED8] text-white shadow-2xs'
+                : 'text-slate-600 hover:bg-white hover:text-slate-900'
             }`}
           >
             JSON ➔ YAML
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={actionType === 'yaml-to-json'}
             onClick={() => {
               setActionType('yaml-to-json');
               if (inputContent === SAMPLE_JSON_CONFIG) {
                 setInputContent(SAMPLE_K8S_YAML);
               }
             }}
-            className={`min-h-[34px] rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
+            className={`min-h-[38px] rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition-all ${
               actionType === 'yaml-to-json'
-                ? 'bg-white text-slate-900 shadow-2xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#1D4ED8] text-white shadow-2xs'
+                : 'text-slate-600 hover:bg-white hover:text-slate-900'
             }`}
           >
             YAML ➔ JSON
