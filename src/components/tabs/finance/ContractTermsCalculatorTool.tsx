@@ -157,36 +157,46 @@ Thank you for your prompt attention to this matter.`;
         </div>
 
         {/* Sub-Tabs */}
-        <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 shrink-0">
+        <div
+          role="tablist"
+          aria-label="Contract terms calculator views"
+          className="grid w-full grid-cols-2 gap-1.5 rounded-xl border border-slate-200 bg-slate-100 p-1.5 sm:inline-flex sm:w-auto shrink-0"
+        >
           <button
             type="button"
+            role="tab"
+            aria-selected={activeSubTab === 'late-fee'}
             onClick={() => setActiveSubTab('late-fee')}
-            className={`min-h-[34px] rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
+            className={`min-h-[38px] rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition-all ${
               activeSubTab === 'late-fee'
-                ? 'bg-white text-slate-900 shadow-2xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#1D4ED8] text-white shadow-2xs'
+                : 'text-slate-600 hover:bg-white hover:text-slate-900'
             }`}
           >
             Late-Fee Interest
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={activeSubTab === 'retainer'}
             onClick={() => setActiveSubTab('retainer')}
-            className={`min-h-[34px] rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
+            className={`min-h-[38px] rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition-all ${
               activeSubTab === 'retainer'
-                ? 'bg-white text-slate-900 shadow-2xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#1D4ED8] text-white shadow-2xs'
+                : 'text-slate-600 hover:bg-white hover:text-slate-900'
             }`}
           >
             Monthly Retainer
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={activeSubTab === 'ip-buyout'}
             onClick={() => setActiveSubTab('ip-buyout')}
-            className={`min-h-[34px] rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
+            className={`col-span-2 sm:col-span-1 min-h-[38px] rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition-all ${
               activeSubTab === 'ip-buyout'
-                ? 'bg-white text-slate-900 shadow-2xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#1D4ED8] text-white shadow-2xs'
+                : 'text-slate-600 hover:bg-white hover:text-slate-900'
             }`}
           >
             IP Buyout Multiplier
