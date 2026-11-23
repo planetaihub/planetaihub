@@ -356,7 +356,7 @@ export const RolePrepHubTool: React.FC<RolePrepHubToolProps> = ({
                 href={jobMeta.applyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-[38px] items-center gap-1.5 rounded-full bg-[#1D4ED8] px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF] whitespace-nowrap"
+                className="inline-flex min-h-[38px] items-center gap-1.5 rounded-full bg-[#1D4ED8] px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF]"
               >
                 <span>Apply Directly at {jobMeta.company}</span>
                 <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
