@@ -178,60 +178,60 @@ export const PartnerSpotlightFrame: React.FC<PartnerSpotlightFrameProps> = ({
       </div>
 
       {/* True 16:9 Branded Partner Spotlight Media Frame */}
-      <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-800 to-[#1E3A8A] text-white shadow-sm">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-white to-blue-50/70 text-slate-900 shadow-sm">
         {/* Ambient Studio Spotlight Accent */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-blue-500/25 blur-3xl"
+          className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-emerald-400/15 blur-3xl"
+          className="pointer-events-none absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-emerald-400/10 blur-3xl"
         />
 
         <div className="relative z-10 flex h-full w-full flex-col justify-between p-3.5 sm:p-6">
           {/* Top Stage Tag Strip */}
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-blue-100 backdrop-blur-xs sm:text-[11px]">
-              <Sparkles className="h-3 w-3 shrink-0 text-blue-300" aria-hidden="true" />
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#1D4ED8] sm:text-[11px]">
+              <Sparkles className="h-3 w-3 shrink-0 text-[#1D4ED8]" aria-hidden="true" />
               <span>PlanetAI Hub Official Employer Spotlight</span>
             </span>
 
-            <span className="hidden items-center gap-1.5 rounded-lg border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-200 sm:inline-flex">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" aria-hidden="true" />
+            <span className="hidden items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 sm:inline-flex">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
               <span>Vetted Remote Tracks</span>
             </span>
           </div>
 
           {/* Center Branded Spotlight Stage */}
           <div className="my-auto flex flex-col items-center text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-200 sm:text-xs">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#1D4ED8] sm:text-xs">
               PlanetAI Hub × {company}
             </p>
-            <h4 className="mt-1 max-w-lg line-clamp-2 font-display text-sm font-bold leading-snug text-white sm:mt-1.5 sm:text-xl">
+            <h4 className="mt-1 max-w-lg line-clamp-2 font-display text-sm font-bold leading-snug text-slate-900 sm:mt-1.5 sm:text-xl">
               {roleTitle}
             </h4>
 
             <button
               type="button"
               onClick={() => setIsOverviewOpen(true)}
-              className="mt-2.5 inline-flex min-h-[36px] items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/95 px-3.5 py-1.5 text-xs font-bold text-slate-900 shadow-md transition-all hover:bg-white sm:mt-4 sm:min-h-[42px] sm:px-5 sm:py-2 sm:text-sm"
+              className="mt-2.5 inline-flex min-h-[36px] items-center justify-center gap-2 rounded-xl bg-[#1D4ED8] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#1E40AF] sm:mt-4 sm:min-h-[42px] sm:px-5 sm:py-2 sm:text-sm"
             >
-              <PlayCircle className="h-4 w-4 shrink-0 text-[#1D4ED8]" aria-hidden="true" />
+              <PlayCircle className="h-4 w-4 shrink-0 text-white" aria-hidden="true" />
               <span>Preview Partner Overview</span>
             </button>
           </div>
 
           {/* Sleek Video Player Progress-Style Footer Bar */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-[10px] font-medium text-slate-300 sm:text-[11px]">
+            <div className="flex items-center justify-between text-[10px] font-medium text-slate-600 sm:text-[11px]">
               <span className="truncate">
                 {company} Official Partner Showcase
               </span>
-              <span className="shrink-0 font-mono text-blue-200">16:9 HD Brief</span>
+              <span className="shrink-0 font-mono font-semibold text-[#1D4ED8]">16:9 HD Brief</span>
             </div>
-            <div className="h-1 w-full overflow-hidden rounded-full bg-white/15">
-              <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-blue-400 to-emerald-400" />
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+              <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-[#1D4ED8] to-emerald-500" />
             </div>
           </div>
         </div>
