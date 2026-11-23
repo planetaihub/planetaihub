@@ -8,8 +8,10 @@ import {
   Video,
 } from 'lucide-react';
 import type { SpotlightVideoConfig } from '../types';
+import { REFERRAL_URLS, resolveApplyUrl } from '../utils/referralLinks';
 import { parsePlayableVideoSource } from '../utils/videoUrl';
 import { BrandTile } from './BrandAvatar';
+import { PartnerSpotlightFrame } from './PartnerSpotlightFrame';
 
 interface FeaturedVideoSpotlightProps {
   spotlightConfig?: SpotlightVideoConfig | null;
@@ -27,57 +29,6 @@ const DEFAULT_COMPANY: SpotlightVideoConfig = {
   videoUrl: '',
 };
 
-interface WalkthroughFallback {
-  youtubeId: string;
-  label: string;
-  instructor: string;
-}
-
-function resolveRoleWalkthroughVideo(
-  company: string,
-  tagline: string
-): WalkthroughFallback {
-  const haystack = `${company} ${tagline}`.toLowerCase();
-
-  if (/\b(voice|audio|speech|babel|spout|elevenlabs)\b/.test(haystack)) {
-    return {
-      youtubeId: 'CZ7cLoZzVoY',
-      label: 'Voice AI Acoustic & Audition Walkthrough',
-      instructor: 'Lenny B',
-    };
-  }
-
-  if (/\b(mercor|behavioral|star)\b/.test(haystack)) {
-    return {
-      youtubeId: 'd2AnPgnCNZM',
-      label: 'Structured STAR & AI Vetting Walkthrough',
-      instructor: 'Aced (Exponent)',
-    };
-  }
-
-  if (/\b(prompt|anthropic|llm workflow|rag)\b/.test(haystack)) {
-    return {
-      youtubeId: '8ib4Qnh2HFE',
-      label: 'Systematic AI Prompting & Workflow Guide',
-      instructor: 'DeepLearning.AI',
-    };
-  }
-
-  if (/\b(outlier|rlhf|annotation|rubric|dataannotation|scale)\b/.test(haystack) && !haystack.includes('micro1')) {
-    return {
-      youtubeId: 'T_X4XFwKX8k',
-      label: 'RLHF Preference Ranking & Rubric Walkthrough',
-      instructor: 'IBM Technology',
-    };
-  }
-
-  return {
-    youtubeId: 'jPKTo1iGQiE',
-    label: 'Technical System & AI Vetting Walkthrough',
-    instructor: 'NeetCode',
-  };
-}
-
 export const FeaturedVideoSpotlight: React.FC<FeaturedVideoSpotlightProps> = ({
   spotlightConfig,
   onViewRoles,
@@ -93,17 +44,19 @@ export const FeaturedVideoSpotlight: React.FC<FeaturedVideoSpotlightProps> = ({
     [spotlightConfig?.videoUrl]
   );
 
-  const fallbackVideo = useMemo(
-    () => resolveRoleWalkthroughVideo(activeCompany.company, activeCompany.tagline),
-    [activeCompany.company, activeCompany.tagline]
-  );
-
   const hasCustomVideo = Boolean(customPlayable);
 
+  const partnerApplyHref = activeCompany.company.toLowerCase().includes('micro1')
+    ? REFERRAL_URLS.micro1
+    : resolveApplyUrl(
+        activeCompany.company,
+        `https://${activeCompany.domain.replace(/^https?:\/\//, '')}`
+      );
+
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md md:p-8">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-md md:p-8">
       <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
-        {/* Left Side: Clean 16:9 Playable Company Video or Smart Role-Specific Walkthrough Fallback */}
+        {/* Left Side: Custom Playable Video OR PlanetAI Hub Official Partner Spotlight Card */}
         <div className="lg:col-span-7 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#1D4ED8]">
@@ -118,41 +71,49 @@ export const FeaturedVideoSpotlight: React.FC<FeaturedVideoSpotlightProps> = ({
             <span className="text-xs font-medium text-slate-500">
               {hasCustomVideo
                 ? `${activeCompany.company} Spotlight Video`
-                : `${fallbackVideo.label} · ${fallbackVideo.instructor}`}
+                : `PlanetAI Hub × ${activeCompany.company}`}
             </span>
           </div>
 
-          <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-sm">
-            {customPlayable ? (
-              customPlayable.kind === 'html5' ? (
-                <video
-                  key={customPlayable.src}
-                  src={customPlayable.src}
-                  controls
-                  playsInline
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <iframe
-                  key={customPlayable.embedUrl}
-                  src={customPlayable.embedUrl}
-                  title={`${activeCompany.company} Commercial Video Spotlight`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="h-full w-full border-0"
-                />
-              )
-            ) : (
-              <iframe
-                key={fallbackVideo.youtubeId}
-                src={`https://www.youtube-nocookie.com/embed/${fallbackVideo.youtubeId}?rel=0`}
-                title={`${activeCompany.company} — ${fallbackVideo.label}`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="h-full w-full border-0"
-              />
-            )}
-          </div>
+          {customPlayable ? (
+            <>
+              <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-sm">
+                {customPlayable.kind === 'html5' ? (
+                  <video
+                    key={customPlayable.src}
+                    src={customPlayable.src}
+                    controls
+                    playsInline
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <iframe
+                    key={customPlayable.embedUrl}
+                    src={customPlayable.embedUrl}
+                    title={`${activeCompany.company} Commercial Video Spotlight`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="h-full w-full border-0"
+                  />
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5 text-[11px] text-slate-500">
+                <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
+                  <span>100% Transparent Pay Standard</span>
+                </span>
+                <span>Direct Employer ATS Verification</span>
+              </div>
+            </>
+          ) : (
+            <PartnerSpotlightFrame
+              company={activeCompany.company}
+              roleTitle={activeCompany.tagline}
+              payBand={activeCompany.payRange}
+              applyUrl={partnerApplyHref}
+            />
+          )}
         </div>
 
         {/* Right Side: Company Info, Pay Band & Employer Video Submission CTA */}
@@ -165,8 +126,8 @@ export const FeaturedVideoSpotlight: React.FC<FeaturedVideoSpotlightProps> = ({
                   <h3 className="font-display text-xl font-bold tracking-tight text-slate-900">
                     {activeCompany.company}
                   </h3>
-                  <span className="text-xs font-semibold text-[#1D4ED8]">
-                    · Verified Partner
+                  <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                    VERIFIED PARTNER
                   </span>
                 </div>
                 <p className="mt-0.5 text-xs font-medium text-slate-500">
