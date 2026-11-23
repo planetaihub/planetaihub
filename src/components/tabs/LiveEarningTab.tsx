@@ -31,6 +31,20 @@ const ProductLogoBadge: React.FC<{ item: EarningOpportunity; size?: 'header' | '
 }) => {
   const [hasError, setHasError] = useState(false);
   const initials = item.name.slice(0, 2).toUpperCase();
+  const isMicro1 = item.id === 'micro1' || item.name.trim().toLowerCase().includes('micro1');
+
+  if (isMicro1) {
+    const micro1Class =
+      size === 'inline'
+        ? 'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-black font-display text-lg font-bold tracking-tight text-white shadow-sm'
+        : 'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/25 bg-black font-display text-lg font-bold tracking-tight text-white shadow-lg';
+
+    return (
+      <div className={micro1Class} aria-label={`${item.name} logo`}>
+        <span>m.</span>
+      </div>
+    );
+  }
 
   const containerClass =
     size === 'inline'
@@ -129,11 +143,11 @@ export const LiveEarningTab: React.FC = () => {
         </p>
       </div>
 
-      {/* Category Filter Pills */}
+      {/* Category Filter Grid */}
       <div
         role="tablist"
         aria-label="Filter live earning opportunities by category"
-        className="flex w-full max-w-full items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1.5"
+        className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center"
       >
         {EARNING_CATEGORIES.map((category) => {
           const isSelected = selectedCategory === category;
@@ -143,20 +157,13 @@ export const LiveEarningTab: React.FC = () => {
               type="button"
               role="tab"
               aria-selected={isSelected}
-              onClick={(e) => {
-                setSelectedCategory(category);
-                if (window.innerWidth <= 768) {
-                  e.currentTarget.scrollIntoView({
-                    behavior: 'smooth',
-                    inline: 'center',
-                    block: 'nearest',
-                  });
-                }
-              }}
-              className={`snap-center min-h-[38px] rounded-full border px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+              onClick={() => setSelectedCategory(category)}
+              className={`flex min-h-[42px] items-center justify-center rounded-xl border px-3.5 py-2 text-center text-xs font-semibold leading-snug transition-all ${
+                category === 'All' ? 'col-span-2 sm:col-span-1' : ''
+              } ${
                 isSelected
                   ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-sm'
-                  : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900'
+                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
               {category}
