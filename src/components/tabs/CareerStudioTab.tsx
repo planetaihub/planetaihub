@@ -122,11 +122,11 @@ export const CareerStudioTab: React.FC<CareerStudioTabProps> = ({
           )}
         </div>
 
-        {/* Clean Single Pill Switcher (Zero Stacked/Nested Tab Bars) */}
+        {/* Clean Single Tool Switcher Grid (Zero horizontal clipping) */}
         <div
           role="tablist"
           aria-label="Career Studio tools"
-          className="flex w-full max-w-full items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1.5"
+          className="grid w-full max-w-full grid-cols-2 gap-2.5 sm:grid-cols-3 lg:flex lg:flex-wrap lg:items-center"
         >
           {CAREER_TOOLS.map(({ id, label, Icon }) => {
             const isSelected = activeTool === id;
@@ -136,17 +136,10 @@ export const CareerStudioTab: React.FC<CareerStudioTabProps> = ({
                 type="button"
                 role="tab"
                 aria-selected={isSelected}
-                onClick={(e) => {
-                  setActiveTool(id);
-                  if (window.innerWidth <= 768) {
-                    e.currentTarget.scrollIntoView({
-                      behavior: 'smooth',
-                      inline: 'center',
-                      block: 'nearest',
-                    });
-                  }
-                }}
-                className={`inline-flex min-h-[40px] shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition-colors whitespace-nowrap ${
+                onClick={() => setActiveTool(id)}
+                className={`flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-center text-xs font-semibold leading-snug whitespace-normal transition-colors lg:w-auto lg:px-3.5 ${
+                  id === 'role-prep' ? 'col-span-2 sm:col-span-1' : ''
+                } ${
                   isSelected
                     ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-sm'
                     : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white hover:text-slate-900'
