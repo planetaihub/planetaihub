@@ -1,5 +1,5 @@
-const STATIC_CACHE = 'planetai-static-v5';
-const DATA_CACHE = 'planetai-data-v5';
+const STATIC_CACHE = 'planetai-static-v6';
+const DATA_CACHE = 'planetai-data-v6';
 
 const APP_SHELL_ASSETS = [
   '/',
