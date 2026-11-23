@@ -332,7 +332,7 @@ export const SecurityVaultTab: React.FC = () => {
       </div>
 
       {/* Sub-Navigation Pills for 4 Cryptographic Utilities */}
-      <div className="flex items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar pb-2">
+      <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-2">
         {[
           { id: 'password', label: 'Password & Passphrase Studio', icon: Key },
           { id: 'entropy', label: 'Entropy & Crack-Time Lab', icon: Zap },
