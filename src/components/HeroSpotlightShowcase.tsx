@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ArrowRight,
   CheckCircle2,
   ExternalLink,
   FileText,
   MessageSquare,
-  Play,
+  ShieldCheck,
   Sparkles,
   Video,
 } from 'lucide-react';
@@ -14,8 +14,10 @@ import {
   HERO_COMPANY_SPOTLIGHTS,
   type CareerPrepPayload,
   type HeroCompanySpotlight,
+  resolveSpotlightApplyUrl,
 } from '../utils/careerPrepTemplates';
-import { BrandTile } from './BrandAvatar';
+import { parsePlayableVideoSource } from '../utils/videoUrl';
+import { BrandAvatar } from './BrandAvatar';
 
 interface HeroSpotlightShowcaseProps {
   customSpotlight?: SpotlightVideoConfig | null;
@@ -23,278 +25,331 @@ interface HeroSpotlightShowcaseProps {
   onOpenFeatureVideoModal: () => void;
 }
 
-function extractYouTubeId(url?: string, fallbackId = 'jPKTo1iGQiE'): string {
-  const cleanUrl = (url || '').trim();
-  if (cleanUrl) {
-    const watchMatch = cleanUrl.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-    if (watchMatch?.[1]) {
-      return watchMatch[1];
-    }
-    const shortMatch = cleanUrl.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-    if (shortMatch?.[1]) {
-      return shortMatch[1];
-    }
-    const embedMatch = cleanUrl.match(/youtube\.com\/(?:embed|v)\/([a-zA-Z0-9_-]{11})/);
-    if (embedMatch?.[1]) {
-      return embedMatch[1];
-    }
-  }
-  return fallbackId;
-}
-
 export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
   customSpotlight,
   onLoadPrepKit,
   onOpenFeatureVideoModal,
 }) => {
-  const [selectedId, setSelectedId] = useState<'micro1' | 'mercor' | 'outlier'>('micro1');
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedId, setSelectedId] = useState<'micro1' | 'mercor' | 'outlier' | 'custom'>(() =>
+    customSpotlight?.videoUrl ? 'custom' : 'micro1'
+  );
 
-  useEffect(() => {
-    setIsPlaying(false);
-  }, [selectedId, customSpotlight?.videoUrl]);
+  const customPlayable = useMemo(
+    () =>
+      customSpotlight?.videoUrl
+        ? parsePlayableVideoSource(customSpotlight.videoUrl)
+        : null,
+    [customSpotlight?.videoUrl]
+  );
 
-  const activePreset: HeroCompanySpotlight =
-    HERO_COMPANY_SPOTLIGHTS.find((item) => item.id === selectedId) ||
-    HERO_COMPANY_SPOTLIGHTS[0];
+  const selectedPreset: HeroCompanySpotlight = useMemo(() => {
+    const found = HERO_COMPANY_SPOTLIGHTS.find((c) => c.id === selectedId);
+    return found ?? HERO_COMPANY_SPOTLIGHTS[0];
+  }, [selectedId]);
 
-  const isCustomActive = Boolean(customSpotlight && customSpotlight.company?.trim());
+  const isCustomActive = selectedId === 'custom' && Boolean(customSpotlight && customPlayable);
 
-  const displayCompany = isCustomActive
-    ? customSpotlight!.company
-    : activePreset.company;
-  const displayDomain = isCustomActive
-    ? customSpotlight!.domain || 'planetaihub.com'
-    : activePreset.domain;
-  const displayRoleTitle = isCustomActive
-    ? customSpotlight!.tagline || 'Featured Remote AI Opportunity'
-    : activePreset.roleTitle;
-  const displayPayBand = isCustomActive
-    ? customSpotlight!.payRange || '$45 – $90 / hr USD'
-    : activePreset.payBand;
-  const displayScreeningFocus = isCustomActive
-    ? customSpotlight!.summary || activePreset.screeningFocus
-    : activePreset.screeningFocus;
-  const displayRequirements = activePreset.requirements;
-  const displayApplyUrl = activePreset.applyUrl;
+  const displayCompany = isCustomActive && customSpotlight
+    ? customSpotlight.company
+    : selectedPreset.company;
+  const displayDomain = isCustomActive && customSpotlight
+    ? customSpotlight.domain
+    : selectedPreset.domain;
+  const displayRole = isCustomActive && customSpotlight
+    ? customSpotlight.tagline
+    : selectedPreset.roleTitle;
+  const displayPayBand = isCustomActive && customSpotlight
+    ? customSpotlight.payRange
+    : selectedPreset.payBand;
+  const displayRequirements = isCustomActive && customSpotlight
+    ? [
+        customSpotlight.summary,
+        `Verified transparent USD compensation (${customSpotlight.payRange})`,
+        'Direct employer ATS link with async remote screening',
+      ]
+    : selectedPreset.requirements;
 
-  const activeVideoId = isCustomActive
-    ? extractYouTubeId(customSpotlight?.videoUrl, activePreset.youtubeId)
-    : activePreset.youtubeId;
-  const embedUrl = `https://www.youtube.com/embed/${activeVideoId}?rel=0`;
-  const thumbnailUrl = `https://img.youtube.com/vi/${activeVideoId}/hqdefault.jpg`;
+  const directApplyHref = isCustomActive && customSpotlight
+    ? `https://${customSpotlight.domain.replace(/^https?:\/\//, '')}`
+    : resolveSpotlightApplyUrl(selectedPreset);
 
-  const buildPayload = (
-    targetTool: 'resume' | 'interview' | 'role-prep'
-  ): CareerPrepPayload => ({
-    nonce: Date.now(),
-    targetTool,
-    sourceLabel: `${displayRoleTitle} @ ${displayCompany}`,
-    roleBundleId: activePreset.roleBundleId,
-    companyDomain: displayDomain,
-    applyUrl: displayApplyUrl,
-    payBand: displayPayBand,
-    customVideoUrl: isCustomActive ? customSpotlight?.videoUrl : undefined,
-    resume: {
-      targetTitle: displayRoleTitle,
-      targetCompany: displayCompany,
-      summary: activePreset.resumeTemplate.summary,
-      skills: activePreset.resumeTemplate.skills,
-      experienceRole: activePreset.resumeTemplate.role,
-      experienceBullets: activePreset.resumeTemplate.bullets,
-    },
-    interview: {
-      track: activePreset.interviewTemplate.track,
-      questionId: activePreset.interviewTemplate.questionId,
-      situation: activePreset.interviewTemplate.situation,
-      task: activePreset.interviewTemplate.task,
-      action: activePreset.interviewTemplate.action,
-      result: activePreset.interviewTemplate.result,
-    },
-  });
+  const handleLoadResume = () => {
+    const template = selectedPreset.resumeTemplate;
+    onLoadPrepKit({
+      nonce: Date.now(),
+      targetTool: 'resume',
+      sourceLabel: `${displayCompany} · ${displayRole}`,
+      roleBundleId: selectedPreset.roleBundleId,
+      companyDomain: displayDomain,
+      applyUrl: directApplyHref,
+      payBand: displayPayBand,
+      customVideoUrl:
+        isCustomActive && customSpotlight ? customSpotlight.videoUrl : undefined,
+      resume: {
+        targetTitle: isCustomActive ? displayRole : template.targetTitle,
+        targetCompany: displayCompany,
+        summary: isCustomActive && customSpotlight
+          ? customSpotlight.summary
+          : template.summary,
+        skills: template.skills,
+        experienceRole: template.role,
+        experienceBullets: template.bullets,
+      },
+      interview: selectedPreset.interviewTemplate,
+    });
+  };
+
+  const handleLoadInterview = () => {
+    onLoadPrepKit({
+      nonce: Date.now(),
+      targetTool: 'interview',
+      sourceLabel: `${displayCompany} · Mock Interview Script`,
+      roleBundleId: selectedPreset.roleBundleId,
+      companyDomain: displayDomain,
+      applyUrl: directApplyHref,
+      payBand: displayPayBand,
+      customVideoUrl:
+        isCustomActive && customSpotlight ? customSpotlight.videoUrl : undefined,
+      resume: {
+        targetTitle: isCustomActive ? displayRole : selectedPreset.resumeTemplate.targetTitle,
+        targetCompany: displayCompany,
+        summary: isCustomActive && customSpotlight
+          ? customSpotlight.summary
+          : selectedPreset.resumeTemplate.summary,
+        skills: selectedPreset.resumeTemplate.skills,
+        experienceRole: selectedPreset.resumeTemplate.role,
+        experienceBullets: selectedPreset.resumeTemplate.bullets,
+      },
+      interview: selectedPreset.interviewTemplate,
+    });
+  };
 
   return (
-    <section className="w-full max-w-full overflow-x-hidden border-b border-slate-200 bg-gradient-to-b from-slate-50/90 to-white">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-        <div className="max-w-3xl">
-          <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-blue-200 bg-blue-50/80 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#1D4ED8]">
-            <Sparkles className="h-3.5 w-3.5 shrink-0" />
-            <span>1 Click, You Have It All · Remote AI Careers &amp; Prep Kits</span>
+    <section className="no-print bg-gradient-to-b from-slate-50 via-white to-white text-slate-900">
+      <div className="mx-auto max-w-7xl px-4 pt-7 pb-9 sm:px-6 sm:pt-10 sm:pb-12">
+        {/* Compact Editorial Intro Strip Engineered to Keep Full Split Above the Fold */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#1D4ED8]">
+              1 Click, You Have It All · Remote AI Careers &amp; Prep Kits
+            </p>
+            <h1 className="mt-2 font-display text-3xl font-bold leading-[1.08] tracking-tight text-slate-900 sm:text-4xl lg:text-[2.75rem] text-balance">
+              Transparent-pay remote AI roles, prepared in one click
+            </h1>
           </div>
-          <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-[42px] lg:leading-[1.15]">
-            Transparent-pay remote AI roles, prepared in one click
-          </h1>
-          <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
+          <p className="max-w-md text-xs leading-relaxed text-slate-600 sm:text-sm">
             Watch vetted company walkthroughs, launch your tailored resume &amp; mock interview script, and apply direct via verified USD ATS links.
           </p>
         </div>
 
-        <div className="mt-7 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
-          <div className="min-w-0 lg:col-span-7">
-            <div className="flex flex-wrap items-center justify-between gap-2 pb-3">
-              <div
-                role="tablist"
-                aria-label="Featured AI companies"
-                className="flex max-w-full items-center gap-2 overflow-x-auto scroll-touch pr-4 py-0.5"
-              >
-                {HERO_COMPANY_SPOTLIGHTS.map((item) => {
-                  const active = !isCustomActive && item.id === selectedId;
-                  return (
+        {/* 2-Column Side-by-Side Split Showcase (Immediate Above-the-Fold View) */}
+        <div className="mt-6 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12 lg:gap-7">
+          {/* LEFT COLUMN: Featured Company Video Theatre */}
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-md lg:col-span-7 sm:p-6">
+            <div className="space-y-3.5">
+              {/* Company Switcher Pills + Employer CTA */}
+              <div className="flex flex-wrap items-center justify-between gap-2.5">
+                <div
+                  role="tablist"
+                  aria-label="Featured company spotlights"
+                  className="flex flex-wrap items-center gap-2"
+                >
+                  {HERO_COMPANY_SPOTLIGHTS.map((item) => {
+                    const isSelected = selectedId === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={isSelected}
+                        onClick={() => setSelectedId(item.id)}
+                        className={`inline-flex min-h-[36px] items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+                          isSelected
+                            ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-xs'
+                            : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>{item.company}</span>
+                      </button>
+                    );
+                  })}
+
+                  {customSpotlight && customPlayable && (
                     <button
-                      key={item.id}
                       type="button"
                       role="tab"
-                      aria-selected={active}
-                      onClick={() => setSelectedId(item.id)}
-                      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-all shrink-0 ${
-                        active
-                          ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-sm'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                      aria-selected={selectedId === 'custom'}
+                      onClick={() => setSelectedId('custom')}
+                      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+                        selectedId === 'custom'
+                          ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-xs'
+                          : 'border-blue-200 bg-blue-50 text-[#1D4ED8] hover:bg-blue-100'
                       }`}
                     >
-                      <span>{item.company}</span>
+                      <Sparkles className="h-3 w-3" aria-hidden="true" />
+                      <span>{customSpotlight.company}</span>
                     </button>
-                  );
-                })}
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onOpenFeatureVideoModal}
+                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-[#1D4ED8]/40 hover:bg-blue-50/50 hover:text-[#1D4ED8] whitespace-nowrap"
+                >
+                  <Video className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Feature Your Company Video</span>
+                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={onOpenFeatureVideoModal}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs transition-colors hover:border-slate-300 hover:bg-slate-50"
-              >
-                <Video className="h-3.5 w-3.5 text-[#1D4ED8] shrink-0" />
-                <span>Feature Your Company Video</span>
-              </button>
-            </div>
-
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 shadow-sm">
-              <div className="relative aspect-video w-full bg-slate-900">
-                {isPlaying ? (
-                  <iframe
-                    src={`${embedUrl}&autoplay=1`}
-                    title={`${displayCompany} — ${activePreset.videoLabel}`}
-                    className="h-full w-full border-0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setIsPlaying(true)}
-                    aria-label={`Play ${displayCompany} walkthrough video`}
-                    className="group relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-blue-950 p-6 text-center"
-                  >
-                    <img
-                      src={thumbnailUrl}
-                      alt={`${displayCompany} walkthrough preview`}
-                      className="absolute inset-0 h-full w-full object-cover opacity-35 transition-transform duration-300 group-hover:scale-105"
+              {/* 16:9 Playable Privacy-Enhanced Video Frame */}
+              <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-sm">
+                {isCustomActive && customPlayable ? (
+                  customPlayable.kind === 'html5' ? (
+                    <video
+                      key={customPlayable.src}
+                      src={customPlayable.src}
+                      controls
+                      playsInline
+                      className="h-full w-full object-cover"
                     />
-                    <div className="relative z-10 flex flex-col items-center">
-                      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-lg transition-transform group-hover:scale-110">
-                        <Play className="ml-0.5 h-6 w-6 fill-current" />
-                      </span>
-                      <span className="mt-3 rounded-full bg-black/70 px-3.5 py-1 text-xs font-semibold text-white backdrop-blur-xs">
-                        {isCustomActive
-                          ? `${displayCompany} — Featured Walkthrough`
-                          : activePreset.videoLabel}
-                      </span>
-                    </div>
-                  </button>
+                  ) : (
+                    <iframe
+                      key={customPlayable.embedUrl}
+                      src={customPlayable.embedUrl}
+                      title={`${displayCompany} Company Video Spotlight`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="h-full w-full border-0"
+                    />
+                  )
+                ) : (
+                  <iframe
+                    key={selectedPreset.youtubeId}
+                    src={`https://www.youtube-nocookie.com/embed/${selectedPreset.youtubeId}?rel=0`}
+                    title={`${selectedPreset.company} — ${selectedPreset.videoLabel}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="h-full w-full border-0"
+                  />
                 )}
               </div>
+            </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800 bg-slate-950 px-4 py-3 text-xs text-slate-300">
-                <span className="font-medium text-white">
-                  {displayCompany} · {displayRoleTitle}
+            {/* Clean Unboxed Metadata Footer */}
+            <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-[#1D4ED8]">
+                  Role Walkthrough
                 </span>
-                <span className="text-slate-400">No signup required to watch</span>
+                <span aria-hidden="true" className="text-slate-300">
+                  ·
+                </span>
+                <span className="font-medium text-slate-800">
+                  {isCustomActive
+                    ? `${displayCompany} Commercial Video Spotlight`
+                    : selectedPreset.videoLabel}
+                </span>
               </div>
+              <span className="text-[11px] text-slate-500">
+                100% Browser-Local · Zero Sign-Up
+              </span>
             </div>
           </div>
 
-          <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:col-span-5">
-            <div className="flex items-start justify-between gap-3">
+          {/* RIGHT COLUMN: Instant Tailored Candidate Prep Card */}
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-xl lg:col-span-5 sm:p-6">
+            <div>
               <div className="flex items-center gap-3 min-w-0">
-                <BrandTile name={displayCompany} size="md" />
+                <BrandAvatar
+                  name={displayCompany}
+                  domain={displayDomain}
+                  size="md"
+                />
                 <div className="min-w-0">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#1D4ED8]">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-[#1D4ED8]">
                     Tailored Candidate Prep Kit
                   </p>
-                  <h2 className="truncate text-lg font-extrabold text-slate-900">
+                  <h2 className="truncate font-display text-xl font-bold text-slate-900">
                     {displayCompany}
                   </h2>
-                  <p className="text-xs font-medium text-slate-600">
-                    {displayRoleTitle}
+                  <p className="truncate text-xs font-medium text-slate-500">
+                    {displayRole}
                   </p>
                 </div>
               </div>
-            </div>
 
-            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3.5">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                  Verified USD Pay
-                </span>
-                <span className="text-sm font-extrabold text-slate-900">
-                  {displayPayBand}
-                </span>
+              {/* Verified USD Pay Band Box */}
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
+                    <ShieldCheck className="h-4 w-4 text-emerald-700" aria-hidden="true" />
+                    <span>Verified USD Pay</span>
+                  </span>
+                  <span className="font-mono text-base font-bold text-emerald-700 tabular-nums">
+                    {displayPayBand}
+                  </span>
+                </div>
+                {!isCustomActive && (
+                  <p className="mt-1 text-[11px] text-slate-600">
+                    <strong className="text-slate-800">Screening:</strong>{' '}
+                    {selectedPreset.screeningFocus}
+                  </p>
+                )}
               </div>
-              <p className="mt-1.5 text-xs leading-relaxed text-slate-700">
-                <span className="font-semibold text-slate-900">Screening:</span>{' '}
-                {displayScreeningFocus}
-              </p>
+
+              {/* Key Role Requirements */}
+              <div className="mt-4">
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  Key Role Requirements
+                </h3>
+                <ul className="mt-2.5 space-y-2">
+                  {displayRequirements.map((req, idx) => (
+                    <li
+                      key={idx}
+                      className="flex items-start gap-2.5 text-xs leading-relaxed text-slate-700"
+                    >
+                      <CheckCircle2
+                        className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#1D4ED8]"
+                        aria-hidden="true"
+                      />
+                      <span>{req}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
-            <div className="mt-4">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Key Role Requirements
-              </p>
-              <ul className="mt-2 space-y-2">
-                {displayRequirements.map((req, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-start gap-2 text-xs leading-relaxed text-slate-700"
-                  >
-                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 text-[#1D4ED8] shrink-0" />
-                    <span>{req}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="mt-5 flex flex-col gap-2.5">
+            {/* 3 Tailored 1-Click Preparation Actions */}
+            <div className="mt-5 space-y-2 border-t border-slate-100 pt-4">
               <button
                 type="button"
-                onClick={() => onLoadPrepKit(buildPayload('resume'))}
-                className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#1D4ED8] px-4 py-2.5 text-center text-xs font-bold text-white shadow-xs transition-colors hover:bg-blue-700"
+                onClick={handleLoadResume}
+                className="inline-flex min-h-[42px] w-full items-center justify-center gap-2 rounded-full bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF] text-center"
               >
-                <FileText className="h-4 w-4 shrink-0" />
+                <FileText className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>Load Tailored Resume Template</span>
-                <ArrowRight className="h-3.5 w-3.5 shrink-0" />
+                <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               </button>
 
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => onLoadPrepKit(buildPayload('interview'))}
-                  className="inline-flex min-h-[42px] w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center text-xs font-semibold text-slate-800 transition-colors hover:border-slate-300 hover:bg-slate-100"
-                >
-                  <MessageSquare className="h-3.5 w-3.5 text-[#1D4ED8] shrink-0" />
-                  <span>Practice Mock Script</span>
-                </button>
+              <button
+                type="button"
+                onClick={handleLoadInterview}
+                className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-full border border-blue-200 bg-blue-50/70 px-4 py-2 text-xs font-semibold text-[#1D4ED8] transition-colors hover:border-[#1D4ED8] hover:bg-blue-100/70 text-center"
+              >
+                <MessageSquare className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>Open Mock Interview Script</span>
+              </button>
 
-                <a
-                  href={displayApplyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-[42px] w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-center text-xs font-semibold text-slate-800 transition-colors hover:border-slate-300 hover:bg-slate-50"
-                >
-                  <span>Apply Direct</span>
-                  <ExternalLink className="h-3.5 w-3.5 text-slate-500 shrink-0" />
-                </a>
-              </div>
+              <a
+                href={directApplyHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-800 transition-colors hover:border-slate-300 hover:bg-slate-50 text-center"
+              >
+                <span>Apply Direct (Verified ATS)</span>
+                <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              </a>
             </div>
           </div>
         </div>
