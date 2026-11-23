@@ -59,7 +59,7 @@ export const FocusedPrepWorkspace: React.FC<FocusedPrepWorkspaceProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 max-w-[100vw] overflow-x-hidden">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#F8FAFC] text-slate-900">
       {/* Clean Sticky Single Top Bar — Zero Nested Browser Tab Bars */}
       <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
@@ -308,43 +308,41 @@ export const FocusedPrepWorkspace: React.FC<FocusedPrepWorkspaceProps> = ({
               </p>
             </div>
 
-            {/* Simple 2-Pill Toggle with Independent Touch-Scrolling & Padding */}
-            <div className="w-full max-w-full overflow-x-auto scroll-touch no-scrollbar py-0.5 sm:w-auto">
-              <div
-                role="tablist"
-                aria-label="Company kit preparation tools"
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white p-1 shadow-2xs shrink-0 pr-4 sm:pr-1"
+            {/* Clean 2-Column Toggle (Zero horizontal scrolling or clipping) */}
+            <div
+              role="tablist"
+              aria-label="Company kit preparation tools"
+              className="grid w-full max-w-full grid-cols-2 gap-2.5 rounded-2xl border border-slate-200 bg-slate-100/90 p-2 shadow-2xs sm:inline-flex sm:w-auto"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeKitTool === 'resume'}
+                onClick={() => setActiveKitTool('resume')}
+                className={`flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-center text-xs font-semibold leading-snug whitespace-normal transition-all sm:w-auto sm:px-4 ${
+                  activeKitTool === 'resume'
+                    ? 'bg-[#1D4ED8] text-white shadow-sm'
+                    : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                }`}
               >
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeKitTool === 'resume'}
-                  onClick={() => setActiveKitTool('resume')}
-                  className={`inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap ${
-                    activeKitTool === 'resume'
-                      ? 'bg-[#1D4ED8] text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  <span>Tailored Resume &amp; Cover Letter</span>
-                </button>
+                <FileText className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>Tailored Resume &amp; Cover Letter</span>
+              </button>
 
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeKitTool === 'interview'}
-                  onClick={() => setActiveKitTool('interview')}
-                  className={`inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap ${
-                    activeKitTool === 'interview'
-                      ? 'bg-[#1D4ED8] text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <MessageSquare className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  <span>Mock Interview Script</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeKitTool === 'interview'}
+                onClick={() => setActiveKitTool('interview')}
+                className={`flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-center text-xs font-semibold leading-snug whitespace-normal transition-all sm:w-auto sm:px-4 ${
+                  activeKitTool === 'interview'
+                    ? 'bg-[#1D4ED8] text-white shadow-sm'
+                    : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <MessageSquare className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>Mock Interview Script</span>
+              </button>
             </div>
           </div>
 
