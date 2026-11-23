@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { AdBanner } from './components/AdBanner';
 import { CompanyMarquee } from './components/CompanyMarquee';
+import { DedicatedSuitePage } from './components/DedicatedSuitePage';
 import { EditorialBriefings } from './components/EditorialBriefings';
 import { FocusedPrepWorkspace } from './components/FocusedPrepWorkspace';
 import { Footer, type LegalModalType } from './components/Footer';
@@ -276,7 +277,8 @@ export default function App() {
 
       const routeInfo = normalizeRouteToTab(candidate);
       if (routeInfo.isBriefing) {
-        scrollToElement('editorial-briefings');
+        setActiveTab('jobs');
+        setTimeout(() => scrollToElement('editorial-briefings'), 80);
       } else if (routeInfo.tab !== activeTab) {
         setActiveTab(routeInfo.tab);
       }
@@ -353,7 +355,7 @@ export default function App() {
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/jobs');
     }
-    scrollToElement('workspace-showcase');
+    setTimeout(() => scrollToElement('workspace-showcase'), 80);
   };
 
   const handleOpenSavedJobs = () => {
@@ -362,34 +364,59 @@ export default function App() {
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/jobs');
     }
-    scrollToElement('workspace-showcase');
+    setTimeout(() => scrollToElement('workspace-showcase'), 80);
   };
 
   const handleSelectTab = (tab: TabId, shouldScroll = true) => {
     setActiveTab(tab);
     if (typeof window !== 'undefined') {
-      window.history.pushState(null, '', `/${tab}`);
+      const nextUrl = tab === 'jobs' ? '/jobs' : `/${tab}`;
+      window.history.pushState(null, '', nextUrl);
+      if (tab !== 'jobs') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
     }
     if (shouldScroll) {
-      scrollToElement('workspace-showcase');
+      setTimeout(() => scrollToElement('workspace-showcase'), 80);
+    }
+  };
+
+  const handleBackToHub = () => {
+    setActiveTab('jobs');
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', '/');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handleScrollToWorkspace = () => {
+    if (activeTab !== 'jobs') {
+      setActiveTab('jobs');
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', '/');
+      }
+      setTimeout(() => scrollToElement('workspace-showcase'), 80);
+      return;
+    }
     scrollToElement('workspace-showcase');
   };
 
   const handleScrollToBriefings = () => {
+    setActiveTab('jobs');
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/editorial-briefings');
     }
-    scrollToElement('editorial-briefings');
+    setTimeout(() => scrollToElement('editorial-briefings'), 80);
   };
 
   const handleLoadCareerPrep = (payload: CareerPrepPayload) => {
     setCareerPrepPayload(payload);
     setActiveTab('career-studio');
-    scrollToElement('workspace-showcase');
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', '/career-studio');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleOpenFocusedPrep = (payload: CareerPrepPayload) => {
@@ -409,12 +436,19 @@ export default function App() {
       setAcademySessionTrigger({ id: sessionId, nonce: Date.now() });
     }
     setActiveTab('video-academy');
-    scrollToElement('workspace-showcase');
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', '/video-academy');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleOpenBriefingById = (briefingId: string) => {
     setBriefingTrigger({ id: briefingId, nonce: Date.now() });
-    scrollToElement('editorial-briefings');
+    setActiveTab('jobs');
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', '/editorial-briefings');
+    }
+    setTimeout(() => scrollToElement('editorial-briefings'), 80);
   };
 
   const handleOpenCareerStudioTool = (tool: CareerToolId = 'role-prep') => {
@@ -428,26 +462,14 @@ export default function App() {
           }
     );
     setActiveTab('career-studio');
-    scrollToElement('workspace-showcase');
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', '/career-studio');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
-  const renderTabContent = () => {
+  const renderDedicatedSuiteContent = () => {
     switch (activeTab) {
-      case 'jobs':
-        return (
-          <JobsBoard
-            savedJobIds={savedJobIds}
-            postedJobs={postedJobs}
-            jobNotes={jobNotes}
-            spotlightConfig={spotlightConfig}
-            viewMode={jobViewMode}
-            onChangeViewMode={setJobViewMode}
-            onToggleSave={handleToggleSaveJob}
-            onUpdateJobNote={handleUpdateJobNote}
-            onOpenPostJob={handleOpenPostJob}
-            onOpenPrepKit={handleOpenJobPrepKit}
-          />
-        );
       case 'career-studio':
         return (
           <CareerStudioTab
@@ -480,6 +502,8 @@ export default function App() {
         return <VaAcademyTab />;
       case 'security-vault':
         return <SecurityVaultTab />;
+      default:
+        return null;
     }
   };
 
@@ -524,8 +548,7 @@ export default function App() {
     },
   ];
 
-  const activeTabMeta = TABS.find((t) => t.id === activeTab);
-
+  // Full-Page Company/Role 1-Click Focused Kit View
   if (focusedPrep) {
     return (
       <>
@@ -539,8 +562,41 @@ export default function App() {
     );
   }
 
+  // Dedicated 1-Click Breathing Pages for All Non-Job Suites
+  if (activeTab !== 'jobs') {
+    return (
+      <>
+        <OfflineIndicator />
+        <DedicatedSuitePage
+          activeTab={activeTab}
+          onBackToHub={handleBackToHub}
+          onSelectTab={(tab) => handleSelectTab(tab)}
+          onScrollToBriefings={handleScrollToBriefings}
+          onOpenPostJob={() => handleOpenPostJob('featured')}
+          legalModal={legalModal}
+          onChangeLegalModal={setLegalModal}
+        >
+          {renderDedicatedSuiteContent()}
+        </DedicatedSuitePage>
+
+        <PostJobModal
+          isOpen={isPostJobOpen}
+          initialTier={postJobInitialTier}
+          onClose={() => setIsPostJobOpen(false)}
+          onPublishJob={handlePublishJob}
+          onSubmitVideoSpotlight={handleSaveSpotlightVideo}
+        />
+
+        <InstallAppModal />
+
+        <ShareToast />
+      </>
+    );
+  }
+
+  // Primary Hub Homepage & Spacious Remote Job Board
   return (
-    <div className="min-h-screen bg-white text-slate-900 max-w-[100vw] overflow-x-hidden">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-white text-slate-900">
       <Navigation
         activeTab={activeTab}
         onSelectTab={(tab) => handleSelectTab(tab)}
@@ -553,7 +609,7 @@ export default function App() {
 
       <OfflineIndicator />
 
-      {/* 1. HOMEPAGE HERO: FEATURED COMPANY VIDEO THEATRE + INSTANT TAILORED CANDIDATE PREP CARD */}
+      {/* 1. HOMEPAGE HERO: FEATURED PARTNER SPOTLIGHT + INSTANT TAILORED CANDIDATE PREP CARD */}
       <HeroSpotlightShowcase
         customSpotlight={spotlightConfig}
         onLoadPrepKit={handleOpenFocusedPrep}
@@ -568,85 +624,88 @@ export default function App() {
         <CompanyMarquee variant="light" />
       </section>
 
-      {/* 2. FLOATING INTERACTIVE SaaS WORKSPACE WINDOW */}
-      <main className="bg-white">
+      {/* 2. DEDICATED SUITE LAUNCHER GRID + SPACIOUS FULL-WIDTH JOB BOARD */}
+      <main className="w-full max-w-full overflow-x-hidden bg-white">
         <section
           id="workspace-showcase"
-          aria-label="PlanetAI Hub Interactive Workspace"
-          className="scroll-mt-20 mx-auto max-w-7xl px-4 pt-8 pb-4 sm:px-6 sm:pt-10"
+          aria-label="PlanetAI Hub Suites and Job Board"
+          className="scroll-mt-20 mx-auto w-full max-w-7xl px-4 pt-6 pb-8 sm:px-6 sm:pt-10 space-y-8"
         >
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-            {/* SaaS Browser Window Chrome + Complete Workspace Tab Switcher (Zero Clipping) */}
-            <div className="no-print border-b border-slate-200 bg-slate-50 px-4 py-3 sm:px-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5" aria-hidden="true">
-                    <span className="h-3 w-3 rounded-full bg-rose-400" />
-                    <span className="h-3 w-3 rounded-full bg-amber-400" />
-                    <span className="h-3 w-3 rounded-full bg-emerald-400" />
-                  </div>
-                  <div className="ml-2 rounded-lg border border-slate-200 bg-white px-3 py-1 font-mono text-[11px] font-medium text-slate-600 shadow-2xs">
-                    planetaihub.com/{activeTab}
-                  </div>
-                </div>
-                <span className="text-xs font-medium text-slate-500">
-                  {activeTabMeta?.label} · Zero-Sign-Up Suite
-                </span>
+          {/* Clean 1-Click Dedicated Page Suite Switcher Grid (Zero Horizontal Scrolling) */}
+          <div className="no-print rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200/80">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#1D4ED8]">
+                  1-Click Dedicated Workspace Pages
+                </p>
+                <p className="text-xs text-slate-600">
+                  Launch any specialized career, VA training, crypto vault, finance, or dev utility in its own full-width page.
+                </p>
               </div>
-
-              <div
-                role="tablist"
-                aria-label="Workspace modules"
-                className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-slate-200/80 pt-3"
-              >
-                {TABS.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      role="tab"
-                      aria-selected={isActive}
-                      type="button"
-                      onClick={() => handleSelectTab(tab.id, false)}
-                      className={`inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8] ${
-                        isActive
-                          ? 'bg-[#1D4ED8] text-white font-semibold shadow-sm'
-                          : 'bg-white border border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900'
-                      }`}
-                    >
-                      <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                      <span>{tab.desktopLabel}</span>
-                    </button>
-                  );
-                })}
-
-                <button
-                  type="button"
-                  onClick={handleScrollToBriefings}
-                  className="inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8]"
-                >
-                  <BookOpen className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  <span>Briefings</span>
-                </button>
-              </div>
+              <span className="font-mono text-[11px] font-medium text-slate-500">
+                Zero Sign-Up · Browser-Local
+              </span>
             </div>
 
-            {/* Inner Workspace Canvas (Clean 1Password-Style Light SaaS Interface) */}
-            <div className="bg-white px-4 py-6 text-slate-900 sm:px-6 sm:py-8 lg:px-8">
-              <div className="no-print">
-                <PWAInstallBanner />
-              </div>
+            <div
+              role="navigation"
+              aria-label="Dedicated workspace suites"
+              className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+            >
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={() => handleSelectTab(tab.id, tab.id === 'jobs')}
+                    className={`inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition-all text-center ${
+                      isActive
+                        ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-sm'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-[#1D4ED8]/40 hover:bg-blue-50/40 hover:text-[#1D4ED8]'
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    <span className="truncate">{tab.desktopLabel}</span>
+                  </button>
+                );
+              })}
 
-              {renderTabContent()}
+              <button
+                type="button"
+                onClick={handleScrollToBriefings}
+                className="inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-all hover:border-[#1D4ED8]/40 hover:bg-blue-50/40 hover:text-[#1D4ED8] text-center"
+              >
+                <BookOpen className="h-3.5 w-3.5 shrink-0 text-[#1D4ED8]" aria-hidden="true" />
+                <span className="truncate">18 Briefings</span>
+              </button>
             </div>
           </div>
+
+          <div className="no-print">
+            <PWAInstallBanner />
+          </div>
+
+          <JobsBoard
+            savedJobIds={savedJobIds}
+            postedJobs={postedJobs}
+            jobNotes={jobNotes}
+            spotlightConfig={spotlightConfig}
+            viewMode={jobViewMode}
+            onChangeViewMode={setJobViewMode}
+            onToggleSave={handleToggleSaveJob}
+            onUpdateJobNote={handleUpdateJobNote}
+            onOpenPostJob={handleOpenPostJob}
+            onOpenPrepKit={handleOpenJobPrepKit}
+          />
         </section>
 
         {/* 3. 4-COLUMN PLATFORM CAPABILITY GRID (Clean White Canvas) */}
         <section
           aria-labelledby="capabilities-heading"
-          className="no-print border-b border-slate-200 bg-white py-16 sm:py-20"
+          className="no-print border-y border-slate-200 bg-white py-16 sm:py-20"
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <div className="max-w-2xl">
@@ -755,6 +814,55 @@ export default function App() {
             />
             <div className="mt-10">
               <AdBanner variant="light" />
+            </div>
+          </div>
+        </section>
+
+        {/* 6. COMPACT PLATFORM EDITORIAL OVERVIEW (SEO & AdSense Publisher Context) */}
+        <section
+          aria-labelledby="platform-editorial-overview-heading"
+          className="no-print border-t border-slate-200 bg-white py-10 sm:py-12"
+        >
+          <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6">
+            <div className="max-w-3xl space-y-2">
+              <h2
+                id="platform-editorial-overview-heading"
+                className="font-display text-xl font-bold tracking-tight text-slate-900"
+              >
+                PlanetAI Hub — Remote AI Jobs &amp; Utility Platform
+              </h2>
+              <p className="text-sm leading-relaxed text-slate-600">
+                PlanetAI Hub is the premier editorial directory for remote artificial intelligence, RLHF, prompt engineering, voice AI, and software engineering roles with transparent USD pay. We also feature 18 long-form editorial briefings and professional offline-ready career, finance, and productivity utilities.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-5 space-y-1.5">
+                <h3 className="font-display text-sm font-bold text-[#1D4ED8]">
+                  Curated Remote AI &amp; Tech Careers
+                </h3>
+                <p className="text-sm leading-relaxed text-slate-600">
+                  Explore daily-updated remote contracts, full-time positions, and freelance opportunities with direct employer ATS links. Every listing adheres to our transparent pay standard.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-5 space-y-1.5">
+                <h3 className="font-display text-sm font-bold text-[#1D4ED8]">
+                  Editorial Briefings &amp; Intelligence
+                </h3>
+                <p className="text-sm leading-relaxed text-slate-600">
+                  Read our 18 in-depth editorial briefings covering AI model evaluations, RLHF career paths, voice synthesis benchmarks, and asynchronous remote team workflows.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-5 space-y-1.5">
+                <h3 className="font-display text-sm font-bold text-[#1D4ED8]">
+                  Professional Workspace Suites
+                </h3>
+                <p className="text-sm leading-relaxed text-slate-600">
+                  Utilize our local-first Career Studio (Resume Builder, STAR Interview Prep, Email Drafter), Finance Desk (Expense Tracker, Invoice Generator, Rate Calculators), and Daily Productivity tools—all operating entirely client-side in your browser with zero signup required.
+                </p>
+              </div>
             </div>
           </div>
         </section>
