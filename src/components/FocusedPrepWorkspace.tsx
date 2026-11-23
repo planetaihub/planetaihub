@@ -73,28 +73,8 @@ export const FocusedPrepWorkspace: React.FC<FocusedPrepWorkspaceProps> = ({
             <span>Back to PlanetAI Hub</span>
           </button>
 
-          {/* Center: Active Company & Role */}
-          <div className="order-3 flex min-w-0 w-full items-center justify-center gap-2.5 border-t border-slate-100 pt-2.5 md:order-2 md:w-auto md:flex-1 md:border-t-0 md:pt-0">
-            <BrandAvatar
-              name={profile.company}
-              domain={profile.domain}
-              size="sm"
-            />
-            <div className="flex min-w-0 items-center gap-2 text-xs sm:text-sm">
-              <span className="truncate font-display font-bold text-slate-900">
-                {profile.company}
-              </span>
-              <span aria-hidden="true" className="text-slate-300">
-                ·
-              </span>
-              <span className="truncate font-medium text-slate-600">
-                {profile.roleTitle}
-              </span>
-            </div>
-          </div>
-
           {/* Right: Reset / Clear to Blank + Apply Direct */}
-          <div className="order-2 flex flex-wrap items-center gap-2 w-full sm:w-auto md:order-3">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={handleResetToBlank}
