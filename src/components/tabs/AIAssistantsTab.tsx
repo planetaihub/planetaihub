@@ -6,18 +6,13 @@
 import React, { useMemo, useState } from 'react';
 import {
   BrainCircuit,
-  Code2,
-  ExternalLink,
-  Globe,
-  Mic,
-  Search,
-  Sparkles,
-  Terminal,
-  Copy,
   Check,
-  FileText,
-  Sliders,
+  Copy,
   Cpu,
+  ExternalLink,
+  RotateCcw,
+  Search,
+  Sliders,
 } from 'lucide-react';
 import { AdBanner } from '../AdBanner';
 import { BrandAvatar, getCompanyMark } from '../BrandAvatar';
@@ -269,20 +264,67 @@ const BRAND_THEMES: Record<string, BrandTheme> = {
   },
 };
 
+const DEFAULT_THEME: BrandTheme = {
+  backdropClass: 'bg-gradient-to-br from-slate-50 via-white to-slate-100/60',
+  watermarkColor: 'text-slate-900',
+  pillClass: 'border-slate-200 bg-white/95 text-slate-700',
+};
+
 const SOP_BLUEPRINTS = [
   {
     title: 'Inbox Triage SOP',
-    content: '1. Label urgent founder emails red.\n2. Archive newsletters to Read Later.\n3. Draft replies for 80% of routine inquiries.\n4. Send EOD summary digest.',
+    content:
+      '1. Label urgent founder emails red.\n2. Archive newsletters to Read Later.\n3. Draft replies for 80% of routine inquiries.\n4. Send EOD summary digest.',
   },
   {
     title: 'RLHF Quality Checklist',
-    content: '1. Verify factual accuracy against trusted web citations.\n2. Ensure tone is objective, neutral, and helpful.\n3. Check for logical consistency and edge cases.\n4. Format output cleanly in Markdown.',
+    content:
+      '1. Verify factual accuracy against trusted web citations.\n2. Ensure tone is objective, neutral, and helpful.\n3. Check for logical consistency and edge cases.\n4. Format output cleanly in Markdown.',
   },
   {
     title: 'Client Onboarding Flow',
-    content: '1. Send signed contractor agreement & 50% retainer invoice.\n2. Invite client to shared Notion workspace & Slack channel.\n3. Collect secure credentials via 1Password vault.\n4. Schedule kickoff alignment call.',
+    content:
+      '1. Send signed contractor agreement & 50% retainer invoice.\n2. Invite client to shared Notion workspace & Slack channel.\n3. Collect secure credentials via 1Password vault.\n4. Schedule kickoff alignment call.',
   },
 ];
+
+const DEFAULT_PROMPT_STATE = {
+  role: 'Senior AI Prompt Engineer',
+  context: 'Building high-precision remote workflow templates',
+  task: 'Draft comprehensive documentation with step-by-step checklists',
+  constraints: 'Zero markdown errors, concise and actionable, professional tone',
+  outputFormat: 'Structured Markdown with bullet points',
+};
+
+const DEFAULT_TOKEN_SAMPLE =
+  'PlanetAI Hub delivers curated remote AI and tech contracts with transparent USD pay.';
+
+async function safeCopyToClipboard(text: string): Promise<boolean> {
+  if (!text || typeof navigator === 'undefined') return false;
+  try {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // Fallback below
+  }
+  if (typeof document === 'undefined') return false;
+  try {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    return ok;
+  } catch {
+    return false;
+  }
+}
 
 export const AIAssistantsTab: React.FC = () => {
   const [viewMode, setViewMode] = useState<'directory' | 'workbench'>('directory');
@@ -290,38 +332,51 @@ export const AIAssistantsTab: React.FC = () => {
   const [category, setCategory] = useState<AssistantCategory>('All');
 
   // Prompt Architect State
-  const [promptRole, setPromptRole] = useState('Senior AI Prompt Engineer');
-  const [promptContext, setPromptContext] = useState('Building high-precision remote workflow templates');
-  const [promptTask, setPromptTask] = useState('Draft comprehensive documentation with step-by-step checklists');
-  const [promptConstraints, setPromptConstraints] = useState('Zero markdown errors, concise and actionable, professional tone');
-  const [promptOutputFormat, setPromptOutputFormat] = useState('Structured Markdown with bullet points');
+  const [promptRole, setPromptRole] = useState(DEFAULT_PROMPT_STATE.role);
+  const [promptContext, setPromptContext] = useState(DEFAULT_PROMPT_STATE.context);
+  const [promptTask, setPromptTask] = useState(DEFAULT_PROMPT_STATE.task);
+  const [promptConstraints, setPromptConstraints] = useState(DEFAULT_PROMPT_STATE.constraints);
+  const [promptOutputFormat, setPromptOutputFormat] = useState(DEFAULT_PROMPT_STATE.outputFormat);
   const [promptCopied, setPromptCopied] = useState(false);
 
   // Token Estimator State
-  const [tokenText, setTokenText] = useState('PlanetAI Hub delivers curated remote AI and tech contracts with transparent USD pay.');
+  const [tokenText, setTokenText] = useState(DEFAULT_TOKEN_SAMPLE);
+  const [copiedBpTitle, setCopiedBpTitle] = useState<string | null>(null);
 
   const compiledPrompt = useMemo(() => {
-    return `### Role\n${promptRole}\n\n### Context\n${promptContext}\n\n### Task\n${promptTask}\n\n### Constraints\n${promptConstraints}\n\n### Output Format\n${promptOutputFormat}`;
+    const safeRole = String(promptRole ?? '').trim() || '[Role / Persona]';
+    const safeContext = String(promptContext ?? '').trim() || '[Context / Background]';
+    const safeTask = String(promptTask ?? '').trim() || '[Core Task]';
+    const safeConstraints = String(promptConstraints ?? '').trim() || '[Constraints]';
+    const safeFormat = String(promptOutputFormat ?? '').trim() || '[Output Format]';
+
+    return `### Role\n${safeRole}\n\n### Context\n${safeContext}\n\n### Task\n${safeTask}\n\n### Constraints\n${safeConstraints}\n\n### Output Format\n${safeFormat}`;
   }, [promptRole, promptContext, promptTask, promptConstraints, promptOutputFormat]);
 
   const tokenStats = useMemo(() => {
-    const chars = tokenText.length;
-    const words = tokenText.trim() ? tokenText.trim().split(/\s+/).length : 0;
-    // Rough heuristic: ~4 characters per token in English
-    const estimatedTokens = Math.ceil(chars / 4);
-    const geminiCost = ((estimatedTokens / 1000000) * 0.075).toFixed(5);
-    const claudeCost = ((estimatedTokens / 1000000) * 3.0).toFixed(5);
-    const gptCost = ((estimatedTokens / 1000000) * 2.5).toFixed(5);
+    const safeText = typeof tokenText === 'string' ? tokenText : '';
+    const chars = safeText.length;
+    const trimmed = safeText.trim();
+    const words = trimmed ? trimmed.split(/\s+/).length : 0;
+    const estimatedTokens = chars > 0 ? Math.ceil(chars / 4) : 0;
+    const geminiCost = ((estimatedTokens / 1_000_000) * 0.075).toFixed(5);
+    const claudeCost = ((estimatedTokens / 1_000_000) * 3.0).toFixed(5);
+    const gptCost = ((estimatedTokens / 1_000_000) * 2.5).toFixed(5);
 
     return { chars, words, estimatedTokens, geminiCost, claudeCost, gptCost };
   }, [tokenText]);
 
   const filteredTools = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return AI_ASSISTANTS.filter((tool) => {
+    const safeList = Array.isArray(AI_ASSISTANTS) ? AI_ASSISTANTS : [];
+    const q = String(query ?? '').trim().toLowerCase();
+    return safeList.filter((tool) => {
+      if (!tool) return false;
       if (category !== 'All' && tool.category !== category) return false;
       if (q) {
-        const haystack = [tool.name, tool.provider, tool.category, tool.description].join(' ').toLowerCase();
+        const haystack = [tool.name, tool.provider, tool.category, tool.description]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
@@ -329,63 +384,86 @@ export const AIAssistantsTab: React.FC = () => {
   }, [query, category]);
 
   const handleCopyPrompt = async () => {
-    try {
-      await navigator.clipboard.writeText(compiledPrompt);
+    const ok = await safeCopyToClipboard(compiledPrompt);
+    if (ok) {
       setPromptCopied(true);
-      setTimeout(() => setPromptCopied(false), 2500);
-    } catch {
-      // Fallback
+      window.setTimeout(() => setPromptCopied(false), 2500);
     }
   };
 
+  const handleResetPrompt = () => {
+    setPromptRole(DEFAULT_PROMPT_STATE.role);
+    setPromptContext(DEFAULT_PROMPT_STATE.context);
+    setPromptTask(DEFAULT_PROMPT_STATE.task);
+    setPromptConstraints(DEFAULT_PROMPT_STATE.constraints);
+    setPromptOutputFormat(DEFAULT_PROMPT_STATE.outputFormat);
+  };
+
+  const isWorkbench = viewMode === 'workbench';
+
   return (
-    <section aria-labelledby="ai-tools-heading" className="space-y-8 pb-12">
-      {/* Header Banner & Mode Switcher */}
-      <div className="rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-900 via-[#111827] to-blue-950 p-6 text-white shadow-xl sm:p-8">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+    <section
+      aria-labelledby="ai-tools-heading"
+      className="w-full max-w-full space-y-8 pb-12 overflow-x-hidden"
+    >
+      {/* Header Banner & Mode Switcher (Light SaaS Card) */}
+      <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white to-blue-50/70 p-6 text-slate-900 shadow-sm sm:p-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/20 border border-blue-400/30 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-blue-300">
-              <BrainCircuit className="h-4 w-4 text-blue-400" aria-hidden="true" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#1D4ED8]">
+              <BrainCircuit className="h-4 w-4 text-[#1D4ED8]" aria-hidden="true" />
               <span>AI &amp; Automation Workbench</span>
             </div>
             <h1
               id="ai-tools-heading"
-              className="font-display text-2xl font-bold tracking-tight text-white sm:text-3xl"
+              className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
             >
               AI Assistants Directory &amp; Zero-API Workbench
             </h1>
-            <p className="text-xs text-slate-300 sm:text-sm">
-              Explore 15 verified AI assistant portals or utilize our 100% client-side prompt architect, token estimator, and SOP blueprint generator.
+            <p className="text-xs text-slate-600 sm:text-sm">
+              Explore {AI_ASSISTANTS.length} verified AI assistant portals or utilize our 100% client-side prompt architect, token estimator, and SOP blueprint generator.
             </p>
           </div>
 
-          <div className="flex rounded-xl border border-slate-700 bg-slate-900/80 p-1 shrink-0">
+          <div
+            role="tablist"
+            aria-label="AI Assistants view mode"
+            className="grid w-full grid-cols-2 gap-2.5 rounded-2xl border border-slate-200 bg-slate-100/90 p-1.5 sm:w-auto shrink-0"
+          >
             <button
               type="button"
+              role="tab"
+              aria-selected={!isWorkbench}
               onClick={() => setViewMode('directory')}
-              className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-                viewMode === 'directory' ? 'bg-[#1D4ED8] text-white shadow-xs' : 'text-slate-300 hover:text-white'
+              className={`min-h-[42px] rounded-xl px-3.5 py-2 text-center text-xs font-semibold leading-snug transition-colors ${
+                !isWorkbench
+                  ? 'bg-[#1D4ED8] text-white shadow-xs'
+                  : 'text-slate-600 hover:bg-white/70 hover:text-slate-900'
               }`}
             >
-              AI Tool Directory
+              AI Directory
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={isWorkbench}
               onClick={() => setViewMode('workbench')}
-              className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-                viewMode === 'workbench' ? 'bg-[#1D4ED8] text-white shadow-xs' : 'text-slate-300 hover:text-white'
+              className={`min-h-[42px] rounded-xl px-3.5 py-2 text-center text-xs font-semibold leading-snug transition-colors ${
+                isWorkbench
+                  ? 'bg-[#1D4ED8] text-white shadow-xs'
+                  : 'text-slate-600 hover:bg-white/70 hover:text-slate-900'
               }`}
             >
-              Zero-API Workbench
+              API Bench
             </button>
           </div>
         </div>
       </div>
 
-      {viewMode === 'directory' ? (
+      {!isWorkbench ? (
         <div className="space-y-6">
-          {/* Search & Category Pills */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          {/* Search & Category Grid */}
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative flex-1 max-w-md">
               <Search
                 className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400"
@@ -401,18 +479,26 @@ export const AIAssistantsTab: React.FC = () => {
               />
             </div>
 
-            <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-1.5">
+            <div
+              role="tablist"
+              aria-label="Filter AI assistants by category"
+              className="grid grid-cols-2 gap-2.5 lg:flex lg:flex-wrap lg:items-center"
+            >
               {CATEGORIES.map((cat) => {
                 const isActive = category === cat;
                 return (
                   <button
                     key={cat}
                     type="button"
+                    role="tab"
+                    aria-selected={isActive}
                     onClick={() => setCategory(cat)}
-                    className={`snap-center shrink-0 min-h-[38px] rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+                    className={`flex min-h-[42px] items-center justify-center rounded-xl border px-3.5 py-2 text-center text-xs font-semibold leading-snug transition-all ${
+                      cat === 'All' ? 'col-span-2 lg:col-span-1' : ''
+                    } ${
                       isActive
                         ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-sm'
-                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                     }`}
                   >
                     {cat}
@@ -423,77 +509,124 @@ export const AIAssistantsTab: React.FC = () => {
           </div>
 
           {/* AI Tool Cards Grid with Brand Watermarks */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredTools.map((tool) => {
-              const theme = BRAND_THEMES[tool.id] ?? {
-                backdropClass: 'bg-gradient-to-br from-slate-50 via-white to-slate-100/60',
-                watermarkColor: 'text-slate-900',
-                pillClass: 'border-slate-200 bg-white/95 text-slate-700',
-              };
+          {filteredTools.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-12 text-center">
+              <p className="font-display text-base font-bold text-slate-900">
+                No matching AI assistants found
+              </p>
+              <p className="mt-1 text-xs text-slate-600">
+                Try another search term or switch back to All categories.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery('');
+                  setCategory('All');
+                }}
+                className="mt-4 inline-flex min-h-[40px] items-center justify-center rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white hover:bg-[#1E40AF]"
+              >
+                Show All {AI_ASSISTANTS.length} Assistants
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredTools.map((tool) => {
+                const theme = BRAND_THEMES[tool.id] ?? DEFAULT_THEME;
 
-              return (
-                <article
-                  key={tool.id}
-                  className={`group relative overflow-hidden flex flex-col justify-between rounded-2xl border border-slate-200/90 ${theme.backdropClass} p-5 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-[#1D4ED8]/40 hover:shadow-xl`}
-                >
-                  <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl" aria-hidden="true">
-                    <div className={`absolute -bottom-5 -right-5 flex items-center justify-center font-display font-black tracking-tighter select-none text-[110px] leading-none opacity-[0.12] group-hover:opacity-[0.18] transition-opacity duration-300 ${theme.watermarkColor}`}>
-                      {getCompanyMark(tool.name)}
-                    </div>
-                  </div>
-
-                  <div className="relative z-10 space-y-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold shadow-2xs ${theme.pillClass}`}>
-                        {tool.category}
-                      </span>
-                      <div className="rounded-xl border border-white/90 bg-white p-2 shadow-sm transition-transform duration-300 group-hover:scale-105">
-                        <BrandAvatar name={tool.name} domain={tool.domain} size="sm" variant="light" className="border-0 bg-transparent shadow-none" />
+                return (
+                  <article
+                    key={tool.id}
+                    className={`group relative overflow-hidden flex flex-col justify-between rounded-2xl border border-slate-200/90 ${theme.backdropClass} p-5 shadow-2xs transition-all duration-300 hover:-translate-y-0.5 hover:border-[#1D4ED8]/40 hover:shadow-xl`}
+                  >
+                    <div
+                      className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl"
+                      aria-hidden="true"
+                    >
+                      <div
+                        className={`absolute -bottom-5 -right-5 flex items-center justify-center font-display font-black tracking-tighter select-none text-[110px] leading-none opacity-[0.12] group-hover:opacity-[0.18] transition-opacity duration-300 ${theme.watermarkColor}`}
+                      >
+                        {getCompanyMark(tool.name)}
                       </div>
                     </div>
 
-                    <div>
-                      <h3 className="font-display text-base font-bold text-slate-900 group-hover:text-[#1D4ED8] transition-colors">
-                        {tool.name}
-                      </h3>
-                      <p className="mt-1 text-xs font-semibold text-slate-600">{tool.provider}</p>
-                      <p className="mt-2 text-xs leading-relaxed text-slate-600 line-clamp-3">{tool.description}</p>
-                    </div>
-                  </div>
+                    <div className="relative z-10 space-y-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold shadow-2xs ${theme.pillClass}`}
+                        >
+                          {tool.category}
+                        </span>
+                        <div className="rounded-xl border border-white/90 bg-white p-2 shadow-sm transition-transform duration-300 group-hover:scale-105">
+                          <BrandAvatar
+                            name={tool.name}
+                            domain={tool.domain}
+                            size="sm"
+                            variant="light"
+                            className="border-0 bg-transparent shadow-none"
+                          />
+                        </div>
+                      </div>
 
-                  <div className="relative z-10 mt-6 border-t border-slate-200/60 pt-4">
-                    <a
-                      href={tool.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#1E40AF]"
-                    >
-                      <span>Open Assistant Portal</span>
-                      <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                    </a>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                      <div>
+                        <h3 className="font-display text-base font-bold text-slate-900 group-hover:text-[#1D4ED8] transition-colors">
+                          {tool.name}
+                        </h3>
+                        <p className="mt-1 text-xs font-semibold text-slate-600">{tool.provider}</p>
+                        <p className="mt-2 text-xs leading-relaxed text-slate-600 line-clamp-3">
+                          {tool.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="relative z-10 mt-6 border-t border-slate-200/60 pt-4">
+                      <a
+                        href={tool.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#1E40AF]"
+                      >
+                        <span>Open Assistant Portal</span>
+                        <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      </a>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
       ) : (
-        /* Zero-API AI & Automation Workbench */
+        /* Zero-API AI & Automation Workbench (API Bench) */
         <div className="space-y-8">
           {/* Tool 1: Prompt Architect */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-6 sm:p-8 space-y-4">
-              <div className="flex items-center gap-2 text-[#1D4ED8]">
-                <Sliders className="h-5 w-5" />
-                <h3 className="font-display text-lg font-bold text-slate-900">Interactive Prompt Architect</h3>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-[#1D4ED8]">
+                  <Sliders className="h-5 w-5 shrink-0" aria-hidden="true" />
+                  <h2 className="font-display text-lg font-bold text-slate-900">
+                    Interactive Prompt Architect
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleResetPrompt}
+                  className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                >
+                  <RotateCcw className="h-3 w-3" aria-hidden="true" />
+                  <span>Reset</span>
+                </button>
               </div>
               <p className="text-xs text-slate-600">
-                Configure role, context, task, and constraints to generate clean, high-precision prompts instantly.
+                Configure role, context, task, constraints, and output format to generate clean, high-precision prompts offline.
               </p>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700">Role / Persona</label>
+                <label htmlFor="wb-role" className="block text-xs font-semibold text-slate-700">
+                  Role / Persona
+                </label>
                 <input
+                  id="wb-role"
                   type="text"
                   value={promptRole}
                   onChange={(e) => setPromptRole(e.target.value)}
@@ -502,8 +635,11 @@ export const AIAssistantsTab: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700">Context / Background</label>
+                <label htmlFor="wb-context" className="block text-xs font-semibold text-slate-700">
+                  Context / Background
+                </label>
                 <input
+                  id="wb-context"
                   type="text"
                   value={promptContext}
                   onChange={(e) => setPromptContext(e.target.value)}
@@ -512,8 +648,11 @@ export const AIAssistantsTab: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700">Core Task</label>
+                <label htmlFor="wb-task" className="block text-xs font-semibold text-slate-700">
+                  Core Task
+                </label>
                 <input
+                  id="wb-task"
                   type="text"
                   value={promptTask}
                   onChange={(e) => setPromptTask(e.target.value)}
@@ -521,33 +660,62 @@ export const AIAssistantsTab: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700">Constraints &amp; Rules</label>
-                <input
-                  type="text"
-                  value={promptConstraints}
-                  onChange={(e) => setPromptConstraints(e.target.value)}
-                  className="input-obsidian mt-1 h-10 w-full px-3 text-xs"
-                />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="wb-constraints"
+                    className="block text-xs font-semibold text-slate-700"
+                  >
+                    Constraints &amp; Rules
+                  </label>
+                  <input
+                    id="wb-constraints"
+                    type="text"
+                    value={promptConstraints}
+                    onChange={(e) => setPromptConstraints(e.target.value)}
+                    className="input-obsidian mt-1 h-10 w-full px-3 text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="wb-format" className="block text-xs font-semibold text-slate-700">
+                    Output Format
+                  </label>
+                  <input
+                    id="wb-format"
+                    type="text"
+                    value={promptOutputFormat}
+                    onChange={(e) => setPromptOutputFormat(e.target.value)}
+                    className="input-obsidian mt-1 h-10 w-full px-3 text-xs"
+                  />
+                </div>
               </div>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm lg:col-span-6 sm:p-8 flex flex-col justify-between space-y-4">
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-display text-base font-bold text-slate-900">Compiled Prompt Output</h4>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-display text-base font-bold text-slate-900">
+                    Compiled Prompt Output
+                  </h3>
                   <button
                     type="button"
                     onClick={handleCopyPrompt}
                     className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition-colors ${
-                      promptCopied ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-[#1D4ED8] bg-[#1D4ED8] text-white hover:bg-[#1E40AF]'
+                      promptCopied
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                        : 'border-[#1D4ED8] bg-[#1D4ED8] text-white hover:bg-[#1E40AF]'
                     }`}
                   >
-                    {promptCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    {promptCopied ? (
+                      <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                    )}
                     <span>{promptCopied ? 'Copied to Clipboard!' : 'Copy Prompt'}</span>
                   </button>
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-white p-4 font-mono text-xs text-slate-800 whitespace-pre-wrap select-all max-h-64 overflow-y-auto">
+                <div className="rounded-xl border border-slate-200 bg-white p-4 font-mono text-xs text-slate-800 whitespace-pre-wrap break-words select-all max-h-64 overflow-y-auto">
                   {compiledPrompt}
                 </div>
               </div>
@@ -561,20 +729,40 @@ export const AIAssistantsTab: React.FC = () => {
           {/* Tool 2: Token & Context Estimator */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-6 sm:p-8 space-y-4">
-              <div className="flex items-center gap-2 text-emerald-700">
-                <Cpu className="h-5 w-5" />
-                <h3 className="font-display text-lg font-bold text-slate-900">Client-Side LLM Token Estimator</h3>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-emerald-700">
+                  <Cpu className="h-5 w-5 shrink-0" aria-hidden="true" />
+                  <h2 className="font-display text-lg font-bold text-slate-900">
+                    Client-Side LLM Token Estimator
+                  </h2>
+                </div>
+                {tokenText && (
+                  <button
+                    type="button"
+                    onClick={() => setTokenText('')}
+                    className="text-[11px] font-semibold text-slate-500 hover:text-rose-600"
+                  >
+                    Clear Text
+                  </button>
+                )}
               </div>
               <p className="text-xs text-slate-600">
                 Instant local token counter and estimated API cost comparison across leading LLM providers.
               </p>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700">Input Text / Document</label>
+                <label
+                  htmlFor="wb-token-input"
+                  className="block text-xs font-semibold text-slate-700"
+                >
+                  Input Text / Document
+                </label>
                 <textarea
+                  id="wb-token-input"
                   value={tokenText}
                   onChange={(e) => setTokenText(e.target.value)}
                   rows={4}
+                  placeholder="Paste text to estimate token count and model input cost..."
                   className="input-obsidian mt-1 w-full p-3 text-xs"
                 />
               </div>
@@ -582,34 +770,54 @@ export const AIAssistantsTab: React.FC = () => {
 
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-6 shadow-sm lg:col-span-6 sm:p-8 flex flex-col justify-between space-y-4">
               <div className="space-y-4">
-                <h4 className="font-display text-base font-bold text-emerald-900">Token &amp; Cost Analysis</h4>
-                <div className="grid grid-cols-3 gap-3 text-center">
+                <h3 className="font-display text-base font-bold text-emerald-900">
+                  Token &amp; Cost Analysis
+                </h3>
+                <div className="grid grid-cols-3 gap-2.5 text-center">
                   <div className="rounded-xl border border-emerald-200 bg-white p-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Characters</p>
-                    <p className="mt-1 font-mono text-base font-bold text-slate-900">{tokenStats.chars}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                      Characters
+                    </p>
+                    <p className="mt-1 font-mono text-base font-bold text-slate-900 tabular-nums">
+                      {tokenStats.chars}
+                    </p>
                   </div>
                   <div className="rounded-xl border border-emerald-200 bg-white p-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Words</p>
-                    <p className="mt-1 font-mono text-base font-bold text-slate-900">{tokenStats.words}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                      Words
+                    </p>
+                    <p className="mt-1 font-mono text-base font-bold text-slate-900 tabular-nums">
+                      {tokenStats.words}
+                    </p>
                   </div>
                   <div className="rounded-xl border border-emerald-200 bg-white p-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Est. Tokens</p>
-                    <p className="mt-1 font-mono text-base font-bold text-emerald-700">{tokenStats.estimatedTokens}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                      Est. Tokens
+                    </p>
+                    <p className="mt-1 font-mono text-base font-bold text-emerald-700 tabular-nums">
+                      {tokenStats.estimatedTokens}
+                    </p>
                   </div>
                 </div>
 
                 <div className="space-y-2 text-xs">
-                  <div className="flex justify-between border-b border-emerald-200 pb-1">
+                  <div className="flex justify-between gap-2 border-b border-emerald-200 pb-1">
                     <span className="text-slate-600">Est. API Cost (Gemini Flash):</span>
-                    <span className="font-mono font-bold text-emerald-800">${tokenStats.geminiCost}</span>
+                    <span className="font-mono font-bold text-emerald-800 tabular-nums">
+                      ${tokenStats.geminiCost}
+                    </span>
                   </div>
-                  <div className="flex justify-between border-b border-emerald-200 pb-1">
+                  <div className="flex justify-between gap-2 border-b border-emerald-200 pb-1">
                     <span className="text-slate-600">Est. API Cost (GPT-4o):</span>
-                    <span className="font-mono font-bold text-slate-900">${tokenStats.gptCost}</span>
+                    <span className="font-mono font-bold text-slate-900 tabular-nums">
+                      ${tokenStats.gptCost}
+                    </span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-2">
                     <span className="text-slate-600">Est. API Cost (Claude 3.5 Sonnet):</span>
-                    <span className="font-mono font-bold text-slate-900">${tokenStats.claudeCost}</span>
+                    <span className="font-mono font-bold text-slate-900 tabular-nums">
+                      ${tokenStats.claudeCost}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -618,21 +826,26 @@ export const AIAssistantsTab: React.FC = () => {
 
           {/* Tool 3: No-Code Workflow & SOP Blueprint Generator */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 space-y-6">
-            <h3 className="font-display text-lg font-bold text-slate-900">
-              No-Code Workflow &amp; SOP Blueprint Generator
-            </h3>
-            <p className="text-xs text-slate-600">
-              Pre-built, customizable automation templates ready to copy into your Notion workspace or client documentation.
-            </p>
+            <div>
+              <h2 className="font-display text-lg font-bold text-slate-900">
+                No-Code Workflow &amp; SOP Blueprint Generator
+              </h2>
+              <p className="mt-1 text-xs text-slate-600">
+                Pre-built, customizable automation templates ready to copy into your Notion workspace or client documentation.
+              </p>
+            </div>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-              {SOP_BLUEPRINTS.map((bp) => {
-                const [copiedBp, setCopiedBp] = useState(false);
+              {(SOP_BLUEPRINTS ?? []).map((bp) => {
+                const isCopied = copiedBpTitle === bp.title;
                 return (
-                  <div key={bp.title} className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-4">
+                  <div
+                    key={bp.title}
+                    className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-4"
+                  >
                     <div className="space-y-2">
-                      <h4 className="font-display text-sm font-bold text-slate-900">{bp.title}</h4>
-                      <pre className="font-mono text-[11px] text-slate-600 whitespace-pre-wrap leading-relaxed bg-white p-3 rounded-xl border border-slate-200">
+                      <h3 className="font-display text-sm font-bold text-slate-900">{bp.title}</h3>
+                      <pre className="rounded-xl border border-slate-200 bg-white p-3 font-mono text-[11px] leading-relaxed text-slate-600 whitespace-pre-wrap break-words">
                         {bp.content}
                       </pre>
                     </div>
@@ -640,16 +853,20 @@ export const AIAssistantsTab: React.FC = () => {
                     <button
                       type="button"
                       onClick={async () => {
-                        try {
-                          await navigator.clipboard.writeText(bp.content);
-                          setCopiedBp(true);
-                          setTimeout(() => setCopiedBp(false), 2000);
-                        } catch {}
+                        const ok = await safeCopyToClipboard(bp.content);
+                        if (ok) {
+                          setCopiedBpTitle(bp.title);
+                          window.setTimeout(() => setCopiedBpTitle(null), 2000);
+                        }
                       }}
-                      className="inline-flex min-h-[36px] w-full items-center justify-center gap-1.5 rounded-xl bg-[#1D4ED8] px-3 py-2 text-xs font-semibold text-white hover:bg-[#1E40AF]"
+                      className="inline-flex min-h-[38px] w-full items-center justify-center gap-1.5 rounded-xl bg-[#1D4ED8] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#1E40AF]"
                     >
-                      {copiedBp ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                      <span>{copiedBp ? 'Copied Blueprint!' : 'Copy SOP Template'}</span>
+                      {isCopied ? (
+                        <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                      )}
+                      <span>{isCopied ? 'Copied Blueprint!' : 'Copy SOP Template'}</span>
                     </button>
                   </div>
                 );
