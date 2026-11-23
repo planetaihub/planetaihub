@@ -146,22 +146,30 @@ export const EmailDrafterTool: React.FC = () => {
 
       {/* Floating Studio Toolbar */}
       <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 shadow-2xs sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap sm:inline-flex items-center gap-1 max-w-full rounded-xl border border-slate-200 bg-white p-1">
+        <div
+          role="tablist"
+          aria-label="Email templates"
+          className="grid w-full grid-cols-2 gap-1.5 rounded-xl border border-slate-200 bg-white p-1.5 sm:inline-flex sm:w-auto"
+        >
           {(
             [
               { id: 'cold-outreach', label: 'Cold Outreach' },
               { id: 'follow-up', label: 'Follow-Up' },
               { id: 'thank-you', label: 'Thank You' },
             ] as const
-          ).map((item) => (
+          ).map((item, idx) => (
             <button
               key={item.id}
               type="button"
+              role="tab"
+              aria-selected={template === item.id}
               onClick={() => setTemplate(item.id)}
-              className={`min-h-[36px] rounded-lg px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+              className={`min-h-[38px] rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition-all ${
+                idx === 0 ? 'col-span-2 sm:col-span-1' : ''
+              } ${
                 template === item.id
                   ? 'bg-[#1D4ED8] text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
               {item.label}
