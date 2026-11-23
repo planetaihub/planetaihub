@@ -14,12 +14,13 @@ import {
   ShieldCheck,
   
 } from 'lucide-react';
-import type { CareerPrepPayload } from '../utils/careerPrepTemplates';
+import type { CareerPrepPayload } from '../../../utils/careerPrepTemplates';
 import {
   ROLE_BUNDLES,
   getRoleBundleById,
   type RoleBundleId,
-} from '../utils/roleBundles';
+} from '../../../utils/roleBundles';
+
 
 interface RolePrepHubToolProps {
   prepPayload?: CareerPrepPayload | null;
