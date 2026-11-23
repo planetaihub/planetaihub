@@ -9,6 +9,8 @@
 
 @layer base {
   html {
+    max-width: 100vw;
+    overflow-x: hidden;
     font-family: var(--font-sans);
     scroll-behavior: smooth;
     background-color: #ffffff;
@@ -16,8 +18,18 @@
   }
 
   body {
+    max-width: 100vw;
+    overflow-x: hidden;
     background-color: #ffffff;
     color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    max-width: 100vw;
+    overflow-x: hidden;
+    position: relative;
+    width: 100%;
   }
 
   h1, h2, .font-display {
@@ -31,6 +43,13 @@
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+}
+
+/* Smooth native momentum scrolling for mobile overflow rows */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
 }
 
 /* Light 1Password-Inspired SaaS Surface & Input Helpers */
