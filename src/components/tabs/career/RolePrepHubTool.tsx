@@ -12,7 +12,6 @@ import {
   PlayCircle,
   Printer,
   ShieldCheck,
-  
 } from 'lucide-react';
 import type { CareerPrepPayload } from '../../../utils/careerPrepTemplates';
 import {
@@ -20,7 +19,6 @@ import {
   getRoleBundleById,
   type RoleBundleId,
 } from '../../../utils/roleBundles';
-
 
 interface RolePrepHubToolProps {
   prepPayload?: CareerPrepPayload | null;
