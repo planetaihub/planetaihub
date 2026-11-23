@@ -82,7 +82,7 @@ export const PomodoroTool: React.FC = () => {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm lg:col-span-7">
         {/* Mode Switcher */}
-        <div className="mx-auto inline-flex items-center gap-1 overflow-x-auto no-scrollbar rounded-xl border border-slate-200 bg-slate-50 p-1">
+        <div className="mx-auto flex flex-wrap sm:inline-flex items-center justify-center gap-1 max-w-full rounded-xl border border-slate-200 bg-slate-50 p-1">
           {(['focus', 'short', 'long'] as const).map((m) => (
             <button
               key={m}
