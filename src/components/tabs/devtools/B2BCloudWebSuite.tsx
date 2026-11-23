@@ -59,7 +59,7 @@ export const B2BCloudWebSuite: React.FC = () => {
         <div
           role="tablist"
           aria-label="B2B Cloud and Web utilities"
-          className="flex w-full items-center overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade gap-1.5"
+          className="flex w-full items-center overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch gap-1.5 px-1 pr-8 py-0.5"
         >
           {B2B_TOOLS.map(({ id, label, shortLabel, icon: Icon }) => {
             const isSelected = activeTool === id;
