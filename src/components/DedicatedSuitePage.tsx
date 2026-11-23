@@ -99,6 +99,14 @@ const SUITE_EDITORIAL_GUIDES: Record<Exclude<TabId, 'jobs'>, SuiteEditorialCopy>
     paragraph2:
       'Watch any workshop inside the theatre above, check off action steps as you rehearse, and jump straight to companion Career Studio templates or long-form Editorial Briefings to convert every video lesson into job-ready application materials.',
   },
+  'editorial-briefings': {
+    heading: 'PlanetAI Editorial Briefings & Remote AI Field Intelligence',
+    tagline: '18 Deep-Dive Guides on RLHF Rubrics, Voice AI, Prompt Schemas & Global Pay',
+    paragraph1:
+      'Every PlanetAI Editorial Briefing distills real technical screening standards, acoustic benchmarks, and compensation math observed across distributed AI teams and frontier evaluation labs. Rather than generic career advice, each guide focuses on concrete rubrics, reproducible code diffs, and practical remote execution.',
+    paragraph2:
+      'Open any of the 18 briefings above for key takeaways and structured walkthroughs, copy direct share links for teammates, or launch matching workshops and application templates directly inside Video Academy and Career Studio.',
+  },
 };
 
 interface DedicatedSuitePageProps {
