@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import {
   ArrowLeftRight,
   Calculator,
-  FileCheck,
   FileText,
   Receipt,
-  Scale,
   ShieldCheck,
   Wallet,
 } from 'lucide-react';
@@ -36,14 +34,17 @@ export const FinanceDocsTab: React.FC = () => {
   const [activeTool, setActiveTool] = useState<FinanceToolId>('expenses');
 
   return (
-    <section aria-labelledby="finance-docs-heading" className="space-y-6">
+    <section
+      aria-labelledby="finance-docs-heading"
+      className="w-full max-w-full overflow-x-hidden space-y-6"
+    >
       <div className="no-print flex flex-col gap-4 border-b border-slate-200 pb-6 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-2xl">
+        <div className="max-w-2xl min-w-0">
           <div className="flex items-center gap-3.5">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 text-[#1D4ED8]">
               <Wallet className="h-5 w-5" aria-hidden="true" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-wider text-[#1D4ED8]">
                 USD Contractor Desk &amp; Legal Suite
               </p>
@@ -60,31 +61,39 @@ export const FinanceDocsTab: React.FC = () => {
           </p>
         </div>
 
-        {/* Clean Primary Sub-Switcher (Wraps cleanly on mobile, non-clipping) */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 w-full sm:w-auto">
+        {/* Clean Primary Sub-Switcher (2-column grid on mobile, zero horizontal scrolling) */}
+        <div
+          role="tablist"
+          aria-label="Finance and Legal workspace mode"
+          className="grid w-full max-w-full grid-cols-2 gap-2.5 rounded-2xl border border-slate-200 bg-slate-100/90 p-2 lg:w-auto shrink-0"
+        >
           <button
             type="button"
+            role="tab"
+            aria-selected={financeSection === 'legal-insurance'}
             onClick={() => setFinanceSection('legal-insurance')}
-            className={`inline-flex flex-1 sm:flex-initial justify-center items-center gap-1.5 min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+            className={`flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-center text-xs font-semibold leading-snug whitespace-normal transition-all ${
               financeSection === 'legal-insurance'
                 ? 'bg-[#1D4ED8] text-white shadow-sm'
-                : 'text-slate-700 hover:bg-white hover:text-slate-900'
+                : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >
-            <ShieldCheck className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>Insurance &amp; Legal Estimators</span>
           </button>
 
           <button
             type="button"
+            role="tab"
+            aria-selected={financeSection === 'financial-ops'}
             onClick={() => setFinanceSection('financial-ops')}
-            className={`inline-flex flex-1 sm:flex-initial justify-center items-center gap-1.5 min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+            className={`flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-center text-xs font-semibold leading-snug whitespace-normal transition-all ${
               financeSection === 'financial-ops'
                 ? 'bg-[#1D4ED8] text-white shadow-sm'
-                : 'text-slate-700 hover:bg-white hover:text-slate-900'
+                : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >
-            <Receipt className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <Receipt className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>Financial Ops &amp; Invoicing</span>
           </button>
         </div>
@@ -94,12 +103,12 @@ export const FinanceDocsTab: React.FC = () => {
         <LegalInsuranceSuite />
       ) : (
         <div className="space-y-6">
-          {/* Horizontally Scrollable Sub-Tab Bar */}
-          <div className="no-print w-full max-w-full rounded-2xl border border-slate-200 bg-slate-50 shadow-2xs">
+          {/* 2-Column Mobile / 4-Column Desktop Sub-Tab Grid (Zero Horizontal Scroll) */}
+          <div className="no-print w-full max-w-full rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-2xs">
             <div
               role="tablist"
               aria-label="Finance and Document tools"
-              className="flex w-full items-center overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch gap-2 px-3 pr-8 py-1.5"
+              className="grid grid-cols-2 gap-2.5 lg:grid-cols-4"
             >
               {FINANCE_TOOLS.map(({ id, label, Icon }) => {
                 const isSelected = activeTool === id;
@@ -109,23 +118,14 @@ export const FinanceDocsTab: React.FC = () => {
                     type="button"
                     role="tab"
                     aria-selected={isSelected}
-                    onClick={(e) => {
-                      setActiveTool(id);
-                      if (window.innerWidth <= 768) {
-                        e.currentTarget.scrollIntoView({
-                          behavior: 'smooth',
-                          inline: 'center',
-                          block: 'nearest',
-                        });
-                      }
-                    }}
-                    className={`snap-center inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap min-h-[38px] rounded-xl px-4 py-1.5 text-xs font-semibold transition-all ${
+                    onClick={() => setActiveTool(id)}
+                    className={`flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-center text-xs font-semibold leading-snug whitespace-normal transition-all ${
                       isSelected
                         ? 'bg-[#1D4ED8] text-white shadow-sm'
-                        : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                        : 'border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
-                    <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                    <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                     <span>{label}</span>
                   </button>
                 );
