@@ -9,6 +9,7 @@ import {
   X,
 } from 'lucide-react';
 import { MICRO1_COMPANY_REFERRAL_URL } from '../utils/referralLinks';
+import { BrandAvatar } from './BrandAvatar';
 
 interface VettingTrack {
   code: string;
@@ -23,14 +24,6 @@ interface PartnerSpotlightFrameProps {
   payBand: string;
   applyUrl: string;
   screeningFocus?: string;
-}
-
-function getPartnerMark(company: string): string {
-  const lower = company.trim().toLowerCase();
-  if (lower.includes('micro1')) return 'm.';
-  const clean = company.trim().replace(/[^a-zA-Z0-9]/g, '');
-  if (!clean) return 'P.';
-  return `${clean[0].toLowerCase()}.`;
 }
 
 function getPartnerTracks(
@@ -128,8 +121,9 @@ export const PartnerSpotlightFrame: React.FC<PartnerSpotlightFrameProps> = ({
 }) => {
   const [isOverviewOpen, setIsOverviewOpen] = useState(false);
 
-  const isMicro1 = company.trim().toLowerCase().includes('micro1');
-  const partnerMark = getPartnerMark(company);
+  const normalizedCompany = company.trim().toLowerCase();
+  const isMicro1 = normalizedCompany.includes('micro1');
+  const isMercor = normalizedCompany.includes('mercor');
   const partnerTracks = getPartnerTracks(company, screeningFocus);
 
   const primaryCtaHref = isMicro1 ? MICRO1_COMPANY_REFERRAL_URL : applyUrl;
@@ -151,11 +145,15 @@ export const PartnerSpotlightFrame: React.FC<PartnerSpotlightFrameProps> = ({
   return (
     <div className="w-full max-w-full overflow-x-hidden space-y-3">
       {/* Crisp Partner Header Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-gradient-to-br from-neutral-50/90 via-white to-zinc-100/80 px-3.5 py-2.5 sm:px-4">
+      <div
+        className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 sm:px-4 ${
+          isMercor
+            ? 'border-indigo-200/80 bg-gradient-to-br from-indigo-50/80 via-white to-blue-50/50'
+            : 'border-slate-200/90 bg-gradient-to-br from-neutral-50/90 via-white to-zinc-100/80'
+        }`}
+      >
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-black font-display text-lg font-bold tracking-tight text-white shadow-sm">
-            {partnerMark}
-          </div>
+          <BrandAvatar name={company} size="md" />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <p className="truncate font-display text-sm font-bold text-slate-900 sm:text-base">
@@ -215,7 +213,7 @@ export const PartnerSpotlightFrame: React.FC<PartnerSpotlightFrameProps> = ({
             <button
               type="button"
               onClick={() => setIsOverviewOpen(true)}
-              className="mt-3 inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#1E40AF] sm:mt-4 sm:min-h-[42px] sm:px-5 sm:py-2 sm:text-sm"
+              className="mt-3 inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#1E40AF] sm:mt-4 sm:min-h-[42px] sm:px-5 sm:text-sm"
             >
               <PlayCircle className="h-4 w-4 shrink-0 text-white" aria-hidden="true" />
               <span>Preview Partner Overview</span>
@@ -238,11 +236,19 @@ export const PartnerSpotlightFrame: React.FC<PartnerSpotlightFrameProps> = ({
       </div>
 
       {/* Job-Card Styled Partner CTA Card with Subtle Bottom-Right Vertical Bar Watermark */}
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-br from-neutral-50/90 via-white to-zinc-100/80 p-3.5 shadow-2xs">
+      <div
+        className={`relative overflow-hidden rounded-2xl border p-3.5 shadow-2xs ${
+          isMercor
+            ? 'border-indigo-200/80 bg-gradient-to-br from-indigo-50/75 via-white to-blue-50/60'
+            : 'border-slate-200/90 bg-gradient-to-br from-neutral-50/90 via-white to-zinc-100/80'
+        }`}
+      >
         <svg
           aria-hidden="true"
           viewBox="0 0 112 68"
-          className="pointer-events-none absolute -right-1 -bottom-1 h-16 w-28 text-neutral-900 opacity-[0.07]"
+          className={`pointer-events-none absolute -right-1 -bottom-1 h-16 w-28 opacity-[0.07] ${
+            isMercor ? 'text-[#4F46E5]' : 'text-neutral-900'
+          }`}
           fill="currentColor"
         >
           <rect x="8" y="22" width="15" height="46" rx="3.5" />
@@ -253,9 +259,7 @@ export const PartnerSpotlightFrame: React.FC<PartnerSpotlightFrameProps> = ({
 
         <div className="relative z-10 space-y-2">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-black font-display text-lg font-bold tracking-tight text-white shadow-sm">
-              {partnerMark}
-            </div>
+            <BrandAvatar name={company} size="md" />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-display text-xs font-bold text-slate-900">
@@ -304,9 +308,7 @@ export const PartnerSpotlightFrame: React.FC<PartnerSpotlightFrameProps> = ({
             {/* Modal Header */}
             <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-black font-display text-lg font-bold text-white shadow-sm">
-                  {partnerMark}
-                </div>
+                <BrandAvatar name={company} size="md" />
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3
