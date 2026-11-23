@@ -151,13 +151,6 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   return (
     <>
-      {/* Top Announcement Bar */}
-      <div className="no-print w-full max-w-full overflow-hidden bg-[#0F172A] px-3 py-2 text-center text-[11px] sm:text-xs font-medium text-slate-200 border-b border-slate-800">
-        <p className="mx-auto max-w-7xl truncate">
-          PlanetAI Hub: Curated Remote AI, RLHF &amp; Voice AI Roles with Transparent USD Pay • Zero Sign-Up Required
-        </p>
-      </div>
-
       {/* Clean, Spacious White Sticky Header */}
       <header className="no-print sticky top-0 z-30 w-full max-w-full overflow-hidden border-b border-slate-200 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6 lg:gap-8">
