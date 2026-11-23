@@ -118,9 +118,38 @@ export const Footer: React.FC<FooterProps> = ({
                     href={MICRO1_COMPANY_REFERRAL_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-semibold leading-snug text-[#1D4ED8] shadow-2xs transition-all duration-200 hover:border-blue-300 hover:bg-blue-50/70"
+                    className="group relative flex items-start gap-3 overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-br from-neutral-50/90 via-white to-zinc-100/80 p-3.5 shadow-2xs transition-all duration-200 hover:border-blue-300 hover:shadow-md"
                   >
-                    Hiring AI Talent? Source Pre-Vetted Engineers via micro1 →
+                    {/* Subtle vertical bar/column watermark in bottom-right */}
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 88 56"
+                      className="pointer-events-none absolute -right-1 -bottom-1 h-14 w-22 text-neutral-900 opacity-[0.07] transition-opacity duration-200 group-hover:opacity-[0.11]"
+                      fill="currentColor"
+                    >
+                      <rect x="6" y="18" width="12" height="38" rx="3" />
+                      <rect x="26" y="8" width="12" height="48" rx="3" />
+                      <rect x="46" y="14" width="12" height="42" rx="3" />
+                      <rect x="66" y="24" width="12" height="32" rx="3" />
+                    </svg>
+
+                    <div className="relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-black font-display text-lg font-bold tracking-tight text-white shadow-sm">
+                      m.
+                    </div>
+
+                    <div className="relative z-10 min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="font-display text-xs font-bold text-slate-900">
+                          micro1
+                        </span>
+                        <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-700">
+                          VERIFIED PARTNER
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs font-semibold leading-snug text-[#1D4ED8] group-hover:text-[#1E40AF]">
+                        Hiring AI Talent? Source Pre-Vetted Engineers via micro1 →
+                      </p>
+                    </div>
                   </a>
                 </li>
                 <li className="text-xs leading-relaxed text-slate-500">
