@@ -294,45 +294,45 @@ export const SecurityVaultTab: React.FC = () => {
   }
 
   const containerClassName = isFullScreen
-    ? 'fixed inset-0 z-50 overflow-y-auto bg-white p-6 sm:p-10'
-    : 'space-y-8 pb-12';
+    ? 'fixed inset-0 z-50 w-full max-w-full overflow-y-auto overflow-x-hidden bg-white p-4 sm:p-10'
+    : 'w-full max-w-full space-y-6 pb-0 overflow-x-hidden';
 
   return (
     <section aria-labelledby="security-vault-heading" className={containerClassName}>
       {/* Top Zero-Knowledge Status Banner */}
-      <div className="rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-900 via-[#111827] to-blue-950 p-6 text-white shadow-xl sm:p-8">
+      <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-blue-50/80 p-5 text-slate-900 shadow-sm sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-300">
-              <Shield className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+          <div className="min-w-0 space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-700">
+              <Shield className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
               <span>UserKey Browser Enclave</span>
             </div>
             <h1
               id="security-vault-heading"
-              className="font-display text-2xl font-bold tracking-tight text-white sm:text-3xl"
+              className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
             >
               Zero-Knowledge Cryptographic Workspace
             </h1>
-            <p className="font-mono text-xs text-slate-300">
+            <p className="font-mono text-xs text-slate-600 break-words">
               UserKey Browser Enclave • 100% Client-Side Web Crypto • Zero Server Transmission
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex shrink-0 items-center gap-2.5">
             <button
               type="button"
               onClick={() => setIsFullScreen((prev) => !prev)}
-              className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-slate-700 bg-white/10 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-white/20 whitespace-nowrap"
+              className="inline-flex min-h-[42px] w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-800 shadow-2xs transition-colors hover:border-slate-300 hover:bg-slate-50 text-center"
             >
-              <Terminal className="h-3.5 w-3.5 text-blue-400" aria-hidden="true" />
+              <Terminal className="h-3.5 w-3.5 shrink-0 text-[#1D4ED8]" aria-hidden="true" />
               <span>{isFullScreen ? 'Exit Full-Screen Vault' : 'Open Full-Screen Security Vault'}</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Sub-Navigation Pills for 4 Cryptographic Utilities */}
-      <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch px-1 pr-8 pb-2">
+      {/* Sub-Navigation Grid for 4 Cryptographic Utilities */}
+      <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
         {[
           { id: 'password', label: 'Password & Passphrase Studio', icon: Key },
           { id: 'entropy', label: 'Entropy & Crack-Time Lab', icon: Zap },
@@ -346,7 +346,7 @@ export const SecurityVaultTab: React.FC = () => {
               key={tab.id}
               type="button"
               onClick={() => setActiveTool(tab.id as VaultToolId)}
-              className={`snap-center shrink-0 inline-flex min-h-[42px] items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold transition-all ${
+              className={`flex min-h-[46px] items-center justify-center gap-2 rounded-xl border px-3 py-2 text-center text-xs font-semibold leading-snug transition-all ${
                 isActive
                   ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-sm'
                   : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
@@ -361,44 +361,46 @@ export const SecurityVaultTab: React.FC = () => {
 
       {/* Tool 1: Password & Diceware Passphrase Studio */}
       {activeTool === 'password' && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-7 sm:p-8 space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-7 sm:p-8 space-y-6 min-w-0">
+            <div className="space-y-4 min-w-0">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="font-display text-lg font-bold text-slate-900">
                   Cryptographic Generator Studio
                 </h3>
-                <div className="flex rounded-lg border border-slate-200 bg-slate-100 p-1">
+                <div className="grid w-full grid-cols-2 gap-1.5 rounded-xl border border-slate-200 bg-slate-100 p-1 sm:w-auto shrink-0">
                   <button
                     type="button"
                     onClick={() => setGenMode('password')}
-                    className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
+                    className={`min-h-[36px] rounded-lg px-3 py-1.5 text-center text-xs font-semibold leading-snug transition-colors ${
                       genMode === 'password' ? 'bg-[#1D4ED8] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    Password
+                    Password Studio
                   </button>
                   <button
                     type="button"
                     onClick={() => setGenMode('diceware')}
-                    className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
+                    className={`min-h-[36px] rounded-lg px-3 py-1.5 text-center text-xs font-semibold leading-snug transition-colors ${
                       genMode === 'diceware' ? 'bg-[#1D4ED8] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    Diceware
+                    Diceware Passphrase
                   </button>
                 </div>
               </div>
 
-              {/* Output Display Box */}
-              <div className="relative flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-base font-bold text-slate-900 shadow-2xs">
-                <span className="break-all pr-12 select-all">{generatedSecret}</span>
-                <div className="absolute right-3 flex items-center gap-1.5">
+              {/* Output Display Box — Non-overlapping responsive action bar */}
+              <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 shadow-2xs sm:flex-row sm:items-center sm:justify-between">
+                <span className="min-w-0 flex-1 break-all font-mono text-sm font-bold leading-relaxed text-slate-900 select-all sm:text-base">
+                  {generatedSecret}
+                </span>
+                <div className="flex shrink-0 items-center justify-end gap-1.5 border-t border-slate-200/80 pt-2.5 sm:border-t-0 sm:pt-0">
                   <button
                     type="button"
                     onClick={handleGenerateSecret}
                     aria-label="Regenerate secret"
-                    className="inline-flex min-h-[36px] min-w-[36px] items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+                    className="inline-flex min-h-[36px] min-w-[36px] items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 shrink-0"
                   >
                     <RefreshCw className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -406,13 +408,13 @@ export const SecurityVaultTab: React.FC = () => {
                     type="button"
                     onClick={() => handleCopySecret(generatedSecret)}
                     aria-label="Copy secret to clipboard"
-                    className={`inline-flex min-h-[36px] items-center gap-1 rounded-lg border px-3 text-xs font-semibold transition-colors ${
+                    className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
                       copied
                         ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
                         : 'border-[#1D4ED8] bg-[#1D4ED8] text-white hover:bg-[#1E40AF]'
                     }`}
                   >
-                    {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copied ? <Check className="h-3.5 w-3.5 shrink-0" /> : <Copy className="h-3.5 w-3.5 shrink-0" />}
                     <span>{copied ? 'Copied (30s clear)' : 'Copy'}</span>
                   </button>
                 </div>
@@ -740,17 +742,17 @@ export const SecurityVaultTab: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700">Base32 Secret Key</label>
-              <div className="mt-1 flex gap-2">
+              <div className="mt-1 flex flex-col gap-2 sm:flex-row">
                 <input
                   type="text"
                   value={totpSecret}
                   onChange={(e) => setTotpSecret(e.target.value)}
-                  className="input-obsidian h-10 flex-1 px-3 font-mono text-xs"
+                  className="input-obsidian h-10 min-w-0 flex-1 px-3 font-mono text-xs"
                 />
                 <button
                   type="button"
                   onClick={() => setTotpSecret('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ')}
-                  className="rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-100 whitespace-nowrap"
+                  className="min-h-[40px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 whitespace-nowrap shrink-0"
                 >
                   Load Demo Secret
                 </button>
@@ -763,7 +765,7 @@ export const SecurityVaultTab: React.FC = () => {
                 {totpCode.slice(0, 3)} {totpCode.slice(3)}
               </p>
               <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
-                <Clock className="h-4 w-4 text-emerald-600 animate-pulse" />
+                <Clock className="h-4 w-4 text-emerald-600" />
                 <span>Refreshes in <strong className="font-mono text-slate-900">{totpSecondsLeft}s</strong></span>
               </div>
             </div>
