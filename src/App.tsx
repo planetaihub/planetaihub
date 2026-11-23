@@ -329,20 +329,28 @@ export default function App() {
     window.scrollTo({ top: targetTop, behavior: 'smooth' });
   };
 
-  const scrollToBriefings = () => {
+  const scrollToBriefings = (instant = false) => {
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
     const performScroll = () => {
-      const stickyHeader = document.querySelector('header');
-      const measuredHeaderHeight = stickyHeader
-        ? Math.round(stickyHeader.getBoundingClientRect().height)
-        : 64;
-      // Tuck section 2px under the sticky header border so zero blue banner sliver ever shows
-      const flushOffset = Math.max(56, measuredHeaderHeight - 2);
-      scrollToElement('editorial-briefings', flushOffset);
+      const targetEl =
+        document.getElementById('editorial-briefings') ||
+        document.getElementById('editorial-briefings-header');
+      if (!targetEl) return;
+      // Sticky top bar is 64px; subtracting 52px tucks the top edge cleanly behind the bar
+      // so zero blue CTA banner sliver ever appears above PLANETAI EDITORIAL • 18 GUIDES.
+      const headerHeight = 52;
+      const y = Math.max(
+        0,
+        targetEl.getBoundingClientRect().top + window.scrollY - headerHeight
+      );
+      window.scrollTo({
+        top: y,
+        behavior: instant ? 'auto' : 'smooth',
+      });
     };
 
     window.requestAnimationFrame(() => {
-      performScroll();
+      window.requestAnimationFrame(performScroll);
     });
   };
 
@@ -421,11 +429,15 @@ export default function App() {
   };
 
   const handleScrollToBriefings = () => {
+    const switchingTab = activeTab !== 'jobs';
     setActiveTab('jobs');
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/editorial-briefings');
     }
-    setTimeout(() => scrollToBriefings(), 100);
+    window.setTimeout(
+      () => scrollToBriefings(switchingTab),
+      switchingTab ? 140 : 40
+    );
   };
 
   const handleLoadCareerPrep = (payload: CareerPrepPayload) => {
@@ -461,12 +473,16 @@ export default function App() {
   };
 
   const handleOpenBriefingById = (briefingId: string) => {
+    const switchingTab = activeTab !== 'jobs';
     setBriefingTrigger({ id: briefingId, nonce: Date.now() });
     setActiveTab('jobs');
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', '/editorial-briefings');
     }
-    setTimeout(() => scrollToBriefings(), 100);
+    window.setTimeout(
+      () => scrollToBriefings(switchingTab),
+      switchingTab ? 140 : 40
+    );
   };
 
   const handleOpenCareerStudioTool = (tool: CareerToolId = 'role-prep') => {
@@ -614,7 +630,7 @@ export default function App() {
 
   // Primary Hub Homepage & Spacious Remote Job Board
   return (
-    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-white text-slate-900">
+    <div className="min-h-screen w-full max-w-full overflow-x-clip bg-white text-slate-900">
       <Navigation
         activeTab={activeTab}
         onSelectTab={(tab) => handleSelectTab(tab)}
@@ -643,7 +659,7 @@ export default function App() {
       </section>
 
       {/* 2. DEDICATED SUITE LAUNCHER GRID + SPACIOUS FULL-WIDTH JOB BOARD */}
-      <main className="w-full max-w-full overflow-x-hidden bg-white">
+      <main className="w-full max-w-full overflow-x-clip bg-white">
         <section
           id="workspace-showcase"
           aria-label="PlanetAI Hub Suites and Job Board"
@@ -822,7 +838,7 @@ export default function App() {
         {/* 5. LIGHT-SLATE EDITORIAL BRIEFINGS HUB (#F8FAFC) */}
         <section
           id="editorial-briefings"
-          className="no-print scroll-mt-16 bg-[#F8FAFC] pt-6 pb-16 sm:pt-8 sm:pb-20"
+          className="no-print scroll-mt-[52px] bg-[#F8FAFC] pt-3 pb-16 sm:pt-5 sm:pb-20"
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <EditorialBriefings
