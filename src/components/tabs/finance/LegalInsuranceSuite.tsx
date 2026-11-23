@@ -72,7 +72,7 @@ export const LegalInsuranceSuite: React.FC = () => {
         <div
           role="tablist"
           aria-label="Business Insurance and Legal Estimators"
-          className="flex w-full items-center overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade gap-1.5"
+          className="flex w-full items-center overflow-x-auto scroll-smooth snap-x no-scrollbar mobile-scroll-fade scroll-touch gap-1.5 px-1 pr-8 py-0.5"
         >
           {LEGAL_TOOLS.map(({ id, label, shortLabel, icon: Icon }) => {
             const isSelected = activeTool === id;
