@@ -1,359 +1,684 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ArrowRight,
+  BookOpen,
+  Briefcase,
+  Check,
   CheckCircle2,
+  Copy,
   ExternalLink,
   FileText,
   MessageSquare,
+  PlayCircle,
+  Printer,
   ShieldCheck,
-  Sparkles,
-  Video,
 } from 'lucide-react';
-import type { SpotlightVideoConfig } from '../types';
+import type { CareerPrepPayload } from '../../../utils/careerPrepTemplates';
 import {
-  HERO_COMPANY_SPOTLIGHTS,
-  type CareerPrepPayload,
-  type HeroCompanySpotlight,
-  resolveSpotlightApplyUrl,
-} from '../utils/careerPrepTemplates';
-import { parsePlayableVideoSource } from '../utils/videoUrl';
-import { BrandAvatar } from './BrandAvatar';
+  ROLE_BUNDLES,
+  getRoleBundleById,
+  type RoleBundleId,
+} from '../../../utils/roleBundles';
 
-interface HeroSpotlightShowcaseProps {
-  customSpotlight?: SpotlightVideoConfig | null;
-  onLoadPrepKit: (payload: CareerPrepPayload) => void;
-  onOpenFeatureVideoModal: () => void;
+interface RolePrepHubToolProps {
+  prepPayload?: CareerPrepPayload | null;
+  onEditResume: (payload: CareerPrepPayload) => void;
+  onPracticeInterview: (payload: CareerPrepPayload) => void;
 }
 
-export const HeroSpotlightShowcase: React.FC<HeroSpotlightShowcaseProps> = ({
-  customSpotlight,
-  onLoadPrepKit,
-  onOpenFeatureVideoModal,
+export const RolePrepHubTool: React.FC<RolePrepHubToolProps> = ({
+  prepPayload,
+  onEditResume,
+  onPracticeInterview,
 }) => {
-  const [selectedId, setSelectedId] = useState<'micro1' | 'mercor' | 'outlier' | 'custom'>(() =>
-    customSpotlight?.videoUrl ? 'custom' : 'micro1'
+  const [selectedBundleId, setSelectedBundleId] = useState<RoleBundleId>(
+    prepPayload?.roleBundleId || 'rlhf'
   );
+  const [copiedKey, setCopiedKey] = useState<'resume' | 'interview' | null>(null);
 
-  const customPlayable = useMemo(
-    () =>
-      customSpotlight?.videoUrl
-        ? parsePlayableVideoSource(customSpotlight.videoUrl)
-        : null,
-    [customSpotlight?.videoUrl]
+  useEffect(() => {
+    if (prepPayload?.roleBundleId) {
+      setSelectedBundleId(prepPayload.roleBundleId);
+    }
+  }, [prepPayload?.nonce, prepPayload?.roleBundleId]);
+
+  const activeBundle = getRoleBundleById(selectedBundleId);
+  const hasMatchingJobMeta = Boolean(
+    prepPayload?.jobMeta && prepPayload?.roleBundleId === selectedBundleId
   );
+  const jobMeta = hasMatchingJobMeta ? prepPayload?.jobMeta : undefined;
 
-  const selectedPreset: HeroCompanySpotlight = useMemo(() => {
-    const found = HERO_COMPANY_SPOTLIGHTS.find((c) => c.id === selectedId);
-    return found ?? HERO_COMPANY_SPOTLIGHTS[0];
-  }, [selectedId]);
+  const displayTitle = jobMeta ? jobMeta.title : activeBundle.title;
+  const displayPayBand = jobMeta ? jobMeta.payRange : activeBundle.payBand;
+  const displaySubline = jobMeta
+    ? `${jobMeta.company} · ${jobMeta.location} · ${jobMeta.type}`
+    : `${activeBundle.contractFormat} · ${activeBundle.timezoneSummary}`;
+  const displayOverview = jobMeta ? jobMeta.summary : activeBundle.overviewSummary;
+  const displayDuties =
+    jobMeta && jobMeta.responsibilities.length > 0
+      ? jobMeta.responsibilities
+      : activeBundle.duties;
+  const displayRequirements =
+    jobMeta && jobMeta.requirements.length > 0
+      ? jobMeta.requirements
+      : activeBundle.requirements;
 
-  const isCustomActive = selectedId === 'custom' && Boolean(customSpotlight && customPlayable);
+  const activeResume =
+    hasMatchingJobMeta && prepPayload?.resume
+      ? {
+          targetTitle: prepPayload.resume.targetTitle,
+          targetCompany: prepPayload.resume.targetCompany,
+          summary: prepPayload.resume.summary,
+          skills: prepPayload.resume.skills,
+          experienceRole:
+            prepPayload.resume.experienceRole || activeBundle.resumeTemplate.experienceRole,
+          experienceBullets:
+            prepPayload.resume.experienceBullets ||
+            activeBundle.resumeTemplate.experienceBullets,
+        }
+      : activeBundle.resumeTemplate;
 
-  const displayCompany = isCustomActive && customSpotlight
-    ? customSpotlight.company
-    : selectedPreset.company;
-  const displayDomain = isCustomActive && customSpotlight
-    ? customSpotlight.domain
-    : selectedPreset.domain;
-  const displayRole = isCustomActive && customSpotlight
-    ? customSpotlight.tagline
-    : selectedPreset.roleTitle;
-  const displayPayBand = isCustomActive && customSpotlight
-    ? customSpotlight.payRange
-    : selectedPreset.payBand;
-  const displayRequirements = isCustomActive && customSpotlight
-    ? [
-        customSpotlight.summary,
-        `Verified transparent USD compensation (${customSpotlight.payRange})`,
-        'Direct employer ATS link with async remote screening',
-      ]
-    : selectedPreset.requirements;
+  const activeInterview =
+    hasMatchingJobMeta && prepPayload?.interview
+      ? {
+          track: prepPayload.interview.track,
+          questionId: prepPayload.interview.questionId,
+          questionPrompt: activeBundle.interviewScript.questionPrompt,
+          interviewerLens: activeBundle.interviewScript.interviewerLens,
+          situation: prepPayload.interview.situation,
+          task: prepPayload.interview.task,
+          action: prepPayload.interview.action,
+          result: prepPayload.interview.result,
+        }
+      : activeBundle.interviewScript;
 
-  const directApplyHref = isCustomActive && customSpotlight
-    ? `https://${customSpotlight.domain.replace(/^https?:\/\//, '')}`
-    : resolveSpotlightApplyUrl(selectedPreset);
+  const handleSelectBundle = (bundleId: RoleBundleId) => {
+    setSelectedBundleId(bundleId);
+  };
 
-  const handleLoadResume = () => {
-    const template = selectedPreset.resumeTemplate;
-    onLoadPrepKit({
+  const scrollToSection = (sectionId: string) => {
+    if (typeof document === 'undefined') return;
+    document
+      .getElementById(sectionId)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const buildResumePlainText = (): string => {
+    return [
+      activeResume.targetTitle,
+      `Target Employer: ${activeResume.targetCompany}`,
+      '',
+      'EXECUTIVE SUMMARY',
+      activeResume.summary,
+      '',
+      'EXPERIENCE',
+      activeResume.experienceRole,
+      activeResume.experienceBullets,
+      '',
+      'CORE SKILLS',
+      activeResume.skills,
+    ].join('\n');
+  };
+
+  const buildInterviewPlainText = (): string => {
+    return [
+      `Track: ${activeInterview.track}`,
+      `Question: ${activeInterview.questionPrompt}`,
+      '',
+      `Situation: ${activeInterview.situation}`,
+      `Task: ${activeInterview.task}`,
+      `Action: ${activeInterview.action}`,
+      `Result: ${activeInterview.result}`,
+    ].join('\n');
+  };
+
+  const handleCopy = async (kind: 'resume' | 'interview') => {
+    const text =
+      kind === 'resume' ? buildResumePlainText() : buildInterviewPlainText();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedKey(kind);
+      setTimeout(() => setCopiedKey(null), 1800);
+    } catch {
+      // Clipboard permission ignored
+    }
+  };
+
+  const handleLaunchResumeBuilder = () => {
+    onEditResume({
       nonce: Date.now(),
       targetTool: 'resume',
-      sourceLabel: `${displayCompany} · ${displayRole}`,
-      roleBundleId: selectedPreset.roleBundleId,
-      companyDomain: displayDomain,
-      applyUrl: directApplyHref,
-      payBand: displayPayBand,
-      customVideoUrl:
-        isCustomActive && customSpotlight ? customSpotlight.videoUrl : undefined,
-      resume: {
-        targetTitle: isCustomActive ? displayRole : template.targetTitle,
-        targetCompany: displayCompany,
-        summary: isCustomActive && customSpotlight
-          ? customSpotlight.summary
-          : template.summary,
-        skills: template.skills,
-        experienceRole: template.role,
-        experienceBullets: template.bullets,
+      roleBundleId: selectedBundleId,
+      sourceLabel: jobMeta
+        ? `${jobMeta.title} @ ${jobMeta.company}`
+        : activeBundle.shortLabel,
+      jobMeta,
+      resume: activeResume,
+      interview: {
+        track: activeInterview.track,
+        questionId: activeInterview.questionId,
+        situation: activeInterview.situation,
+        task: activeInterview.task,
+        action: activeInterview.action,
+        result: activeInterview.result,
       },
-      interview: selectedPreset.interviewTemplate,
     });
   };
 
-  const handleLoadInterview = () => {
-    onLoadPrepKit({
+  const handleLaunchInterviewTool = () => {
+    onPracticeInterview({
       nonce: Date.now(),
       targetTool: 'interview',
-      sourceLabel: `${displayCompany} · Mock Interview Script`,
-      roleBundleId: selectedPreset.roleBundleId,
-      companyDomain: displayDomain,
-      applyUrl: directApplyHref,
-      payBand: displayPayBand,
-      customVideoUrl:
-        isCustomActive && customSpotlight ? customSpotlight.videoUrl : undefined,
-      resume: {
-        targetTitle: isCustomActive ? displayRole : selectedPreset.resumeTemplate.targetTitle,
-        targetCompany: displayCompany,
-        summary: isCustomActive && customSpotlight
-          ? customSpotlight.summary
-          : selectedPreset.resumeTemplate.summary,
-        skills: selectedPreset.resumeTemplate.skills,
-        experienceRole: selectedPreset.resumeTemplate.role,
-        experienceBullets: selectedPreset.resumeTemplate.bullets,
+      roleBundleId: selectedBundleId,
+      sourceLabel: jobMeta
+        ? `${jobMeta.title} @ ${jobMeta.company}`
+        : activeBundle.shortLabel,
+      jobMeta,
+      resume: activeResume,
+      interview: {
+        track: activeInterview.track,
+        questionId: activeInterview.questionId,
+        situation: activeInterview.situation,
+        task: activeInterview.task,
+        action: activeInterview.action,
+        result: activeInterview.result,
       },
-      interview: selectedPreset.interviewTemplate,
     });
   };
 
   return (
-    <section className="no-print bg-gradient-to-b from-slate-50 via-white to-white text-slate-900">
-      <div className="mx-auto max-w-7xl px-4 pt-7 pb-9 sm:px-6 sm:pt-10 sm:pb-12">
-        {/* Compact Editorial Intro Strip Engineered to Keep Full Split Above the Fold */}
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#1D4ED8]">
-              1 Click, You Have It All · Remote AI Careers &amp; Prep Kits
-            </p>
-            <h1 className="mt-2 font-display text-3xl font-bold leading-[1.08] tracking-tight text-slate-900 sm:text-4xl lg:text-[2.75rem] text-balance">
-              Transparent-pay remote AI roles, prepared in one click
-            </h1>
-          </div>
-          <p className="max-w-md text-xs leading-relaxed text-slate-600 sm:text-sm">
-            Watch vetted company walkthroughs, launch your tailored resume &amp; mock interview script, and apply direct via verified USD ATS links.
+    <div className="space-y-8">
+      {/* Top 4-Track Selector + Quick 5-Section Anchor Strip */}
+      <div className="no-print space-y-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Select Specialty Track (1-Click 5-in-1 Role Bundle)
           </p>
+          <div
+            role="tablist"
+            aria-label="Specialty role tracks"
+            className="mt-2.5 flex flex-wrap items-center gap-2"
+          >
+            {ROLE_BUNDLES.map((bundle) => {
+              const isSelected = bundle.id === selectedBundleId;
+              return (
+                <button
+                  key={bundle.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => handleSelectBundle(bundle.id)}
+                  className={`inline-flex min-h-[42px] items-center rounded-full border px-4 py-2 text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                    isSelected
+                      ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-sm'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
+                >
+                  {bundle.shortLabel}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* 2-Column Side-by-Side Split Showcase (Immediate Above-the-Fold View) */}
-        <div className="mt-6 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12 lg:gap-7">
-          {/* LEFT COLUMN: Featured Company Video Theatre */}
-          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-md lg:col-span-7 sm:p-6">
-            <div className="space-y-3.5">
-              {/* Company Switcher Pills + Employer CTA */}
-              <div className="flex flex-wrap items-center justify-between gap-2.5">
-                <div
-                  role="tablist"
-                  aria-label="Featured company spotlights"
-                  className="flex flex-wrap items-center gap-2"
-                >
-                  {HERO_COMPANY_SPOTLIGHTS.map((item) => {
-                    const isSelected = selectedId === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        role="tab"
-                        aria-selected={isSelected}
-                        onClick={() => setSelectedId(item.id)}
-                        className={`inline-flex min-h-[36px] items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
-                          isSelected
-                            ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-xs'
-                            : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>{item.company}</span>
-                      </button>
-                    );
-                  })}
+        {/* Clean Unboxed Section Jump Navigation */}
+        <nav
+          aria-label="Role bundle sections"
+          className="flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-slate-200 py-3 text-xs font-medium text-slate-600"
+        >
+          <span className="font-semibold text-slate-900">Jump to:</span>
+          <button
+            type="button"
+            onClick={() => scrollToSection('bundle-overview')}
+            className="hover:text-[#1D4ED8] hover:underline whitespace-nowrap"
+          >
+            01. Role Overview &amp; USD Pay
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection('bundle-video')}
+            className="hover:text-[#1D4ED8] hover:underline whitespace-nowrap"
+          >
+            02. Video Tutorial
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection('bundle-guide')}
+            className="hover:text-[#1D4ED8] hover:underline whitespace-nowrap"
+          >
+            03. Editorial Guide
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection('bundle-resume')}
+            className="hover:text-[#1D4ED8] hover:underline whitespace-nowrap"
+          >
+            04. Tailored Resume
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection('bundle-interview')}
+            className="hover:text-[#1D4ED8] hover:underline whitespace-nowrap"
+          >
+            05. Mock Interview Script
+          </button>
+        </nav>
+      </div>
 
-                  {customSpotlight && customPlayable && (
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={selectedId === 'custom'}
-                      onClick={() => setSelectedId('custom')}
-                      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
-                        selectedId === 'custom'
-                          ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white shadow-xs'
-                          : 'border-blue-200 bg-blue-50 text-[#1D4ED8] hover:bg-blue-100'
-                      }`}
-                    >
-                      <Sparkles className="h-3 w-3" aria-hidden="true" />
-                      <span>{customSpotlight.company}</span>
-                    </button>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={onOpenFeatureVideoModal}
-                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-[#1D4ED8]/40 hover:bg-blue-50/50 hover:text-[#1D4ED8] whitespace-nowrap"
-                >
-                  <Video className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>Feature Your Company Video</span>
-                </button>
-              </div>
-
-              {/* 16:9 Playable Privacy-Enhanced Video Frame */}
-              <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-sm">
-                {isCustomActive && customPlayable ? (
-                  customPlayable.kind === 'html5' ? (
-                    <video
-                      key={customPlayable.src}
-                      src={customPlayable.src}
-                      controls
-                      playsInline
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <iframe
-                      key={customPlayable.embedUrl}
-                      src={customPlayable.embedUrl}
-                      title={`${displayCompany} Company Video Spotlight`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      className="h-full w-full border-0"
-                    />
-                  )
-                ) : (
-                  <iframe
-                    key={selectedPreset.youtubeId}
-                    src={`https://www.youtube-nocookie.com/embed/${selectedPreset.youtubeId}?rel=0`}
-                    title={`${selectedPreset.company} — ${selectedPreset.videoLabel}`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    className="h-full w-full border-0"
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* Clean Unboxed Metadata Footer */}
-            <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-[#1D4ED8]">
-                  Role Walkthrough
-                </span>
-                <span aria-hidden="true" className="text-slate-300">
-                  ·
-                </span>
-                <span className="font-medium text-slate-800">
-                  {isCustomActive
-                    ? `${displayCompany} Commercial Video Spotlight`
-                    : selectedPreset.videoLabel}
-                </span>
-              </div>
-              <span className="text-[11px] text-slate-500">
-                100% Browser-Local · Zero Sign-Up
+      {/* SECTION 01: Role Overview & Verified USD Job Description */}
+      <section
+        id="bundle-overview"
+        aria-labelledby="bundle-overview-heading"
+        className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+      >
+        <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
+              <span className="font-semibold text-[#1D4ED8]">
+                01. Role Overview
               </span>
+              <span aria-hidden="true">·</span>
+              <span>{displaySubline}</span>
             </div>
+            <h3
+              id="bundle-overview-heading"
+              className="font-display text-2xl font-bold tracking-tight text-slate-900 text-balance"
+            >
+              {displayTitle}
+            </h3>
+            <p className="max-w-3xl text-sm leading-relaxed text-slate-600">
+              {displayOverview}
+            </p>
           </div>
 
-          {/* RIGHT COLUMN: Instant Tailored Candidate Prep Card */}
-          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-xl lg:col-span-5 sm:p-6">
-            <div>
-              <div className="flex items-center gap-3 min-w-0">
-                <BrandAvatar
-                  name={displayCompany}
-                  domain={displayDomain}
-                  size="md"
-                />
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-[#1D4ED8]">
-                    Tailored Candidate Prep Kit
-                  </p>
-                  <h2 className="truncate font-display text-xl font-bold text-slate-900">
-                    {displayCompany}
-                  </h2>
-                  <p className="truncate text-xs font-medium text-slate-500">
-                    {displayRole}
-                  </p>
-                </div>
-              </div>
+          <div className="shrink-0 rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-3 text-left lg:text-right">
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-emerald-800">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Verified USD Pay</span>
+            </p>
+            <p className="mt-0.5 font-mono text-lg font-bold text-emerald-700 tabular-nums whitespace-nowrap">
+              {displayPayBand}
+            </p>
+          </div>
+        </div>
 
-              {/* Verified USD Pay Band Box */}
-              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
-                    <ShieldCheck className="h-4 w-4 text-emerald-700" aria-hidden="true" />
-                    <span>Verified USD Pay</span>
-                  </span>
-                  <span className="font-mono text-base font-bold text-emerald-700 tabular-nums">
-                    {displayPayBand}
-                  </span>
-                </div>
-                {!isCustomActive && (
-                  <p className="mt-1 text-[11px] text-slate-600">
-                    <strong className="text-slate-800">Screening:</strong>{' '}
-                    {selectedPreset.screeningFocus}
-                  </p>
-                )}
-              </div>
+        <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <div>
+            <h4 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-900">
+              <Briefcase className="h-3.5 w-3.5 text-[#1D4ED8]" aria-hidden="true" />
+              <span>Typical Day-to-Day Duties</span>
+            </h4>
+            <ul className="mt-3 space-y-2.5">
+              {displayDuties.map((duty, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-start gap-2.5 text-sm leading-relaxed text-slate-700"
+                >
+                  <CheckCircle2
+                    className="mt-1 h-4 w-4 shrink-0 text-[#1D4ED8]"
+                    aria-hidden="true"
+                  />
+                  <span>{duty}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-              {/* Key Role Requirements */}
-              <div className="mt-4">
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                  Key Role Requirements
-                </h3>
-                <ul className="mt-2.5 space-y-2">
-                  {displayRequirements.map((req, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-start gap-2.5 text-xs leading-relaxed text-slate-700"
-                    >
-                      <CheckCircle2
-                        className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#1D4ED8]"
-                        aria-hidden="true"
-                      />
-                      <span>{req}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+          <div>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-900">
+              Baseline Requirements
+            </h4>
+            <ul className="mt-3 space-y-2.5">
+              {displayRequirements.map((req, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-start gap-2.5 text-sm leading-relaxed text-slate-700"
+                >
+                  <Check
+                    className="mt-1 h-4 w-4 shrink-0 text-emerald-600"
+                    aria-hidden="true"
+                  />
+                  <span>{req}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
-            {/* 3 Tailored 1-Click Preparation Actions */}
-            <div className="mt-5 space-y-2 border-t border-slate-100 pt-4">
-              <button
-                type="button"
-                onClick={handleLoadResume}
-                className="inline-flex min-h-[42px] w-full items-center justify-center gap-2 rounded-full bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF] text-center"
-              >
-                <FileText className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>Load Tailored Resume Template</span>
-                <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              </button>
-
-              <button
-                type="button"
-                onClick={handleLoadInterview}
-                className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-full border border-blue-200 bg-blue-50/70 px-4 py-2 text-xs font-semibold text-[#1D4ED8] transition-colors hover:border-[#1D4ED8] hover:bg-blue-100/70 text-center"
-              >
-                <MessageSquare className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>Open Mock Interview Script</span>
-              </button>
-
+        {/* Verified Direct ATS Apply Destinations */}
+        <div className="mt-7 border-t border-slate-200 pt-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Direct Employer ATS Destinations
+            </h4>
+            {jobMeta && (
               <a
-                href={directApplyHref}
+                href={jobMeta.applyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-800 transition-colors hover:border-slate-300 hover:bg-slate-50 text-center"
+                className="inline-flex min-h-[38px] items-center gap-1.5 rounded-full bg-[#1D4ED8] px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF]"
               >
-                <span>Apply Direct (Verified ATS)</span>
-                <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span>Apply Directly at {jobMeta.company}</span>
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
               </a>
+            )}
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {activeBundle.employerLinks.map((employer) => (
+              <a
+                key={employer.company}
+                href={employer.applyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:border-[#1D4ED8]/50 hover:bg-white"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-display text-sm font-bold text-slate-900 group-hover:text-[#1D4ED8]">
+                      {employer.company}
+                    </span>
+                    <ExternalLink
+                      className="h-3.5 w-3.5 shrink-0 text-slate-400 group-hover:text-[#1D4ED8]"
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <p className="mt-1 font-mono text-xs font-semibold text-emerald-700 tabular-nums">
+                    {employer.payBand}
+                  </p>
+                </div>
+                <p className="mt-2 text-xs text-slate-600">{employer.note}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 02 & 03: Video Tutorial + Tailored Editorial Guide */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* SECTION 02: Embedded Video Tutorial */}
+        <section
+          id="bundle-video"
+          aria-labelledby="bundle-video-heading"
+          className="scroll-mt-24 flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-6"
+        >
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+              <span className="inline-flex items-center gap-1.5 font-semibold text-[#1D4ED8]">
+                <PlayCircle className="h-4 w-4" aria-hidden="true" />
+                <span>02. Video Tutorial</span>
+              </span>
+              <span>
+                {activeBundle.video.instructor} · {activeBundle.video.duration}
+              </span>
+            </div>
+
+            <h3
+              id="bundle-video-heading"
+              className="mt-2 font-display text-lg font-bold text-slate-900 text-balance"
+            >
+              {activeBundle.video.title}
+            </h3>
+
+            <div className="mt-4 aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900">
+              <iframe
+                key={activeBundle.video.youtubeId}
+                src={`https://www.youtube-nocookie.com/embed/${activeBundle.video.youtubeId}?rel=0`}
+                title={activeBundle.video.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="h-full w-full border-0"
+              />
+            </div>
+          </div>
+
+          <p className="mt-4 border-t border-slate-100 pt-3.5 text-xs leading-relaxed text-slate-600">
+            <strong className="font-semibold text-slate-800">Focus while watching:</strong>{' '}
+            {activeBundle.video.watchTip}
+          </p>
+        </section>
+
+        {/* SECTION 03: Tailored Editorial Guide */}
+        <section
+          id="bundle-guide"
+          aria-labelledby="bundle-guide-heading"
+          className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-6"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+            <span className="inline-flex items-center gap-1.5 font-semibold text-[#1D4ED8]">
+              <BookOpen className="h-4 w-4" aria-hidden="true" />
+              <span>03. Editorial Rubric Briefing</span>
+            </span>
+            <span>{activeBundle.editorialGuide.readTime}</span>
+          </div>
+
+          <h3
+            id="bundle-guide-heading"
+            className="mt-2 font-display text-lg font-bold text-slate-900 text-balance"
+          >
+            {activeBundle.editorialGuide.title}
+          </h3>
+
+          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-600">
+              Key Passing Criteria
+            </p>
+            <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-slate-700">
+              {activeBundle.editorialGuide.keyTakeaways.map((point, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="font-mono font-bold text-[#1D4ED8]">•</span>
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-5 space-y-4">
+            {activeBundle.editorialGuide.sections.map((section) => (
+              <div key={section.heading}>
+                <h4 className="text-sm font-bold text-slate-900">
+                  {section.heading}
+                </h4>
+                <p className="mt-1 text-xs leading-relaxed text-slate-600">
+                  {section.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* SECTION 04: Ready-to-Edit Tailored Resume */}
+      <section
+        id="bundle-resume"
+        aria-labelledby="bundle-resume-heading"
+        className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+      >
+        <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1D4ED8]">
+              <FileText className="h-4 w-4" aria-hidden="true" />
+              <span>04. Ready-to-Edit Tailored Resume</span>
+            </span>
+            <h3
+              id="bundle-resume-heading"
+              className="mt-1 font-display text-xl font-bold text-slate-900"
+            >
+              {activeResume.targetTitle}
+            </h3>
+            <p className="text-xs text-slate-500">
+              ATS-formatted structure ready to personalize with your contact info and portfolio.
+            </p>
+          </div>
+
+          <div className="no-print flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => handleCopy('resume')}
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 whitespace-nowrap"
+            >
+              {copiedKey === 'resume' ? (
+                <>
+                  <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
+                  <span className="text-emerald-700">Copied ATS Text</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
+                  <span>Copy ATS Text</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 whitespace-nowrap"
+            >
+              <Printer className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
+              <span>Print / PDF</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleLaunchResumeBuilder}
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-[#1D4ED8] px-5 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF] whitespace-nowrap"
+            >
+              <span>Open &amp; Edit in Resume Builder</span>
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-6 font-sans text-slate-800 sm:p-7">
+          <div className="border-b border-slate-200 pb-3">
+            <p className="text-base font-bold text-slate-950">
+              [Your Full Name] — {activeResume.targetTitle}
+            </p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Target Employer: {activeResume.targetCompany} · Remote Async · Portfolio / GitHub Link
+            </p>
+          </div>
+
+          <div className="mt-4 space-y-4 text-xs leading-relaxed">
+            <div>
+              <p className="font-bold uppercase tracking-wider text-slate-500">
+                Executive Summary
+              </p>
+              <p className="mt-1 text-slate-700">{activeResume.summary}</p>
+            </div>
+
+            <div>
+              <p className="font-bold uppercase tracking-wider text-slate-500">
+                Representative Experience — {activeResume.experienceRole}
+              </p>
+              <p className="mt-1 whitespace-pre-line text-slate-700">
+                {activeResume.experienceBullets}
+              </p>
+            </div>
+
+            <div>
+              <p className="font-bold uppercase tracking-wider text-slate-500">
+                Core Skills
+              </p>
+              <p className="mt-1 text-slate-700">{activeResume.skills}</p>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* SECTION 05: Ready-to-Practice Mock Interview Script */}
+      <section
+        id="bundle-interview"
+        aria-labelledby="bundle-interview-heading"
+        className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+      >
+        <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1D4ED8]">
+              <MessageSquare className="h-4 w-4" aria-hidden="true" />
+              <span>05. Mock Interview STAR Script</span>
+            </span>
+            <h3
+              id="bundle-interview-heading"
+              className="mt-1 font-display text-xl font-bold text-slate-900 text-balance"
+            >
+              {activeInterview.questionPrompt}
+            </h3>
+            <p className="mt-1 text-xs text-slate-500">
+              <strong className="font-semibold text-slate-700">Interviewer lens:</strong>{' '}
+              {activeInterview.interviewerLens}
+            </p>
+          </div>
+
+          <div className="no-print flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => handleCopy('interview')}
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 whitespace-nowrap"
+            >
+              {copiedKey === 'interview' ? (
+                <>
+                  <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
+                  <span className="text-emerald-700">Copied Script</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
+                  <span>Copy Script</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleLaunchInterviewTool}
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-[#1D4ED8] px-5 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1E40AF] whitespace-nowrap"
+            >
+              <span>Practice in Mock Interview Tool</span>
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#1D4ED8]">
+              S — Situation
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-700">
+              {activeInterview.situation}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#1D4ED8]">
+              T — Task
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-700">
+              {activeInterview.task}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#1D4ED8]">
+              A — Action
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-700">
+              {activeInterview.action}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#1D4ED8]">
+              R — Result
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-700">
+              {activeInterview.result}
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 };
