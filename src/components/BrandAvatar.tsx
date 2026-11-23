@@ -80,9 +80,9 @@ interface SignatureBrandTileStyle {
 const SIGNATURE_BRAND_TILES: Record<string, SignatureBrandTileStyle> = {
   micro1: {
     mark: 'm.',
-    bgClass: 'bg-[#0A0A0A]',
+    bgClass: 'bg-black',
     textClass: 'text-white',
-    borderClass: 'border border-slate-900',
+    borderClass: 'border border-black',
   },
   'scale ai': {
     mark: 'S/',
@@ -357,10 +357,29 @@ export const BrandAvatar: React.FC<BrandAvatarProps> = ({
 }) => {
   const resolvedDomain = resolveBrandDomain(name, domain);
   const [hasError, setHasError] = useState(false);
+  const isMicro1 = (name || '').trim().toLowerCase().includes('micro1');
 
   useEffect(() => {
     setHasError(false);
   }, [resolvedDomain, name]);
+
+  if (isMicro1) {
+    const micro1SizeClasses =
+      size === 'xs'
+        ? 'w-6 h-6 rounded-md text-[11px]'
+        : size === 'sm'
+        ? 'w-9 h-9 rounded-lg text-sm'
+        : 'w-11 h-11 rounded-xl text-base';
+
+    return (
+      <div
+        aria-hidden="true"
+        className={`shrink-0 flex items-center justify-center bg-black font-display font-bold tracking-tight text-white shadow-sm select-none ${micro1SizeClasses} ${className}`}
+      >
+        <span>m.</span>
+      </div>
+    );
+  }
 
   const surfaceClasses =
     variant === 'dark'
