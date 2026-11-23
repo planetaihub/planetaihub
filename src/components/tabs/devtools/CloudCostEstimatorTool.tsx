@@ -536,7 +536,7 @@ Potential Annual Savings vs AWS: $${(maxSavings * 12).toFixed(0)} (${savingsPerc
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scroll-touch">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/50 text-slate-600 font-semibold">
