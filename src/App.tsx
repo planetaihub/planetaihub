@@ -320,7 +320,7 @@ export default function App() {
     writeJson(STORAGE_KEYS.SPOTLIGHT_VIDEO, config);
   };
 
-  const scrollToElement = (elementId: string, headerOffset = 72) => {
+  const scrollToElement = (elementId: string, headerOffset = 64) => {
     if (typeof document === 'undefined' || typeof window === 'undefined') return;
     const el = document.getElementById(elementId);
     if (!el) return;
@@ -331,13 +331,18 @@ export default function App() {
 
   const scrollToBriefings = () => {
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    const performScroll = () => {
+      const stickyHeader = document.querySelector('header');
+      const measuredHeaderHeight = stickyHeader
+        ? Math.round(stickyHeader.getBoundingClientRect().height)
+        : 64;
+      // Tuck section 2px under the sticky header border so zero blue banner sliver ever shows
+      const flushOffset = Math.max(56, measuredHeaderHeight - 2);
+      scrollToElement('editorial-briefings', flushOffset);
+    };
+
     window.requestAnimationFrame(() => {
-      const headerTarget = document.getElementById('editorial-briefings-header');
-      if (headerTarget) {
-        scrollToElement('editorial-briefings-header', 76);
-      } else {
-        scrollToElement('editorial-briefings', 64);
-      }
+      performScroll();
     });
   };
 
@@ -817,7 +822,7 @@ export default function App() {
         {/* 5. LIGHT-SLATE EDITORIAL BRIEFINGS HUB (#F8FAFC) */}
         <section
           id="editorial-briefings"
-          className="no-print scroll-mt-16 bg-[#F8FAFC] pt-10 pb-16 sm:pt-14 sm:pb-20"
+          className="no-print scroll-mt-16 bg-[#F8FAFC] pt-6 pb-16 sm:pt-8 sm:pb-20"
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <EditorialBriefings
