@@ -393,24 +393,24 @@ export const WorkspaceStudioTab: React.FC = () => {
       {toastMessage && <ShareToast message={toastMessage} />}
 
       {/* Header Banner */}
-      <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-6 text-white shadow-xl sm:p-8">
+      <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-blue-50/70 p-6 text-slate-900 shadow-sm sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-300">
-              <Sparkles className="h-3.5 w-3.5 shrink-0 text-blue-400" />
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+              <Sparkles className="h-3.5 w-3.5 shrink-0 text-blue-600" />
               <span>Offline-Ready Professional Suite</span>
             </div>
-            <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+            <h1 className="mt-3 font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
               Workspace &amp; Docs Studio
             </h1>
-            <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-300 sm:text-sm">
+            <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-600 sm:text-sm">
               9 interactive, browser-local productivity workspaces. Manage Notion docs, Trello boards, ClickUp sprints, GHL pipelines, Monday grids, Canva banners, Docs, Sheets, and Slides entirely client-side with zero external login required.
             </p>
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 text-xs font-semibold text-emerald-300">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
               <span>Auto-Saved Locally</span>
             </span>
           </div>
