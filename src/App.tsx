@@ -36,6 +36,7 @@ import { ProductivityTab } from './components/tabs/ProductivityTab';
 import { VideoAcademyTab } from './components/tabs/VideoAcademyTab';
 import { VaAcademyTab } from './components/tabs/VaAcademyTab';
 import { SecurityVaultTab } from './components/tabs/SecurityVaultTab';
+import { WorkspaceStudioTab } from './components/tabs/WorkspaceStudioTab';
 import type { JobListing, SpotlightVideoConfig, TabId } from './types';
 import {
   buildJobPrepPayload,
@@ -113,6 +114,11 @@ const SUITE_SEO_DATA: Record<TabId, { title: string; description: string }> = {
     description:
       'Deep-dive editorial guides covering RLHF evaluation rubrics, studio voice acoustics, structured prompt schemas, and remote USD contractor math.',
   },
+  'workspace-studio': {
+    title: 'Workspace & Docs Studio — Notion, Trello, ClickUp & Canva Tools | PlanetAI Hub',
+    description:
+      'Browser-local Notion workspace builder, Trello kanban board, ClickUp sprint planner, GoHighLevel CRM, Monday grid, Canva banner studio, Docs, Sheets & Slides.',
+  },
 };
 
 interface RouteResolution {
@@ -181,6 +187,10 @@ const normalizeRouteToTab = (routeCandidate: string): RouteResolution => {
 
   if (clean.startsWith('live-earning') || clean === 'earning') {
     return { tab: 'live-earning' };
+  }
+
+  if (clean.startsWith('workspace-studio') || clean === 'workspace' || clean === 'studio') {
+    return { tab: 'workspace-studio' };
   }
 
   return { tab: 'jobs' };
@@ -511,6 +521,8 @@ export default function App() {
         return <VaAcademyTab />;
       case 'security-vault':
         return <SecurityVaultTab />;
+      case 'workspace-studio':
+        return <WorkspaceStudioTab />;
       case 'editorial-briefings':
         return (
           <div className="space-y-8">
