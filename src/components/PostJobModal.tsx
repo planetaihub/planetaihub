@@ -1,3 +1,5 @@
+// /src/components/PostJobModal.tsx
+
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, ExternalLink, Sparkles, Video, X } from 'lucide-react';
 import type {
@@ -6,12 +8,12 @@ import type {
   JobRoleLevel,
   RemoteRegion,
   SpotlightVideoConfig,
-} from '../types';
-import { BrandAvatar, resolveBrandDomain } from './BrandAvatar';
+} from '@/src/types';
+import { BrandAvatar, resolveBrandDomain } from '@/src/components/BrandAvatar';
 import {
   MICRO1_COMPANY_REFERRAL_URL,
   resolveApplyUrl,
-} from '../utils/referralLinks';
+} from '@/src/utils/referralLinks';
 
 export type PostJobTier = 'standard' | 'featured' | 'video-spotlight';
 
@@ -23,7 +25,8 @@ interface PostJobModalProps {
   onSubmitVideoSpotlight?: (config: SpotlightVideoConfig) => void;
 }
 
-const PAYPAL_FEATURED_URL = 'https://paypal.com';
+const PAYPAL_FEATURED_URL = 'https://paypal.me/vonambion/79USD';
+const PAYPAL_VIDEO_SPOTLIGHT_URL = 'https://paypal.me/vonambion/249USD';
 const STANDARD_CONTACT_EMAIL = 'team@planetaihub.com';
 const VIDEO_SPOTLIGHT_CONTACT_EMAIL = 'planetai.operations@gmail.com';
 
@@ -156,8 +159,8 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
       setError('Intro Video URL must start with https:// (YouTube, Vimeo, Loom, or MP4 link).');
       return;
     }
-    if (isFeatured && !trimmedTxnId) {
-      setError('Please enter your PayPal Transaction ID as proof of payment for Featured Spotlight.');
+    if (isPaidTier && !trimmedTxnId) {
+      setError('Please enter your PayPal Transaction ID as proof of payment.');
       return;
     }
 
@@ -228,17 +231,17 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
         body: JSON.stringify({
           _subject: `[PlanetAI Hub] ${
             isVideoSpotlight
-              ? 'VIDEO SPOTLIGHT APPLICATION: '
+              ? 'VIDEO SPOTLIGHT ($249) APPLICATION: '
               : isFeatured
-              ? 'FEATURED ($29) '
-              : 'Free '
+              ? 'FEATURED PIN ($79) '
+              : 'Free Standard Listing '
           }${trimmedTitle} @ ${trimmedCompany}`,
           tier: isVideoSpotlight
-            ? 'Video Spotlight Feature'
+            ? 'Flagship Video & Prep Spotlight ($249 USD / 30 Days)'
             : isFeatured
-            ? 'Featured Spotlight ($29 USD / 30 days)'
-            : 'Standard Listing ($0 Free)',
-          paypal_transaction_id: isFeatured ? trimmedTxnId : 'N/A',
+            ? 'Featured Role Pin ($79 USD / 30 Days)'
+            : 'Standard Transparent Listing ($0 FREE)',
+          paypal_transaction_id: isPaidTier ? trimmedTxnId : 'N/A',
           employer_email: trimmedEmail || 'Not provided',
           company_intro_video_url: isVideoSpotlight
             ? trimmedVideoUrl || 'To be provided via email'
@@ -258,7 +261,7 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
     }
 
     setSubmitting(false);
-    setSubmittedTxnId(isFeatured ? trimmedTxnId : '');
+    setSubmittedTxnId(isPaidTier ? trimmedTxnId : '');
     setSubmittedTier(tier);
 
     setTitle('');
@@ -299,8 +302,10 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
               className="mt-1 font-display text-2xl font-bold text-slate-900"
             >
               {tier === 'video-spotlight'
-                ? 'Submit Company Video Spotlight'
-                : 'Post a Remote Role'}
+                ? 'Flagship Video & Prep Spotlight ($249)'
+                : tier === 'featured'
+                ? 'Featured Role Pin ($79)'
+                : 'Post a Standard Remote Role (Free)'}
             </h2>
             <p className="mt-1 text-xs text-slate-600">
               Every PlanetAI Hub listing requires transparent USD pay and a direct ATS link.
@@ -328,23 +333,24 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                   Video Spotlight Application Received!
                 </h3>
                 <p className="text-xs leading-relaxed text-slate-600">
-                  Your company spotlight request and role listing have been routed to our Video Spotlight desk at{' '}
+                  Your $249 Flagship Video &amp; Prep Spotlight request and PayPal receipt{' '}
+                  <span className="font-mono font-semibold text-emerald-700">{submittedTxnId}</span> have been routed to{' '}
                   <a
                     href={`mailto:${submittedContactEmail}`}
                     className="font-mono font-semibold text-[#1D4ED8] underline"
                   >
                     {submittedContactEmail}
                   </a>
-                  . Your opening is also live in the directory now.
+                  . Your hero spotlight and live role are being activated.
                 </p>
               </div>
             ) : submittedTier === 'featured' ? (
               <div className="space-y-3">
                 <h3 className="font-display text-xl font-bold text-slate-900">
-                  Featured Role Submitted!
+                  Featured Role Pin Submitted!
                 </h3>
                 <p className="text-xs leading-relaxed text-slate-600">
-                  Your listing and PayPal Transaction ID{' '}
+                  Your $79 Featured Role Pin and PayPal Transaction ID{' '}
                   <span className="font-mono font-semibold text-emerald-700">
                     {submittedTxnId}
                   </span>{' '}
@@ -353,7 +359,7 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                     {submittedContactEmail}
                   </span>
                   . Your role is now pinned in the{' '}
-                  <strong className="text-slate-900">Featured Spotlight</strong>.
+                  <strong className="text-slate-900">Top Openings Grid</strong>.
                 </p>
               </div>
             ) : (
@@ -387,11 +393,13 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
               </p>
             )}
 
+            {/* 3 Employer Submission Tiers */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {/* Flagship Video Spotlight ($249) */}
               <button
                 type="button"
                 onClick={() => setTier('video-spotlight')}
-                className={`flex flex-col items-start rounded-xl border p-3.5 text-left transition ${
+                className={`relative flex flex-col items-start rounded-xl border p-3.5 text-left transition ${
                   tier === 'video-spotlight'
                     ? 'border-[#1D4ED8] bg-blue-50/70 shadow-sm'
                     : 'border-slate-200 bg-slate-50 hover:border-slate-300'
@@ -400,35 +408,41 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                 <div className="flex w-full items-center justify-between gap-1">
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1D4ED8]">
                     <Video className="h-3.5 w-3.5 shrink-0" />
-                    Video Spotlight Feature
+                    Video Spotlight
                   </span>
+                  <span className="font-mono text-xs font-bold text-[#1D4ED8]">$249</span>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-600">
-                  16:9 hero video showcase + pay band badge via {VIDEO_SPOTLIGHT_CONTACT_EMAIL}.
+                  16:9 Hero Showcase + custom video &amp; Prep Kit for 30 days.
                 </p>
               </button>
 
+              {/* Featured Role Pin ($79) */}
               <button
                 type="button"
                 onClick={() => setTier('featured')}
-                className={`flex flex-col items-start rounded-xl border p-3.5 text-left transition ${
+                className={`relative flex flex-col items-start rounded-xl border p-3.5 text-left transition ${
                   tier === 'featured'
                     ? 'border-[#1D4ED8] bg-blue-50/70 shadow-sm'
                     : 'border-slate-200 bg-slate-50 hover:border-slate-300'
                 }`}
               >
+                <span className="absolute -top-2.5 right-3 rounded-full bg-[#1D4ED8] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-xs">
+                  Most Popular
+                </span>
                 <div className="flex w-full items-center justify-between">
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1D4ED8]">
                     <Sparkles className="h-3.5 w-3.5" />
-                    Featured Role
+                    Featured Pin
                   </span>
-                  <span className="font-mono text-xs font-bold text-slate-900">$29</span>
+                  <span className="font-mono text-xs font-bold text-slate-900">$79</span>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-600">
-                  Pinned at top for 30 days + Verified Spotlight badge.
+                  Pinned in top 4-card grid for 30 days + verified badge.
                 </p>
               </button>
 
+              {/* Standard Listing (Free) */}
               <button
                 type="button"
                 onClick={() => setTier('standard')}
@@ -440,12 +454,12 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
               >
                 <div className="flex w-full items-center justify-between">
                   <span className="text-xs font-semibold text-slate-900">
-                    Standard Listing
+                    Standard
                   </span>
                   <span className="font-mono text-xs font-bold text-emerald-700">FREE</span>
                 </div>
                 <p className="mt-1 text-[11px] text-slate-600">
-                  Listed in chronological order with transparent USD pay.
+                  Chronological Live Directory listing (USD pay required).
                 </p>
               </button>
             </div>
@@ -588,19 +602,27 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="text-xs font-semibold text-slate-900">
-                      Video Spotlight Feature Placement
+                      Flagship Video &amp; Prep Spotlight ($249 USD / 30 Days)
                     </p>
                     <p className="text-[11px] text-slate-600">
-                      Direct placement inquiries go straight to{' '}
+                      Complete $249 USD PayPal payment below, then enter your Transaction ID. Direct partner inquiries:{' '}
                       <a
                         href={`mailto:${VIDEO_SPOTLIGHT_CONTACT_EMAIL}`}
                         className="font-mono font-semibold text-[#1D4ED8] underline"
                       >
                         {VIDEO_SPOTLIGHT_CONTACT_EMAIL}
                       </a>
-                      .
                     </p>
                   </div>
+                  <a
+                    href={PAYPAL_VIDEO_SPOTLIGHT_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[38px] shrink-0 items-center justify-center gap-1.5 rounded-full bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#1E40AF] whitespace-nowrap"
+                  >
+                    <span>Pay $249 USD via PayPal →</span>
+                    <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
                 </div>
 
                 <div>
@@ -612,6 +634,24 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                     value={videoUrl}
                     onChange={(e) => setVideoUrl(e.target.value)}
                     placeholder="https://www.youtube.com/watch?v=..."
+                    className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 font-mono text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#1D4ED8] focus:ring-2 focus:ring-blue-600/15 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="paypal-transaction-id-video"
+                    className="block text-xs font-semibold text-slate-800"
+                  >
+                    PayPal Transaction ID *
+                  </label>
+                  <input
+                    id="paypal-transaction-id-video"
+                    type="text"
+                    required
+                    value={paypalTransactionId}
+                    onChange={(e) => setPaypalTransactionId(e.target.value)}
+                    placeholder="e.g. 9AB12345CD678901E"
                     className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 font-mono text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#1D4ED8] focus:ring-2 focus:ring-blue-600/15 focus:outline-none"
                   />
                 </div>
@@ -636,7 +676,7 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-semibold text-slate-900">
-                      Featured Spotlight Checkout ($29 USD)
+                      Featured Role Pin Checkout ($79 USD / 30 Days)
                     </p>
                     <p className="text-[11px] text-slate-600">
                       Complete PayPal payment first, then paste your receipt ID below.
@@ -646,9 +686,9 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                     href={PAYPAL_FEATURED_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-[38px] shrink-0 items-center justify-center gap-1.5 rounded-full border border-blue-200 bg-white px-3.5 py-2 text-xs font-semibold text-[#1D4ED8] transition hover:bg-blue-50 whitespace-nowrap"
+                    className="inline-flex min-h-[38px] shrink-0 items-center justify-center gap-1.5 rounded-full bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#1E40AF] whitespace-nowrap"
                   >
-                    <span>Pay $29 via PayPal</span>
+                    <span>Pay $79 USD via PayPal →</span>
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                   </a>
                 </div>
@@ -670,7 +710,7 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                     className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 font-mono text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#1D4ED8] focus:ring-2 focus:ring-blue-600/15 focus:outline-none"
                   />
                   <p className="mt-1.5 text-[11px] text-slate-600">
-                    Required as proof of payment to verify and pin your Featured Spotlight listing.
+                    Required as proof of payment to verify and pin your Featured Role listing.
                   </p>
                 </div>
               </div>
@@ -692,9 +732,9 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
                 {submitting
                   ? 'Submitting...'
                   : tier === 'video-spotlight'
-                  ? 'Submit Video Spotlight Application →'
+                  ? 'Verify Payment & Submit Video Spotlight →'
                   : tier === 'featured'
-                  ? 'Verify Payment & Publish Featured Role →'
+                  ? 'Verify Payment & Publish Featured Pin →'
                   : 'Publish Free Standard Role'}
               </button>
             </div>
