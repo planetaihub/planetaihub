@@ -1,5 +1,3 @@
-// /src/components/tabs/WorkspaceStudioTab.tsx
-
 import React, { useState, useEffect, useRef } from 'react';
 import {
   FileText,
@@ -476,7 +474,7 @@ export const WorkspaceStudioTab: React.FC = () => {
 
       {/* Tool Selector Pills (Wrapped 2-Column Grid on Mobile) */}
       <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3">
-        {filteredTools.map((tool) => {
+        {toolsList.map((tool) => {
           const IconComp = tool.icon;
           const isActive = activeTool === tool.id;
           return (
