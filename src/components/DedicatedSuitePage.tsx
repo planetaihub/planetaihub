@@ -1,5 +1,3 @@
-// /src/components/DedicatedSuitePage.tsx
-
 import React, { useState } from 'react';
 import {
   ArrowLeft,
@@ -21,14 +19,6 @@ interface SuiteEditorialCopy {
 }
 
 const SUITE_EDITORIAL_GUIDES: Record<Exclude<TabId, 'jobs'>, SuiteEditorialCopy> = {
-  'workspace-studio': {
-    heading: 'Workspace & Docs Studio · Browser-Local Productivity Tools',
-    tagline: 'Notion, Trello, ClickUp, GHL, Monday, Canva, Docs, Sheets & Slides',
-    paragraph1:
-      'PlanetAI Hub’s Workspace & Docs Studio brings 9 essential cloud and project management utilities directly into your browser with zero logins, external API keys, or tracking scripts required. Whether you are formatting SOPs in Notion, managing sprint velocity in ClickUp or Trello, tracking enterprise leads in GoHighLevel, organizing cross-functional milestones in Monday.com, or generating banners in Canva, all data persists instantly via secure local storage.',
-    paragraph2:
-      'Designed specifically for distributed engineering teams, remote AI evaluators, and virtual assistants, this suite ensures lightning-fast load times and complete data ownership. Combine these browser-local tools with our transparent USD job board and automated resume builder for an unmatched remote workflow experience.',
-  },
   'va-academy': {
     heading: 'Virtual Assistant Academy & Remote Operations Guide',
     tagline: 'Structured Training, Masterclass Modules & Client Retention Playbooks',
@@ -116,6 +106,14 @@ const SUITE_EDITORIAL_GUIDES: Record<Exclude<TabId, 'jobs'>, SuiteEditorialCopy>
       'Every PlanetAI Editorial Briefing distills real technical screening standards, acoustic benchmarks, and compensation math observed across distributed AI teams and frontier evaluation labs. Rather than generic career advice, each guide focuses on concrete rubrics, reproducible code diffs, and practical remote execution.',
     paragraph2:
       'Open any of the 18 briefings above for key takeaways and structured walkthroughs, copy direct share links for teammates, or launch matching workshops and application templates directly inside Video Academy and Career Studio.',
+  },
+  'workspace-studio': {
+    heading: 'Workspace & Docs Studio & Browser-Local Operations Guide',
+    tagline: 'Notion, Trello, ClickUp, GoHighLevel, Monday & Canva Tools',
+    paragraph1:
+      'Modern remote operators rely on specialized workspace apps, kanban boards, and document designers to manage client workflows without opening a dozen heavy desktop subscriptions. Running these productivity tools entirely in browser memory ensures instant load times and zero data leakage across remote networks.',
+    paragraph2:
+      'Use the 9 interactive tools above—Notion SOP builder, Trello boards, ClickUp sprints, GoHighLevel pipelines, Monday work OS, Canva banner designer, Google Docs, Sheets, and Slides—to manage your entire freelance or agency operation directly from your browser, with 100% automatic localStorage persistence.',
   },
 };
 
