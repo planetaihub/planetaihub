@@ -10,7 +10,8 @@ export type TabId =
   | 'video-academy'
   | 'va-academy'
   | 'security-vault'
-  | 'editorial-briefings';
+  | 'editorial-briefings'
+  | 'workspace-studio';
 
 export interface SpotlightVideoConfig {
   company: string;
