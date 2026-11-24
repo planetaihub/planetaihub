@@ -86,7 +86,7 @@ const SIGNATURE_BRAND_TILES: Record<string, SignatureBrandTileStyle> = {
   },
   'scale ai': {
     mark: 'S/',
-    bgClass: 'bg-[#111827]',
+    bgClass: 'bg-[#0F172A]',
     textClass: 'text-indigo-300',
     borderClass: 'border border-slate-800',
   },
@@ -133,6 +133,12 @@ const SIGNATURE_BRAND_TILES: Record<string, SignatureBrandTileStyle> = {
     borderClass: 'border border-blue-700',
   },
   spout: {
+    mark: 'sp',
+    bgClass: 'bg-[#0369A1]',
+    textClass: 'text-white',
+    borderClass: 'border border-sky-800',
+  },
+  withspout: {
     mark: 'sp',
     bgClass: 'bg-[#0369A1]',
     textClass: 'text-white',
@@ -210,6 +216,12 @@ const SIGNATURE_BRAND_TILES: Record<string, SignatureBrandTileStyle> = {
     textClass: 'text-[#FEF3C7]',
     borderClass: 'border border-amber-800',
   },
+  huggingface: {
+    mark: 'HF',
+    bgClass: 'bg-[#92400E]',
+    textClass: 'text-[#FEF3C7]',
+    borderClass: 'border border-amber-800',
+  },
   appen: {
     mark: 'Ap',
     bgClass: 'bg-[#991B1B]',
@@ -227,6 +239,60 @@ const SIGNATURE_BRAND_TILES: Record<string, SignatureBrandTileStyle> = {
     bgClass: 'bg-[#312E81]',
     textClass: 'text-white',
     borderClass: 'border border-indigo-900',
+  },
+  deepgram: {
+    mark: 'Dg',
+    bgClass: 'bg-[#0F172A]',
+    textClass: 'text-emerald-400',
+    borderClass: 'border border-slate-800',
+  },
+  cartesia: {
+    mark: 'Ca',
+    bgClass: 'bg-[#1E1B4B]',
+    textClass: 'text-sky-300',
+    borderClass: 'border border-indigo-900',
+  },
+  vapi: {
+    mark: 'Va',
+    bgClass: 'bg-[#111827]',
+    textClass: 'text-cyan-300',
+    borderClass: 'border border-slate-800',
+  },
+  'weights & biases': {
+    mark: 'W&B',
+    bgClass: 'bg-[#1C1917]',
+    textClass: 'text-amber-300',
+    borderClass: 'border border-stone-800',
+  },
+  'together ai': {
+    mark: 'Tg',
+    bgClass: 'bg-[#0F172A]',
+    textClass: 'text-blue-300',
+    borderClass: 'border border-slate-800',
+  },
+  'modal labs': {
+    mark: 'Mo',
+    bgClass: 'bg-[#052E16]',
+    textClass: 'text-lime-300',
+    borderClass: 'border border-emerald-950',
+  },
+  replicate: {
+    mark: 'Rp',
+    bgClass: 'bg-[#18181B]',
+    textClass: 'text-white',
+    borderClass: 'border border-zinc-800',
+  },
+  replit: {
+    mark: 'Re',
+    bgClass: 'bg-[#EA580C]',
+    textClass: 'text-white',
+    borderClass: 'border border-orange-700',
+  },
+  langchain: {
+    mark: 'LC',
+    bgClass: 'bg-[#115E59]',
+    textClass: 'text-teal-100',
+    borderClass: 'border border-teal-900',
   },
 };
 
@@ -292,7 +358,7 @@ export function getCompanyMark(name: string = ''): string {
 }
 
 export const MercorMarkSvg: React.FC<{ className?: string }> = ({
-  className = 'h-6 w-6',
+  className = 'h-7 w-7',
 }) => (
   <svg
     viewBox="0 0 32 32"
@@ -312,6 +378,176 @@ export const MercorMarkSvg: React.FC<{ className?: string }> = ({
   </svg>
 );
 
+const ScaleMarkSvg: React.FC<{ className?: string }> = ({
+  className = 'h-7 w-7',
+}) => (
+  <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" className={className}>
+    <path
+      d="M8.5 23.5L15.5 8.5H19.5L12.5 23.5H8.5Z"
+      fill="#A5B4FC"
+    />
+    <path
+      d="M14.5 23.5L21.5 8.5H25L18 23.5H14.5Z"
+      fill="white"
+    />
+    <circle cx="9.5" cy="10.5" r="2.2" fill="#818CF8" />
+  </svg>
+);
+
+const OutlierMarkSvg: React.FC<{ className?: string }> = ({
+  className = 'h-7 w-7',
+}) => (
+  <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" className={className}>
+    <circle cx="15.5" cy="16" r="8.5" stroke="#34D399" strokeWidth="3.2" />
+    <circle cx="23.5" cy="8.5" r="2.6" fill="white" />
+  </svg>
+);
+
+const DataAnnotationMarkSvg: React.FC<{ className?: string }> = ({
+  className = 'h-7 w-7',
+}) => (
+  <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" className={className}>
+    <path
+      d="M11 9L5.5 16L11 23"
+      stroke="#6EE7B7"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M21 9L26.5 16L21 23"
+      stroke="#6EE7B7"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M17.5 8L14.5 24"
+      stroke="white"
+      strokeWidth="2.8"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const TelusMarkSvg: React.FC<{ className?: string }> = ({
+  className = 'h-7 w-7',
+}) => (
+  <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" className={className}>
+    <path
+      d="M7 10.5H21M14 10.5V23.5"
+      stroke="white"
+      strokeWidth="3.2"
+      strokeLinecap="round"
+    />
+    <circle cx="23.5" cy="21" r="3" fill="#4ADE80" />
+  </svg>
+);
+
+const VisoraMarkSvg: React.FC<{ className?: string }> = ({
+  className = 'h-7 w-7',
+}) => (
+  <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" className={className}>
+    <path
+      d="M7 9.5L16 24L25 9.5"
+      stroke="white"
+      strokeWidth="3.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <circle cx="16" cy="11.5" r="2.3" fill="#A5B4FC" />
+  </svg>
+);
+
+const SpoutMarkSvg: React.FC<{ className?: string }> = ({
+  className = 'h-7 w-7',
+}) => (
+  <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" className={className}>
+    <path
+      d="M7 18.5C9.5 14 13 14 15.5 18.5C18 23 21.5 23 24.5 18.5"
+      stroke="white"
+      strokeWidth="3.2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M9.5 12.5C11.5 9.5 14.5 9.5 16.5 12.5"
+      stroke="#BAE6FD"
+      strokeWidth="2.6"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const BabelAudioMarkSvg: React.FC<{ className?: string }> = ({
+  className = 'h-7 w-7',
+}) => (
+  <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" className={className}>
+    <rect x="6" y="13" width="3.2" height="6" rx="1.6" fill="#BFDBFE" />
+    <rect x="11.5" y="8" width="3.2" height="16" rx="1.6" fill="white" />
+    <rect x="17" y="10.5" width="3.2" height="11" rx="1.6" fill="#DBEAFE" />
+    <rect x="22.5" y="7" width="3.2" height="18" rx="1.6" fill="white" />
+  </svg>
+);
+
+const AnthropicMarkSvg: React.FC<{ className?: string }> = ({
+  className = 'h-7 w-7',
+}) => (
+  <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" className={className}>
+    <path
+      d="M6.5 23.5L12.5 8.5H15.8L21.8 23.5H18.4L17 19.7H11.3L9.9 23.5H6.5ZM12.3 16.8H16L14.15 11.7L12.3 16.8Z"
+      fill="#F5EFE6"
+    />
+    <path
+      d="M19.8 8.5H23L26.5 23.5H23.3L19.8 8.5Z"
+      fill="#D6CFC2"
+    />
+  </svg>
+);
+
+function renderCustomBrandSvg(
+  normalizedName: string,
+  svgClass: string
+): React.ReactNode | null {
+  if (normalizedName.includes('mercor')) {
+    return <MercorMarkSvg className={svgClass} />;
+  }
+  if (normalizedName.includes('scale')) {
+    return <ScaleMarkSvg className={svgClass} />;
+  }
+  if (normalizedName.includes('outlier')) {
+    return <OutlierMarkSvg className={svgClass} />;
+  }
+  if (normalizedName.includes('dataannotation') || normalizedName.includes('data annotation')) {
+    return <DataAnnotationMarkSvg className={svgClass} />;
+  }
+  if (normalizedName.includes('telus')) {
+    return <TelusMarkSvg className={svgClass} />;
+  }
+  if (normalizedName.includes('visora')) {
+    return <VisoraMarkSvg className={svgClass} />;
+  }
+  if (normalizedName.includes('spout')) {
+    return <SpoutMarkSvg className={svgClass} />;
+  }
+  if (normalizedName.includes('babel')) {
+    return <BabelAudioMarkSvg className={svgClass} />;
+  }
+  if (normalizedName.includes('anthropic') || normalizedName.includes('claude')) {
+    return <AnthropicMarkSvg className={svgClass} />;
+  }
+  return null;
+}
+
+function matchSignatureBrand(name: string): SignatureBrandTileStyle | undefined {
+  const normalized = name.trim().toLowerCase();
+  return (
+    SIGNATURE_BRAND_TILES[normalized] ||
+    Object.entries(SIGNATURE_BRAND_TILES).find(([key]) =>
+      normalized.includes(key)
+    )?.[1]
+  );
+}
+
 export interface BrandTileProps {
   name: string;
   size?: 'md' | 'lg';
@@ -319,21 +555,16 @@ export interface BrandTileProps {
 }
 
 /**
- * Bold square brand tile (w-14 h-14 rounded-2xl) featuring signature brand
- * monograms & high-contrast surfaces with zero broken external images.
+ * High-contrast square brand tile featuring crisp custom SVG marks and bold
+ * monograms (w-12 h-12 rounded-xl) with zero broken external images.
  */
 export const BrandTile: React.FC<BrandTileProps> = ({
   name = '',
-  size = 'lg',
+  size = 'md',
   className = '',
 }) => {
   const normalized = name.trim().toLowerCase();
-  const isMercor = normalized.includes('mercor');
-  const matched =
-    SIGNATURE_BRAND_TILES[normalized] ||
-    Object.entries(SIGNATURE_BRAND_TILES).find(([key]) =>
-      normalized.includes(key)
-    )?.[1];
+  const matched = matchSignatureBrand(name);
 
   const fallbackPalette =
     FALLBACK_TILE_PALETTE[hashNameIndex(normalized || 'ai', FALLBACK_TILE_PALETTE.length)];
@@ -344,20 +575,19 @@ export const BrandTile: React.FC<BrandTileProps> = ({
   const borderClass = matched?.borderClass || 'border border-black/10';
 
   const sizeClass =
-    size === 'md'
-      ? 'w-12 h-12 rounded-xl text-lg'
-      : 'w-14 h-14 rounded-2xl text-xl';
+    size === 'lg'
+      ? 'w-14 h-14 rounded-2xl text-xl font-black tracking-tight'
+      : 'w-12 h-12 rounded-xl text-lg font-black tracking-tight';
+
+  const svgSizeClass = size === 'lg' ? 'h-8 w-8' : 'h-7 w-7';
+  const customSvg = renderCustomBrandSvg(normalized, svgSizeClass);
 
   return (
     <div
       aria-hidden="true"
-      className={`shrink-0 flex items-center justify-center font-display font-bold tracking-tight shadow-sm select-none ${sizeClass} ${bgClass} ${textClass} ${borderClass} ${className}`}
+      className={`shrink-0 flex items-center justify-center font-display shadow-sm select-none ${sizeClass} ${bgClass} ${textClass} ${borderClass} ${className}`}
     >
-      {isMercor ? (
-        <MercorMarkSvg className={size === 'md' ? 'h-7 w-7' : 'h-8 w-8'} />
-      ) : (
-        <span>{mark}</span>
-      )}
+      {customSvg || <span>{mark}</span>}
     </div>
   );
 };
@@ -371,8 +601,9 @@ export interface BrandAvatarProps {
 }
 
 /**
- * Renders a crisp real brand logo using Google's high-res favicon resolver
- * inside a clean SaaS badge, with an automatic 2-letter monogram fallback.
+ * Renders a crisp real brand logo using signature custom SVG marks / bold
+ * monograms for featured partners, and Google's high-res favicon resolver
+ * with an automatic high-contrast monogram fallback for other domains.
  */
 export const BrandAvatar: React.FC<BrandAvatarProps> = ({
   name = '',
@@ -384,47 +615,40 @@ export const BrandAvatar: React.FC<BrandAvatarProps> = ({
   const resolvedDomain = resolveBrandDomain(name, domain);
   const [hasError, setHasError] = useState(false);
   const normalizedName = (name || '').trim().toLowerCase();
-  const isMicro1 = normalizedName.includes('micro1');
-  const isMercor = normalizedName.includes('mercor');
+  const matchedSignature = matchSignatureBrand(name);
 
   useEffect(() => {
     setHasError(false);
   }, [resolvedDomain, name]);
 
-  if (isMicro1) {
-    const micro1SizeClasses =
-      size === 'xs'
-        ? 'w-6 h-6 rounded-md text-[11px]'
-        : size === 'sm'
-        ? 'w-9 h-9 rounded-lg text-sm'
-        : 'w-11 h-11 rounded-xl text-base';
+  const signatureSizeClasses =
+    size === 'xs'
+      ? 'w-6 h-6 rounded-md text-[11px] font-black tracking-tight'
+      : size === 'sm'
+      ? 'w-9 h-9 rounded-lg text-sm font-black tracking-tight'
+      : 'w-12 h-12 rounded-xl text-lg font-black tracking-tight';
+
+  const svgSizeClasses =
+    size === 'xs' ? 'h-4 w-4' : size === 'sm' ? 'h-5 w-5' : 'h-7 w-7';
+
+  const customSvg = renderCustomBrandSvg(normalizedName, svgSizeClasses);
+
+  if (customSvg || matchedSignature) {
+    const fallbackPalette =
+      FALLBACK_TILE_PALETTE[
+        hashNameIndex(normalizedName || 'ai', FALLBACK_TILE_PALETTE.length)
+      ];
+    const bgClass = matchedSignature?.bgClass || fallbackPalette.bgClass;
+    const textClass = matchedSignature?.textClass || fallbackPalette.textClass;
+    const borderClass = matchedSignature?.borderClass || 'border border-black/10';
+    const mark = matchedSignature?.mark || getTwoLetterMonogram(name);
 
     return (
       <div
         aria-hidden="true"
-        className={`shrink-0 flex items-center justify-center bg-black font-display font-bold tracking-tight text-white shadow-sm select-none ${micro1SizeClasses} ${className}`}
+        className={`shrink-0 flex items-center justify-center font-display shadow-sm select-none ${signatureSizeClasses} ${bgClass} ${textClass} ${borderClass} ${className}`}
       >
-        <span>m.</span>
-      </div>
-    );
-  }
-
-  if (isMercor) {
-    const mercorSizeClasses =
-      size === 'xs'
-        ? 'w-6 h-6 rounded-md'
-        : size === 'sm'
-        ? 'w-9 h-9 rounded-lg'
-        : 'w-11 h-11 rounded-xl';
-    const svgSizeClasses =
-      size === 'xs' ? 'h-4 w-4' : size === 'sm' ? 'h-5 w-5' : 'h-6 w-6';
-
-    return (
-      <div
-        aria-hidden="true"
-        className={`shrink-0 flex items-center justify-center border border-[#4338CA] bg-[#4F46E5] text-white shadow-sm select-none ${mercorSizeClasses} ${className}`}
-      >
-        <MercorMarkSvg className={svgSizeClasses} />
+        {customSvg || <span>{mark}</span>}
       </div>
     );
   }
@@ -432,17 +656,21 @@ export const BrandAvatar: React.FC<BrandAvatarProps> = ({
   const surfaceClasses =
     variant === 'dark'
       ? 'bg-white/[0.08] border border-white/15'
-      : 'bg-slate-50 border border-slate-200 shadow-2xs';
+      : 'bg-slate-50 border border-slate-200 shadow-sm';
 
   const sizeClasses =
     size === 'xs'
       ? `w-6 h-6 rounded-md p-0.5 ${surfaceClasses}`
       : size === 'sm'
       ? `w-9 h-9 rounded-lg p-1 ${surfaceClasses}`
-      : `w-10 h-10 rounded-xl p-1.5 ${surfaceClasses}`;
+      : `w-12 h-12 rounded-xl p-1.5 ${surfaceClasses}`;
 
   const textSizeClass =
-    size === 'xs' ? 'text-[9px]' : size === 'sm' ? 'text-[11px]' : 'text-xs';
+    size === 'xs'
+      ? 'text-[10px] font-black tracking-tight'
+      : size === 'sm'
+      ? 'text-sm font-black tracking-tight'
+      : 'text-lg font-black tracking-tight';
   const fallbackColorClass =
     variant === 'dark' ? 'text-blue-200' : 'text-[#1D4ED8]';
   const showFallback = !resolvedDomain || hasError;
@@ -459,7 +687,7 @@ export const BrandAvatar: React.FC<BrandAvatarProps> = ({
     >
       {showFallback ? (
         <span
-          className={`font-mono font-bold tracking-tight select-none ${fallbackColorClass} ${textSizeClass}`}
+          className={`font-display select-none ${fallbackColorClass} ${textSizeClass}`}
         >
           {getTwoLetterMonogram(name)}
         </span>
@@ -470,7 +698,7 @@ export const BrandAvatar: React.FC<BrandAvatarProps> = ({
           loading="lazy"
           decoding="async"
           onError={() => setHasError(true)}
-          className="h-full w-full rounded-[4px] object-contain"
+          className="h-full w-full rounded-md object-contain"
         />
       )}
     </div>
@@ -587,3 +815,4 @@ export function getCompanyTheme(name: string = ''): CompanyTheme {
     }
   );
 }
+
