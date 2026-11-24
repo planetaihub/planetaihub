@@ -1,3 +1,5 @@
+// /src/components/PartnerSpotlightFrame.tsx
+
 import React, { useEffect, useState } from 'react';
 import {
   ArrowRight,
@@ -8,8 +10,8 @@ import {
   Sparkles,
   X,
 } from 'lucide-react';
-import { MICRO1_COMPANY_REFERRAL_URL } from '../utils/referralLinks';
-import { BrandAvatar } from './BrandAvatar';
+import { MICRO1_COMPANY_REFERRAL_URL } from '@/src/utils/referralLinks';
+import { BrandAvatar } from '@/src/components/BrandAvatar';
 
 interface VettingTrack {
   code: string;
@@ -322,7 +324,7 @@ export const PartnerSpotlightFrame: React.FC<PartnerSpotlightFrameProps> = ({
                     </span>
                   </div>
                   <p className="truncate text-xs font-medium text-slate-600">
-                    Vetted Remote AI &amp; Engineering Tracks
+                    Verified Remote Roles
                   </p>
                 </div>
               </div>
