@@ -285,9 +285,14 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
       >
         <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-4">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#1D4ED8] break-all sm:break-normal">
-              For Employers · {activeContactEmail}
-            </p>
+            {/* Clean Mobile Typography Fix: stacked cleanly on mobile */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#1D4ED8]">
+              <span>FOR EMPLOYERS</span>
+              <span className="hidden sm:inline">·</span>
+              <span className="lowercase tracking-normal text-slate-600 font-medium">
+                {activeContactEmail}
+              </span>
+            </div>
             <h2
               id="post-job-title"
               className="mt-1 font-display text-2xl font-bold text-slate-900"
