@@ -15,6 +15,7 @@ import {
   LayoutGrid,
   X,
   BookOpen,
+  Layers,
 } from 'lucide-react';
 import type { TabId } from '../types';
 import { PWAInstallButton, ShareAppButton } from './PWAInstallBanner';
@@ -112,6 +113,13 @@ export const TABS: NavTabItem[] = [
     desktopLabel: '18 Briefings',
     shortLabel: 'Briefings',
     icon: BookOpen,
+  },
+  {
+    id: 'workspace-studio',
+    label: 'Workspace & Docs Studio',
+    desktopLabel: 'Workspace & Docs',
+    shortLabel: 'Workspaces',
+    icon: Layers,
   },
 ];
 
