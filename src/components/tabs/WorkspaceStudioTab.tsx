@@ -373,15 +373,15 @@ export const WorkspaceStudioTab: React.FC = () => {
   }, [slides]);
 
   const toolsList = [
-    { id: 'notion' as WorkspaceToolId, name: 'Notion Workspace Builder', icon: FileText, cat: 'task-ops', desc: 'Interactive block & SOP page creator with Markdown export.' },
-    { id: 'trello' as WorkspaceToolId, name: 'Trello Kanban Board', icon: Kanban, cat: 'task-ops', desc: '3-column task board with instant drag & drop status flow.' },
-    { id: 'clickup' as WorkspaceToolId, name: 'ClickUp Sprint Planner', icon: CheckSquare, cat: 'task-ops', desc: 'Priority task manager with status badges & checklists.' },
-    { id: 'gohighlevel' as WorkspaceToolId, name: 'GoHighLevel CRM Pipeline', icon: Users, cat: 'crm-funnels', desc: 'Lead stage tracker with deal values & outreach templates.' },
-    { id: 'monday' as WorkspaceToolId, name: 'Monday.com Work OS Grid', icon: Grid, cat: 'task-ops', desc: 'Color-coded deliverable table with status & owner tags.' },
-    { id: 'canva' as WorkspaceToolId, name: 'Canva Quick Banner Studio', icon: ImageIcon, cat: 'design-docs', desc: 'Social & hero banner designer with 1-click PNG download.' },
-    { id: 'gdocs' as WorkspaceToolId, name: 'Google Docs Writer', icon: Edit3, cat: 'design-docs', desc: 'Distraction-free document editor with live word count.' },
-    { id: 'gsheets' as WorkspaceToolId, name: 'Google Sheets Budget Grid', icon: Table, cat: 'design-docs', desc: 'Interactive spreadsheet table with formula calculation & CSV.' },
-    { id: 'gslides' as WorkspaceToolId, name: 'Google Slides Deck Outliner', icon: Presentation, cat: 'design-docs', desc: 'Slide presentation builder with full-screen present mode.' },
+    { id: 'notion' as WorkspaceToolId, name: 'Notion', icon: FileText, cat: 'task-ops', desc: 'Docs & Wiki' },
+    { id: 'trello' as WorkspaceToolId, name: 'Trello', icon: Kanban, cat: 'task-ops', desc: 'Kanban Board' },
+    { id: 'clickup' as WorkspaceToolId, name: 'ClickUp', icon: CheckSquare, cat: 'task-ops', desc: 'Sprint Tasks' },
+    { id: 'gohighlevel' as WorkspaceToolId, name: 'GoHighLevel', icon: Users, cat: 'crm-funnels', desc: 'CRM Pipeline' },
+    { id: 'monday' as WorkspaceToolId, name: 'Monday.com', icon: Grid, cat: 'task-ops', desc: 'Work OS Grid' },
+    { id: 'canva' as WorkspaceToolId, name: 'Canva', icon: ImageIcon, cat: 'design-docs', desc: 'Design Studio' },
+    { id: 'gdocs' as WorkspaceToolId, name: 'Google Docs', icon: Edit3, cat: 'design-docs', desc: 'Word Editor' },
+    { id: 'gsheets' as WorkspaceToolId, name: 'Google Sheets', icon: Table, cat: 'design-docs', desc: 'Live Sheets' },
+    { id: 'gslides' as WorkspaceToolId, name: 'Google Slides', icon: Presentation, cat: 'design-docs', desc: 'Pitch Deck' },
   ];
 
   const filteredTools = categoryFilter === 'all'
@@ -474,7 +474,7 @@ export const WorkspaceStudioTab: React.FC = () => {
 
       {/* Tool Selector Pills (Wrapped 2-Column Grid on Mobile) */}
       <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3">
-        {toolsList.map((tool) => {
+        {filteredTools.map((tool) => {
           const IconComp = tool.icon;
           const isActive = activeTool === tool.id;
           return (
@@ -482,25 +482,25 @@ export const WorkspaceStudioTab: React.FC = () => {
               key={tool.id}
               type="button"
               onClick={() => setActiveTool(tool.id)}
-              className={`flex items-start gap-3 rounded-2xl border p-3.5 text-left transition-all ${
+              className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border p-3 sm:p-3.5 text-left transition-all ${
                 isActive
                   ? 'border-[#1D4ED8] bg-blue-50/70 shadow-sm ring-2 ring-blue-600/10'
                   : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50'
               }`}
             >
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+              <div className={`flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl ${
                 isActive ? 'bg-[#1D4ED8] text-white' : 'bg-slate-100 text-slate-700'
               }`}>
-                <IconComp className="h-5 w-5" />
+                <IconComp className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-1">
-                  <p className="truncate font-display text-xs font-bold text-slate-900">
+                <div className="flex items-start justify-between gap-1">
+                  <p className="font-display text-xs sm:text-sm font-bold leading-snug text-slate-900">
                     {tool.name}
                   </p>
-                  {isActive && <ChevronRight className="h-3.5 w-3.5 text-[#1D4ED8] shrink-0" />}
+                  {isActive && <ChevronRight className="mt-0.5 h-3.5 w-3.5 text-[#1D4ED8] shrink-0" />}
                 </div>
-                <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-500">
+                <p className="mt-0.5 text-[11px] leading-snug text-slate-500">
                   {tool.desc}
                 </p>
               </div>
@@ -526,7 +526,7 @@ export const WorkspaceStudioTab: React.FC = () => {
                   navigator.clipboard.writeText(md);
                   triggerToast('Copied Markdown to clipboard!');
                 }}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 w-full sm:w-auto"
               >
                 <Copy className="h-3.5 w-3.5" />
                 <span>Copy Markdown</span>
@@ -573,12 +573,12 @@ export const WorkspaceStudioTab: React.FC = () => {
                 setNotionBlocks([...notionBlocks, { id: Date.now().toString(), type: newBlockType, content: newBlockText.trim(), checked: false }]);
                 setNewBlockText('');
               }}
-              className="flex flex-col gap-2 sm:flex-row sm:items-center pt-2"
+              className="flex flex-col gap-2.5 sm:flex-row sm:items-center pt-2"
             >
               <select
                 value={newBlockType}
                 onChange={(e) => setNewBlockType(e.target.value as any)}
-                className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700"
+                className="h-11 w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700"
               >
                 <option value="text">Text Paragraph</option>
                 <option value="heading">Heading</option>
@@ -590,11 +590,11 @@ export const WorkspaceStudioTab: React.FC = () => {
                 value={newBlockText}
                 onChange={(e) => setNewBlockText(e.target.value)}
                 placeholder="Type block content..."
-                className="h-11 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+                className="h-11 w-full sm:flex-1 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
               />
               <button
                 type="submit"
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-[#1D4ED8] px-5 text-xs font-semibold text-white hover:bg-[#1E40AF]"
+                className="inline-flex h-11 w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-[#1D4ED8] px-5 text-xs font-semibold text-white hover:bg-[#1E40AF]"
               >
                 <Plus className="h-4 w-4" />
                 <span>Add Block</span>
@@ -611,13 +611,13 @@ export const WorkspaceStudioTab: React.FC = () => {
                 <h3 className="font-display text-lg font-bold text-slate-900">Trello Kanban Board</h3>
                 <p className="text-xs text-slate-500">Manage deliverables across To Do, In Progress, and Done columns.</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto">
                 <input
                   type="text"
                   value={newCardTitle}
                   onChange={(e) => setNewCardTitle(e.target.value)}
                   placeholder="New task title..."
-                  className="h-10 rounded-xl border border-slate-200 px-3 text-xs text-slate-900 placeholder:text-slate-400"
+                  className="h-10 w-full sm:w-auto rounded-xl border border-slate-200 px-3 text-xs text-slate-900 placeholder:text-slate-400"
                 />
                 <button
                   type="button"
@@ -626,7 +626,7 @@ export const WorkspaceStudioTab: React.FC = () => {
                     setTrelloCards([...trelloCards, { id: Date.now().toString(), column: 'todo', title: newCardTitle.trim(), priority: newCardPriority, tag: newCardTag }]);
                     setNewCardTitle('');
                   }}
-                  className="inline-flex h-10 items-center justify-center gap-1 rounded-xl bg-[#1D4ED8] px-4 text-xs font-semibold text-white hover:bg-[#1E40AF] whitespace-nowrap"
+                  className="inline-flex h-10 w-full sm:w-auto items-center justify-center gap-1 rounded-xl bg-[#1D4ED8] px-4 text-xs font-semibold text-white hover:bg-[#1E40AF] whitespace-nowrap"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Add Card</span>
@@ -690,13 +690,13 @@ export const WorkspaceStudioTab: React.FC = () => {
                 <h3 className="font-display text-lg font-bold text-slate-900">ClickUp Sprint &amp; Task Planner</h3>
                 <p className="text-xs text-slate-500">Track task statuses, priority flags, and execution dates.</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto">
                 <input
                   type="text"
                   value={cuTitle}
                   onChange={(e) => setCuTitle(e.target.value)}
                   placeholder="Task title..."
-                  className="h-10 rounded-xl border border-slate-200 px-3 text-xs text-slate-900 placeholder:text-slate-400"
+                  className="h-10 w-full sm:w-auto rounded-xl border border-slate-200 px-3 text-xs text-slate-900 placeholder:text-slate-400"
                 />
                 <button
                   type="button"
@@ -705,7 +705,7 @@ export const WorkspaceStudioTab: React.FC = () => {
                     setClickupTasks([...clickupTasks, { id: Date.now().toString(), title: cuTitle.trim(), status: 'Open', priority: cuPriority, dueDate: '2026-04-15' }]);
                     setCuTitle('');
                   }}
-                  className="inline-flex h-10 items-center justify-center gap-1 rounded-xl bg-[#1D4ED8] px-4 text-xs font-semibold text-white hover:bg-[#1E40AF] whitespace-nowrap"
+                  className="inline-flex h-10 w-full sm:w-auto items-center justify-center gap-1 rounded-xl bg-[#1D4ED8] px-4 text-xs font-semibold text-white hover:bg-[#1E40AF] whitespace-nowrap"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Add Task</span>
@@ -723,7 +723,7 @@ export const WorkspaceStudioTab: React.FC = () => {
                         const nextStatus: ClickUpTask['status'] = task.status === 'Open' ? 'In Review' : task.status === 'In Review' ? 'Complete' : 'Open';
                         setClickupTasks(clickupTasks.map(t => t.id === task.id ? { ...t, status: nextStatus } : t));
                       }}
-                      className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold ${
+                      className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold shrink-0 ${
                         task.status === 'Complete' ? 'bg-emerald-100 text-emerald-700' :
                         task.status === 'In Review' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'
                       }`}
@@ -736,7 +736,7 @@ export const WorkspaceStudioTab: React.FC = () => {
 
                   <div className="flex items-center gap-4 text-xs">
                     <span className={`font-semibold ${task.priority === 'Urgent' ? 'text-rose-600' : 'text-slate-600'}`}>{task.priority}</span>
-                    <span className="font-mono text-slate-500">{task.dueDate}</span>
+                    <span className="font-mono text-slate-500 whitespace-nowrap">{task.dueDate}</span>
                     <button
                       type="button"
                       onClick={() => setClickupTasks(clickupTasks.filter(t => t.id !== task.id))}
@@ -759,13 +759,13 @@ export const WorkspaceStudioTab: React.FC = () => {
                 <h3 className="font-display text-lg font-bold text-slate-900">GoHighLevel Pipeline &amp; CRM Tracker</h3>
                 <p className="text-xs text-slate-500">Manage client leads, deal values, and conversion stages.</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto">
                 <input
                   type="text"
                   value={leadName}
                   onChange={(e) => setLeadName(e.target.value)}
                   placeholder="Client name..."
-                  className="h-10 rounded-xl border border-slate-200 px-3 text-xs text-slate-900 placeholder:text-slate-400"
+                  className="h-10 w-full sm:w-auto rounded-xl border border-slate-200 px-3 text-xs text-slate-900 placeholder:text-slate-400"
                 />
                 <button
                   type="button"
@@ -775,7 +775,7 @@ export const WorkspaceStudioTab: React.FC = () => {
                     setLeadName('');
                     setLeadCompany('');
                   }}
-                  className="inline-flex h-10 items-center justify-center gap-1 rounded-xl bg-[#1D4ED8] px-4 text-xs font-semibold text-white hover:bg-[#1E40AF] whitespace-nowrap"
+                  className="inline-flex h-10 w-full sm:w-auto items-center justify-center gap-1 rounded-xl bg-[#1D4ED8] px-4 text-xs font-semibold text-white hover:bg-[#1E40AF] whitespace-nowrap"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Add Lead</span>
@@ -831,13 +831,13 @@ export const WorkspaceStudioTab: React.FC = () => {
                 <h3 className="font-display text-lg font-bold text-slate-900">Monday.com Work OS Grid</h3>
                 <p className="text-xs text-slate-500">Color-coded deliverable tracker with status toggles.</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto">
                 <input
                   type="text"
                   value={mondName}
                   onChange={(e) => setMondName(e.target.value)}
                   placeholder="Deliverable name..."
-                  className="h-10 rounded-xl border border-slate-200 px-3 text-xs text-slate-900 placeholder:text-slate-400"
+                  className="h-10 w-full sm:w-auto rounded-xl border border-slate-200 px-3 text-xs text-slate-900 placeholder:text-slate-400"
                 />
                 <button
                   type="button"
@@ -847,7 +847,7 @@ export const WorkspaceStudioTab: React.FC = () => {
                     setMondName('');
                     setMondOwner('');
                   }}
-                  className="inline-flex h-10 items-center justify-center gap-1 rounded-xl bg-[#1D4ED8] px-4 text-xs font-semibold text-white hover:bg-[#1E40AF] whitespace-nowrap"
+                  className="inline-flex h-10 w-full sm:w-auto items-center justify-center gap-1 rounded-xl bg-[#1D4ED8] px-4 text-xs font-semibold text-white hover:bg-[#1E40AF] whitespace-nowrap"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Add Item</span>
@@ -855,51 +855,47 @@ export const WorkspaceStudioTab: React.FC = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="border-b border-slate-200 bg-slate-50 font-semibold text-slate-700">
-                  <tr>
-                    <th className="p-3">Deliverable</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3">Owner</th>
-                    <th className="p-3">Due Date</th>
-                    <th className="p-3 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {mondayItems.map(item => (
-                    <tr key={item.id} className="hover:bg-slate-50/50">
-                      <td className="p-3 font-medium text-slate-900">{item.name}</td>
-                      <td className="p-3">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const next: MondayItem['status'] = item.status === 'Working on it' ? 'Done' : item.status === 'Done' ? 'Stuck' : 'Working on it';
-                            setMondayItems(mondayItems.map(i => i.id === item.id ? { ...i, status: next } : i));
-                          }}
-                          className={`rounded-lg px-2.5 py-1 text-[11px] font-bold ${
-                            item.status === 'Done' ? 'bg-emerald-100 text-emerald-800' :
-                            item.status === 'Stuck' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
-                          }`}
-                        >
-                          {item.status}
-                        </button>
-                      </td>
-                      <td className="p-3 text-slate-600">{item.owner}</td>
-                      <td className="p-3 font-mono text-slate-500">{item.due}</td>
-                      <td className="p-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => setMondayItems(mondayItems.filter(i => i.id !== item.id))}
-                          className="text-slate-400 hover:text-rose-600"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-2.5">
+              {mondayItems.map(item => (
+                <div
+                  key={item.id}
+                  className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <p className="text-xs sm:text-sm font-medium text-slate-900 leading-snug">
+                    {item.name}
+                  </p>
+
+                  <div className="flex flex-wrap items-center justify-between gap-2.5 sm:justify-end sm:gap-4 text-xs">
+                    <div className="flex items-center gap-2.5 sm:gap-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next: MondayItem['status'] = item.status === 'Working on it' ? 'Done' : item.status === 'Done' ? 'Stuck' : 'Working on it';
+                          setMondayItems(mondayItems.map(i => i.id === item.id ? { ...i, status: next } : i));
+                        }}
+                        className={`inline-flex items-center rounded-lg px-2.5 py-1 text-[11px] font-bold whitespace-nowrap ${
+                          item.status === 'Done' ? 'bg-emerald-100 text-emerald-800' :
+                          item.status === 'Stuck' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
+                        }`}
+                      >
+                        {item.status}
+                      </button>
+                      <span className="text-slate-600 font-medium">{item.owner}</span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-slate-500 whitespace-nowrap">{item.due}</span>
+                      <button
+                        type="button"
+                        onClick={() => setMondayItems(mondayItems.filter(i => i.id !== item.id))}
+                        className="text-slate-400 hover:text-rose-600 shrink-0"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -915,7 +911,7 @@ export const WorkspaceStudioTab: React.FC = () => {
               <button
                 type="button"
                 onClick={handleDownloadCanva}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white hover:bg-[#1E40AF]"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white hover:bg-[#1E40AF] w-full sm:w-auto"
               >
                 <Download className="h-3.5 w-3.5" />
                 <span>Download PNG</span>
@@ -990,12 +986,12 @@ export const WorkspaceStudioTab: React.FC = () => {
                 <h3 className="font-display text-lg font-bold text-slate-900">Google Docs Distraction-Free Writer</h3>
                 <p className="text-xs text-slate-500">Live word counter, clean formatting, and instant text export.</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3">
                 <span className="font-mono text-xs text-slate-500">{wordCount} words · {charCount} chars</span>
                 <button
                   type="button"
                   onClick={handleDownloadDoc}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white hover:bg-[#1E40AF]"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white hover:bg-[#1E40AF]"
                 >
                   <Download className="h-3.5 w-3.5" />
                   <span>Export .txt</span>
@@ -1023,7 +1019,7 @@ export const WorkspaceStudioTab: React.FC = () => {
               <button
                 type="button"
                 onClick={handleExportCsv}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white hover:bg-[#1E40AF]"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white hover:bg-[#1E40AF] w-full sm:w-auto"
               >
                 <Download className="h-3.5 w-3.5" />
                 <span>Export CSV</span>
@@ -1068,7 +1064,7 @@ export const WorkspaceStudioTab: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsPresenting(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white hover:bg-[#1E40AF]"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white hover:bg-[#1E40AF] w-full sm:w-auto"
               >
                 <Presentation className="h-3.5 w-3.5" />
                 <span>Present Preview</span>
