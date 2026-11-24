@@ -1,5 +1,3 @@
-// /src/components/Navigation.tsx
-
 import React, { useState } from 'react';
 import {
   Briefcase,
@@ -17,7 +15,6 @@ import {
   LayoutGrid,
   X,
   BookOpen,
-  Grid,
 } from 'lucide-react';
 import type { TabId } from '../types';
 import { PWAInstallButton, ShareAppButton } from './PWAInstallBanner';
@@ -108,13 +105,6 @@ export const TABS: NavTabItem[] = [
     desktopLabel: 'Security Vault',
     shortLabel: 'Security',
     icon: Shield,
-  },
-  {
-    id: 'workspace-studio',
-    label: 'Workspace Studio',
-    desktopLabel: 'Workspace Studio',
-    shortLabel: 'Workspace',
-    icon: Grid,
   },
   {
     id: 'editorial-briefings',
@@ -261,7 +251,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 max-h-[60vh] overflow-y-auto">
+            <div className="grid grid-cols-2 gap-2">
               {TABS.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
