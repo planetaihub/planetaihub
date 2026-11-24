@@ -1,3 +1,5 @@
+// /src/types.ts
+
 export type TabId =
   | 'jobs'
   | 'career-studio'
@@ -10,6 +12,7 @@ export type TabId =
   | 'video-academy'
   | 'va-academy'
   | 'security-vault'
+  | 'workspace-studio'
   | 'editorial-briefings';
 
 export interface SpotlightVideoConfig {
