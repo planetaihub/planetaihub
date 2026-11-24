@@ -105,7 +105,7 @@ export const FocusedPrepWorkspace: React.FC<FocusedPrepWorkspaceProps> = ({
           className="no-print rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
         >
           <div className="flex flex-col gap-5 border-b border-slate-200 pb-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex items-start gap-4">
+            <div className="flex min-w-0 flex-1 items-start gap-4">
               <BrandAvatar
                 name={profile.company}
                 domain={profile.domain}
@@ -127,18 +127,18 @@ export const FocusedPrepWorkspace: React.FC<FocusedPrepWorkspaceProps> = ({
                 >
                   {profile.roleTitle}
                 </h1>
-                <p className="text-sm font-medium text-slate-600">
+                <p className="text-sm font-medium text-slate-600 break-words">
                   {profile.company} ({profile.domain})
                 </p>
               </div>
             </div>
 
-            <div className="shrink-0 rounded-xl border border-emerald-200 bg-emerald-50/70 px-5 py-3.5 text-left lg:text-right">
+            <div className="w-full max-w-full overflow-hidden rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-3.5 text-left sm:px-5 lg:w-auto lg:shrink-0 lg:text-right">
               <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-emerald-800">
-                <ShieldCheck className="h-4 w-4 text-emerald-700" aria-hidden="true" />
+                <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-700" aria-hidden="true" />
                 <span>Verified USD Pay</span>
               </p>
-              <p className="mt-0.5 font-mono text-xl font-bold text-emerald-700 tabular-nums whitespace-nowrap">
+              <p className="mt-1 font-mono text-lg sm:text-2xl font-bold text-emerald-700 tabular-nums break-words leading-tight">
                 {profile.payBand}
               </p>
             </div>
