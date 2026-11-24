@@ -1,3 +1,5 @@
+// /src/components/DedicatedSuitePage.tsx
+
 import React, { useState } from 'react';
 import {
   ArrowLeft,
@@ -19,6 +21,14 @@ interface SuiteEditorialCopy {
 }
 
 const SUITE_EDITORIAL_GUIDES: Record<Exclude<TabId, 'jobs'>, SuiteEditorialCopy> = {
+  'workspace-studio': {
+    heading: 'Workspace & Docs Studio · Browser-Local Productivity Tools',
+    tagline: 'Notion, Trello, ClickUp, GHL, Monday, Canva, Docs, Sheets & Slides',
+    paragraph1:
+      'PlanetAI Hub’s Workspace & Docs Studio brings 9 essential cloud and project management utilities directly into your browser with zero logins, external API keys, or tracking scripts required. Whether you are formatting SOPs in Notion, managing sprint velocity in ClickUp or Trello, tracking enterprise leads in GoHighLevel, organizing cross-functional milestones in Monday.com, or generating banners in Canva, all data persists instantly via secure local storage.',
+    paragraph2:
+      'Designed specifically for distributed engineering teams, remote AI evaluators, and virtual assistants, this suite ensures lightning-fast load times and complete data ownership. Combine these browser-local tools with our transparent USD job board and automated resume builder for an unmatched remote workflow experience.',
+  },
   'va-academy': {
     heading: 'Virtual Assistant Academy & Remote Operations Guide',
     tagline: 'Structured Training, Masterclass Modules & Client Retention Playbooks',
